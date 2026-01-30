@@ -1,0 +1,1215 @@
+{
+  "next_id": 56,
+  "experiments": [
+    {
+      "exp_id": "EXP_001",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583182",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 8.0,
+        "VOacac": 0.08,
+        "DDT": 1.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 1
+    },
+    {
+      "exp_id": "EXP_002",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583418",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 8.0,
+        "VOacac": 0.08,
+        "DDT": 5.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 2
+    },
+    {
+      "exp_id": "EXP_003",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583464",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 8.0,
+        "VOacac": 0.66,
+        "DDT": 1.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 3
+    },
+    {
+      "exp_id": "EXP_004",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583501",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 8.0,
+        "VOacac": 0.66,
+        "DDT": 5.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 4
+    },
+    {
+      "exp_id": "EXP_005",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583533",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 90.0,
+        "VOacac": 0.08,
+        "DDT": 1.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 11.241,
+        "GSD": 1.7058,
+        "Squareness": 0.502,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 5
+    },
+    {
+      "exp_id": "EXP_006",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583567",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 90.0,
+        "VOacac": 0.08,
+        "DDT": 5.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 6
+    },
+    {
+      "exp_id": "EXP_007",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583628",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 90.0,
+        "VOacac": 0.66,
+        "DDT": 1.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 7
+    },
+    {
+      "exp_id": "EXP_008",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583674",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 90.0,
+        "VOacac": 0.66,
+        "DDT": 5.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 44.961,
+        "GSD": 1.3403,
+        "Squareness": 0.479,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 8
+    },
+    {
+      "exp_id": "EXP_009",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583730",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 8.0,
+        "VOacac": 0.08,
+        "DDT": 1.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 11.426,
+        "GSD": 1.4999,
+        "Squareness": 0.568,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 9
+    },
+    {
+      "exp_id": "EXP_010",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583769",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 8.0,
+        "VOacac": 0.08,
+        "DDT": 5.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": 17.385,
+        "GSD": 1.4189,
+        "Squareness": 0.462,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 10
+    },
+    {
+      "exp_id": "EXP_011",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583802",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 8.0,
+        "VOacac": 0.66,
+        "DDT": 1.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": 14.865,
+        "GSD": 1.1319,
+        "Squareness": 0.525,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 11
+    },
+    {
+      "exp_id": "EXP_012",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583833",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 8.0,
+        "VOacac": 0.66,
+        "DDT": 5.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 22.118,
+        "GSD": 1.1563,
+        "Squareness": 0.535,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 12
+    },
+    {
+      "exp_id": "EXP_013",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583864",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 90.0,
+        "VOacac": 0.08,
+        "DDT": 1.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": 14.544,
+        "GSD": 1.2458,
+        "Squareness": 0.577,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 13
+    },
+    {
+      "exp_id": "EXP_014",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583894",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 90.0,
+        "VOacac": 0.08,
+        "DDT": 5.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 17.451,
+        "GSD": 1.223,
+        "Squareness": 0.569,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 14
+    },
+    {
+      "exp_id": "EXP_015",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583924",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 90.0,
+        "VOacac": 0.66,
+        "DDT": 1.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 30.947,
+        "GSD": 1.5099,
+        "Squareness": 0.525,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 15
+    },
+    {
+      "exp_id": "EXP_016",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583957",
+      "conditions": {
+        "Temp": 285.0,
+        "Time": 49.0,
+        "VOacac": 0.37,
+        "DDT": 3.0,
+        "OAm": 4.0
+      },
+      "results": {
+        "Size": 21.038,
+        "GSD": 1.1591,
+        "Squareness": 0.521,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 17
+    },
+    {
+      "exp_id": "EXP_017",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.583987",
+      "conditions": {
+        "Temp": 285.0,
+        "Time": 49.0,
+        "VOacac": 0.37,
+        "DDT": 3.0,
+        "OAm": 4.0
+      },
+      "results": {
+        "Size": 21.57,
+        "GSD": 1.2347,
+        "Squareness": 0.552,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 18
+    },
+    {
+      "exp_id": "EXP_018",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584016",
+      "conditions": {
+        "Temp": 285.0,
+        "Time": 49.0,
+        "VOacac": 0.37,
+        "DDT": 3.0,
+        "OAm": 4.0
+      },
+      "results": {
+        "Size": 21.524,
+        "GSD": 1.1709,
+        "Squareness": 0.544,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 19
+    },
+    {
+      "exp_id": "EXP_019",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584046",
+      "conditions": {
+        "Temp": 285.0,
+        "Time": 49.0,
+        "VOacac": 0.37,
+        "DDT": 3.0,
+        "OAm": 4.0
+      },
+      "results": {
+        "Size": 24.127,
+        "GSD": 1.3963,
+        "Squareness": 0.495,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 20
+    },
+    {
+      "exp_id": "EXP_020",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584075",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 90.0,
+        "VOacac": 0.08,
+        "DDT": 5.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 12.024,
+        "GSD": 1.556,
+        "Squareness": 0.505,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 21
+    },
+    {
+      "exp_id": "EXP_021",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584104",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 90.0,
+        "VOacac": 0.08,
+        "DDT": 1.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 22
+    },
+    {
+      "exp_id": "EXP_022",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584130",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 90.0,
+        "VOacac": 0.66,
+        "DDT": 1.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 23
+    },
+    {
+      "exp_id": "EXP_023",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584156",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 90.0,
+        "VOacac": 0.66,
+        "DDT": 5.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": 24.359,
+        "GSD": 1.2629,
+        "Squareness": 0.39,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "multipod"
+      },
+      "run_id_original": 24
+    },
+    {
+      "exp_id": "EXP_024",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584186",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 8.0,
+        "VOacac": 0.08,
+        "DDT": 1.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 25
+    },
+    {
+      "exp_id": "EXP_025",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584212",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 8.0,
+        "VOacac": 0.66,
+        "DDT": 5.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": 20.588,
+        "GSD": 1.2743,
+        "Squareness": 0.368,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "multipod"
+      },
+      "run_id_original": 26
+    },
+    {
+      "exp_id": "EXP_026",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584241",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 8.0,
+        "VOacac": 0.08,
+        "DDT": 5.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 12.545,
+        "GSD": 1.2964,
+        "Squareness": 0.428,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 27
+    },
+    {
+      "exp_id": "EXP_027",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584269",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 8.0,
+        "VOacac": 0.66,
+        "DDT": 1.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 19.535,
+        "GSD": 1.3225,
+        "Squareness": 0.605,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 28
+    },
+    {
+      "exp_id": "EXP_028",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584297",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 90.0,
+        "VOacac": 0.08,
+        "DDT": 1.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 22.039,
+        "GSD": 1.2093,
+        "Squareness": 0.598,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 29
+    },
+    {
+      "exp_id": "EXP_029",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584326",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 90.0,
+        "VOacac": 0.66,
+        "DDT": 1.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": 16.81,
+        "GSD": 1.9185,
+        "Squareness": 0.535,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 30
+    },
+    {
+      "exp_id": "EXP_030",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584375",
+      "conditions": {
+        "Temp": 265.0,
+        "Time": 32.0,
+        "VOacac": 0.474,
+        "DDT": 3.1,
+        "OAm": 6.5
+      },
+      "results": {
+        "Size": 29.751,
+        "GSD": 1.2551,
+        "Squareness": 0.437,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "multipod"
+      },
+      "run_id_original": 31
+    },
+    {
+      "exp_id": "EXP_031",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584455",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 71.0,
+        "VOacac": 0.187,
+        "DDT": 1.6,
+        "OAm": 2.8
+      },
+      "results": {
+        "Size": 10.188,
+        "GSD": 1.5282,
+        "Squareness": 0.555,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 32
+    },
+    {
+      "exp_id": "EXP_032",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584500",
+      "conditions": {
+        "Temp": 280.0,
+        "Time": 25.0,
+        "VOacac": 0.125,
+        "DDT": 4.4,
+        "OAm": 3.7
+      },
+      "results": {
+        "Size": 12.589,
+        "GSD": 1.7954,
+        "Squareness": 0.538,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 33
+    },
+    {
+      "exp_id": "EXP_033",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584535",
+      "conditions": {
+        "Temp": 299.0,
+        "Time": 47.0,
+        "VOacac": 0.516,
+        "DDT": 3.7,
+        "OAm": 5.6
+      },
+      "results": {
+        "Size": 24.927,
+        "GSD": 1.4306,
+        "Squareness": 0.514,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 34
+    },
+    {
+      "exp_id": "EXP_034",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584566",
+      "conditions": {
+        "Temp": 305.0,
+        "Time": 41.0,
+        "VOacac": 0.299,
+        "DDT": 4.3,
+        "OAm": 1.7
+      },
+      "results": {
+        "Size": 22.185,
+        "GSD": 1.179,
+        "Squareness": 0.541,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 35
+    },
+    {
+      "exp_id": "EXP_035",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584596",
+      "conditions": {
+        "Temp": 271.0,
+        "Time": 50.0,
+        "VOacac": 0.433,
+        "DDT": 1.2,
+        "OAm": 2.1
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 36
+    },
+    {
+      "exp_id": "EXP_036",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584622",
+      "conditions": {
+        "Temp": 293.0,
+        "Time": 69.0,
+        "VOacac": 0.622,
+        "DDT": 4.8,
+        "OAm": 4.2
+      },
+      "results": {
+        "Size": 41.641,
+        "GSD": 1.2092,
+        "Squareness": 0.433,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "multipod"
+      },
+      "run_id_original": 37
+    },
+    {
+      "exp_id": "EXP_037",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584651",
+      "conditions": {
+        "Temp": 286.0,
+        "Time": 60.0,
+        "VOacac": 0.343,
+        "DDT": 3.6,
+        "OAm": 6.9
+      },
+      "results": {
+        "Size": 18.242,
+        "GSD": 1.5262,
+        "Squareness": 0.518,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 38
+    },
+    {
+      "exp_id": "EXP_038",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584680",
+      "conditions": {
+        "Temp": 273.0,
+        "Time": 87.0,
+        "VOacac": 0.259,
+        "DDT": 1.8,
+        "OAm": 3.4
+      },
+      "results": {
+        "Size": 13.149,
+        "GSD": 1.2517,
+        "Squareness": 0.407,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 40
+    },
+    {
+      "exp_id": "EXP_039",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584708",
+      "conditions": {
+        "Temp": 284.0,
+        "Time": 80.0,
+        "VOacac": 0.416,
+        "DDT": 2.6,
+        "OAm": 1.2
+      },
+      "results": {
+        "Size": 16.92,
+        "GSD": 1.3011,
+        "Squareness": 0.52,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 36
+    },
+    {
+      "exp_id": "EXP_040",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584737",
+      "conditions": {
+        "Temp": 309.0,
+        "Time": 9.0,
+        "VOacac": 0.146,
+        "DDT": 2.1,
+        "OAm": 4.8
+      },
+      "results": {
+        "Size": 12.904,
+        "GSD": 1.2641,
+        "Squareness": 0.574,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 33
+    },
+    {
+      "exp_id": "EXP_041",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584765",
+      "conditions": {
+        "Temp": 294.0,
+        "Time": 15.0,
+        "VOacac": 0.596,
+        "DDT": 2.9,
+        "OAm": 5.3
+      },
+      "results": {
+        "Size": 21.204,
+        "GSD": 1.623,
+        "Squareness": 0.53,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 37
+    },
+    {
+      "exp_id": "EXP_042",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584813",
+      "conditions": {
+        "Temp": 297.0,
+        "Time": 14.0,
+        "VOacac": 0.594,
+        "DDT": 2.3,
+        "OAm": 6.2
+      },
+      "results": {
+        "Size": 18.242,
+        "GSD": 1.2143,
+        "Squareness": 0.578,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 45
+    },
+    {
+      "exp_id": "EXP_043",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584843",
+      "conditions": {
+        "Temp": 300.0,
+        "Time": 14.0,
+        "VOacac": 0.607,
+        "DDT": 2.0,
+        "OAm": 5.4
+      },
+      "results": {
+        "Size": 22.055,
+        "GSD": 1.3807,
+        "Squareness": 0.527,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 46
+    },
+    {
+      "exp_id": "EXP_044",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584904",
+      "conditions": {
+        "Temp": 289.0,
+        "Time": 79.0,
+        "VOacac": 0.255,
+        "DDT": 1.2,
+        "OAm": 2.7
+      },
+      "results": {
+        "Size": 14.399,
+        "GSD": 1.2746,
+        "Squareness": 0.369,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 47
+    },
+    {
+      "exp_id": "EXP_045",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584935",
+      "conditions": {
+        "Temp": 270.0,
+        "Time": 75.0,
+        "VOacac": 0.125,
+        "DDT": 3.5,
+        "OAm": 5.0
+      },
+      "results": {
+        "Size": 18.368,
+        "GSD": 1.2553,
+        "Squareness": 0.362,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 48
+    },
+    {
+      "exp_id": "EXP_046",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584963",
+      "conditions": {
+        "Temp": 280.0,
+        "Time": 67.0,
+        "VOacac": 0.301,
+        "DDT": 3.9,
+        "OAm": 6.0
+      },
+      "results": {
+        "Size": 22.873,
+        "GSD": 1.3006,
+        "Squareness": 0.558,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 49
+    },
+    {
+      "exp_id": "EXP_047",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.584991",
+      "conditions": {
+        "Temp": 285.0,
+        "Time": 60.0,
+        "VOacac": 0.083,
+        "DDT": 3.0,
+        "OAm": 4.0
+      },
+      "results": {
+        "Size": 11.716,
+        "GSD": 1.4786,
+        "Squareness": 0.4,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 50
+    },
+    {
+      "exp_id": "EXP_048",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.585069",
+      "conditions": {
+        "Temp": 267.0,
+        "Time": 86.0,
+        "VOacac": 0.293,
+        "DDT": 3.7,
+        "OAm": 1.3
+      },
+      "results": {
+        "Size": 35.678,
+        "GSD": 1.3542,
+        "Squareness": 0.469,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 51
+    },
+    {
+      "exp_id": "EXP_049",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.585108",
+      "conditions": {
+        "Temp": 284.0,
+        "Time": 89.0,
+        "VOacac": 0.198,
+        "DDT": 3.1,
+        "OAm": 2.9
+      },
+      "results": {
+        "Size": 16.084,
+        "GSD": 1.3044,
+        "Squareness": 0.497,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 52
+    },
+    {
+      "exp_id": "EXP_050",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.585164",
+      "conditions": {
+        "Temp": 304.0,
+        "Time": 34.0,
+        "VOacac": 0.252,
+        "DDT": 2.1,
+        "OAm": 3.8
+      },
+      "results": {
+        "Size": 15.62,
+        "GSD": 1.15,
+        "Squareness": 0.609,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 53
+    },
+    {
+      "exp_id": "EXP_051",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.585274",
+      "conditions": {
+        "Temp": 290.0,
+        "Time": 30.0,
+        "VOacac": 0.11,
+        "DDT": 4.0,
+        "OAm": 2.0
+      },
+      "results": {
+        "Size": 15.279,
+        "GSD": 1.4297,
+        "Squareness": 0.526,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 54
+    },
+    {
+      "exp_id": "EXP_052",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.585407",
+      "conditions": {
+        "Temp": 292.0,
+        "Time": 42.0,
+        "VOacac": 0.394,
+        "DDT": 4.7,
+        "OAm": 1.8
+      },
+      "results": {
+        "Size": 40.781,
+        "GSD": 1.3374,
+        "Squareness": 0.464,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "multipod"
+      },
+      "run_id_original": 55
+    },
+    {
+      "exp_id": "EXP_053",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.585482",
+      "conditions": {
+        "Temp": 300.0,
+        "Time": 39.0,
+        "VOacac": 0.376,
+        "DDT": 4.6,
+        "OAm": 5.4
+      },
+      "results": {
+        "Size": 27.977,
+        "GSD": 1.3691,
+        "Squareness": 0.418,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "multipod"
+      },
+      "run_id_original": 56
+    },
+    {
+      "exp_id": "EXP_054",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.585517",
+      "conditions": {
+        "Temp": 289.0,
+        "Time": 57.0,
+        "VOacac": 0.244,
+        "DDT": 1.9,
+        "OAm": 4.0
+      },
+      "results": {
+        "Size": 14.444,
+        "GSD": 1.6664,
+        "Squareness": 0.51,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 57
+    },
+    {
+      "exp_id": "EXP_055",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-01-30T08:29:37.585851",
+      "conditions": {
+        "Temp": 300.0,
+        "Time": 45.0,
+        "VOacac": 0.1,
+        "DDT": 2.5,
+        "OAm": 3.0
+      },
+      "results": {
+        "Size": 16.373,
+        "GSD": 1.284,
+        "Squareness": 0.572,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 58
+    }
+  ]
+}
