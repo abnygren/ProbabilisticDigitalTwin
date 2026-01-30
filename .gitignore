@@ -20,3 +20,6 @@ Outputs/
 
 # Runtime state: do not commit (updated by notebook runs)
 data/recommendations.json
+
+# Publication materials (keep local only)
+publication/
