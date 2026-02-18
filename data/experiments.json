@@ -1,11 +1,11 @@
 {
-  "next_id": 56,
+  "next_id": 59,
   "experiments": [
     {
       "exp_id": "EXP_001",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583182",
+      "timestamp": "2026-02-18T08:39:34.952139",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -27,7 +27,7 @@
       "exp_id": "EXP_002",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583418",
+      "timestamp": "2026-02-18T08:39:34.952401",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -49,7 +49,7 @@
       "exp_id": "EXP_003",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583464",
+      "timestamp": "2026-02-18T08:39:34.952442",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -71,7 +71,7 @@
       "exp_id": "EXP_004",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583501",
+      "timestamp": "2026-02-18T08:39:34.952476",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -93,7 +93,7 @@
       "exp_id": "EXP_005",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583533",
+      "timestamp": "2026-02-18T08:39:34.952508",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -115,7 +115,7 @@
       "exp_id": "EXP_006",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583567",
+      "timestamp": "2026-02-18T08:39:34.952544",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -137,7 +137,7 @@
       "exp_id": "EXP_007",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583628",
+      "timestamp": "2026-02-18T08:39:34.952574",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -159,7 +159,7 @@
       "exp_id": "EXP_008",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583674",
+      "timestamp": "2026-02-18T08:39:34.952604",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -181,7 +181,7 @@
       "exp_id": "EXP_009",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583730",
+      "timestamp": "2026-02-18T08:39:34.952637",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -203,7 +203,7 @@
       "exp_id": "EXP_010",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583769",
+      "timestamp": "2026-02-18T08:39:34.952671",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -225,7 +225,7 @@
       "exp_id": "EXP_011",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583802",
+      "timestamp": "2026-02-18T08:39:34.952704",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -247,7 +247,7 @@
       "exp_id": "EXP_012",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583833",
+      "timestamp": "2026-02-18T08:39:34.952735",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -269,7 +269,7 @@
       "exp_id": "EXP_013",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583864",
+      "timestamp": "2026-02-18T08:39:34.952767",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -291,7 +291,7 @@
       "exp_id": "EXP_014",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583894",
+      "timestamp": "2026-02-18T08:39:34.952798",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -313,7 +313,7 @@
       "exp_id": "EXP_015",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583924",
+      "timestamp": "2026-02-18T08:39:34.952830",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -335,7 +335,7 @@
       "exp_id": "EXP_016",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583957",
+      "timestamp": "2026-02-18T08:39:34.952862",
       "conditions": {
         "Temp": 285.0,
         "Time": 49.0,
@@ -357,7 +357,7 @@
       "exp_id": "EXP_017",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.583987",
+      "timestamp": "2026-02-18T08:39:34.952894",
       "conditions": {
         "Temp": 285.0,
         "Time": 49.0,
@@ -379,7 +379,7 @@
       "exp_id": "EXP_018",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584016",
+      "timestamp": "2026-02-18T08:39:34.952926",
       "conditions": {
         "Temp": 285.0,
         "Time": 49.0,
@@ -401,29 +401,7 @@
       "exp_id": "EXP_019",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584046",
-      "conditions": {
-        "Temp": 285.0,
-        "Time": 49.0,
-        "VOacac": 0.37,
-        "DDT": 3.0,
-        "OAm": 4.0
-      },
-      "results": {
-        "Size": 24.127,
-        "GSD": 1.3963,
-        "Squareness": 0.495,
-        "HasProduct": 1,
-        "PhasePure": 1,
-        "Polymorph": "cubic"
-      },
-      "run_id_original": 20
-    },
-    {
-      "exp_id": "EXP_020",
-      "source": "imported",
-      "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584075",
+      "timestamp": "2026-02-18T08:39:34.952958",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -442,10 +420,10 @@
       "run_id_original": 21
     },
     {
-      "exp_id": "EXP_021",
+      "exp_id": "EXP_020",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584104",
+      "timestamp": "2026-02-18T08:39:34.952990",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -464,10 +442,10 @@
       "run_id_original": 22
     },
     {
-      "exp_id": "EXP_022",
+      "exp_id": "EXP_021",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584130",
+      "timestamp": "2026-02-18T08:39:34.953018",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -486,10 +464,10 @@
       "run_id_original": 23
     },
     {
-      "exp_id": "EXP_023",
+      "exp_id": "EXP_022",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584156",
+      "timestamp": "2026-02-18T08:39:34.953047",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -508,10 +486,10 @@
       "run_id_original": 24
     },
     {
-      "exp_id": "EXP_024",
+      "exp_id": "EXP_023",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584186",
+      "timestamp": "2026-02-18T08:39:34.953079",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -530,10 +508,10 @@
       "run_id_original": 25
     },
     {
-      "exp_id": "EXP_025",
+      "exp_id": "EXP_024",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584212",
+      "timestamp": "2026-02-18T08:39:34.953107",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -552,10 +530,10 @@
       "run_id_original": 26
     },
     {
-      "exp_id": "EXP_026",
+      "exp_id": "EXP_025",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584241",
+      "timestamp": "2026-02-18T08:39:34.953139",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -574,10 +552,10 @@
       "run_id_original": 27
     },
     {
-      "exp_id": "EXP_027",
+      "exp_id": "EXP_026",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584269",
+      "timestamp": "2026-02-18T08:39:34.953170",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -596,10 +574,10 @@
       "run_id_original": 28
     },
     {
-      "exp_id": "EXP_028",
+      "exp_id": "EXP_027",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584297",
+      "timestamp": "2026-02-18T08:39:34.953201",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -618,10 +596,10 @@
       "run_id_original": 29
     },
     {
-      "exp_id": "EXP_029",
+      "exp_id": "EXP_028",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584326",
+      "timestamp": "2026-02-18T08:39:34.953294",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -640,10 +618,10 @@
       "run_id_original": 30
     },
     {
-      "exp_id": "EXP_030",
+      "exp_id": "EXP_029",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584375",
+      "timestamp": "2026-02-18T08:39:34.953338",
       "conditions": {
         "Temp": 265.0,
         "Time": 32.0,
@@ -662,10 +640,10 @@
       "run_id_original": 31
     },
     {
-      "exp_id": "EXP_031",
+      "exp_id": "EXP_030",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584455",
+      "timestamp": "2026-02-18T08:39:34.953374",
       "conditions": {
         "Temp": 260.0,
         "Time": 71.0,
@@ -684,10 +662,10 @@
       "run_id_original": 32
     },
     {
-      "exp_id": "EXP_032",
+      "exp_id": "EXP_031",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584500",
+      "timestamp": "2026-02-18T08:39:34.953408",
       "conditions": {
         "Temp": 280.0,
         "Time": 25.0,
@@ -706,10 +684,10 @@
       "run_id_original": 33
     },
     {
-      "exp_id": "EXP_033",
+      "exp_id": "EXP_032",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584535",
+      "timestamp": "2026-02-18T08:39:34.953441",
       "conditions": {
         "Temp": 299.0,
         "Time": 47.0,
@@ -728,10 +706,10 @@
       "run_id_original": 34
     },
     {
-      "exp_id": "EXP_034",
+      "exp_id": "EXP_033",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584566",
+      "timestamp": "2026-02-18T08:39:34.953475",
       "conditions": {
         "Temp": 305.0,
         "Time": 41.0,
@@ -750,10 +728,10 @@
       "run_id_original": 35
     },
     {
-      "exp_id": "EXP_035",
+      "exp_id": "EXP_034",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584596",
+      "timestamp": "2026-02-18T08:39:34.953507",
       "conditions": {
         "Temp": 271.0,
         "Time": 50.0,
@@ -772,10 +750,10 @@
       "run_id_original": 36
     },
     {
-      "exp_id": "EXP_036",
+      "exp_id": "EXP_035",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584622",
+      "timestamp": "2026-02-18T08:39:34.953536",
       "conditions": {
         "Temp": 293.0,
         "Time": 69.0,
@@ -794,10 +772,10 @@
       "run_id_original": 37
     },
     {
-      "exp_id": "EXP_037",
+      "exp_id": "EXP_036",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584651",
+      "timestamp": "2026-02-18T08:39:34.953875",
       "conditions": {
         "Temp": 286.0,
         "Time": 60.0,
@@ -816,10 +794,10 @@
       "run_id_original": 38
     },
     {
-      "exp_id": "EXP_038",
+      "exp_id": "EXP_037",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584680",
+      "timestamp": "2026-02-18T08:39:34.953913",
       "conditions": {
         "Temp": 273.0,
         "Time": 87.0,
@@ -838,10 +816,10 @@
       "run_id_original": 40
     },
     {
-      "exp_id": "EXP_039",
+      "exp_id": "EXP_038",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584708",
+      "timestamp": "2026-02-18T08:39:34.954074",
       "conditions": {
         "Temp": 284.0,
         "Time": 80.0,
@@ -860,10 +838,10 @@
       "run_id_original": 36
     },
     {
-      "exp_id": "EXP_040",
+      "exp_id": "EXP_039",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584737",
+      "timestamp": "2026-02-18T08:39:34.954234",
       "conditions": {
         "Temp": 309.0,
         "Time": 9.0,
@@ -882,10 +860,10 @@
       "run_id_original": 33
     },
     {
-      "exp_id": "EXP_041",
+      "exp_id": "EXP_040",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584765",
+      "timestamp": "2026-02-18T08:39:34.954284",
       "conditions": {
         "Temp": 294.0,
         "Time": 15.0,
@@ -904,10 +882,10 @@
       "run_id_original": 37
     },
     {
-      "exp_id": "EXP_042",
+      "exp_id": "EXP_041",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584813",
+      "timestamp": "2026-02-18T08:39:34.954324",
       "conditions": {
         "Temp": 297.0,
         "Time": 14.0,
@@ -926,10 +904,10 @@
       "run_id_original": 45
     },
     {
-      "exp_id": "EXP_043",
+      "exp_id": "EXP_042",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584843",
+      "timestamp": "2026-02-18T08:39:34.954364",
       "conditions": {
         "Temp": 300.0,
         "Time": 14.0,
@@ -948,10 +926,10 @@
       "run_id_original": 46
     },
     {
-      "exp_id": "EXP_044",
+      "exp_id": "EXP_043",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584904",
+      "timestamp": "2026-02-18T08:39:34.954398",
       "conditions": {
         "Temp": 289.0,
         "Time": 79.0,
@@ -970,10 +948,10 @@
       "run_id_original": 47
     },
     {
-      "exp_id": "EXP_045",
+      "exp_id": "EXP_044",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584935",
+      "timestamp": "2026-02-18T08:39:34.954433",
       "conditions": {
         "Temp": 270.0,
         "Time": 75.0,
@@ -992,10 +970,10 @@
       "run_id_original": 48
     },
     {
-      "exp_id": "EXP_046",
+      "exp_id": "EXP_045",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584963",
+      "timestamp": "2026-02-18T08:39:34.954465",
       "conditions": {
         "Temp": 280.0,
         "Time": 67.0,
@@ -1014,10 +992,10 @@
       "run_id_original": 49
     },
     {
-      "exp_id": "EXP_047",
+      "exp_id": "EXP_046",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.584991",
+      "timestamp": "2026-02-18T08:39:34.954497",
       "conditions": {
         "Temp": 285.0,
         "Time": 60.0,
@@ -1036,10 +1014,10 @@
       "run_id_original": 50
     },
     {
-      "exp_id": "EXP_048",
+      "exp_id": "EXP_047",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.585069",
+      "timestamp": "2026-02-18T08:39:34.954528",
       "conditions": {
         "Temp": 267.0,
         "Time": 86.0,
@@ -1058,10 +1036,10 @@
       "run_id_original": 51
     },
     {
-      "exp_id": "EXP_049",
+      "exp_id": "EXP_048",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.585108",
+      "timestamp": "2026-02-18T08:39:34.954559",
       "conditions": {
         "Temp": 284.0,
         "Time": 89.0,
@@ -1080,10 +1058,10 @@
       "run_id_original": 52
     },
     {
-      "exp_id": "EXP_050",
+      "exp_id": "EXP_049",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.585164",
+      "timestamp": "2026-02-18T08:39:34.954591",
       "conditions": {
         "Temp": 304.0,
         "Time": 34.0,
@@ -1102,10 +1080,10 @@
       "run_id_original": 53
     },
     {
-      "exp_id": "EXP_051",
+      "exp_id": "EXP_050",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.585274",
+      "timestamp": "2026-02-18T08:39:34.954623",
       "conditions": {
         "Temp": 290.0,
         "Time": 30.0,
@@ -1124,10 +1102,10 @@
       "run_id_original": 54
     },
     {
-      "exp_id": "EXP_052",
+      "exp_id": "EXP_051",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.585407",
+      "timestamp": "2026-02-18T08:39:34.954951",
       "conditions": {
         "Temp": 292.0,
         "Time": 42.0,
@@ -1146,10 +1124,10 @@
       "run_id_original": 55
     },
     {
-      "exp_id": "EXP_053",
+      "exp_id": "EXP_052",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.585482",
+      "timestamp": "2026-02-18T08:39:34.954993",
       "conditions": {
         "Temp": 300.0,
         "Time": 39.0,
@@ -1168,10 +1146,10 @@
       "run_id_original": 56
     },
     {
-      "exp_id": "EXP_054",
+      "exp_id": "EXP_053",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.585517",
+      "timestamp": "2026-02-18T08:39:34.955029",
       "conditions": {
         "Temp": 289.0,
         "Time": 57.0,
@@ -1190,10 +1168,10 @@
       "run_id_original": 57
     },
     {
-      "exp_id": "EXP_055",
+      "exp_id": "EXP_054",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-01-30T08:29:37.585851",
+      "timestamp": "2026-02-18T08:39:34.955062",
       "conditions": {
         "Temp": 300.0,
         "Time": 45.0,
@@ -1210,6 +1188,94 @@
         "Polymorph": "cubic"
       },
       "run_id_original": 58
+    },
+    {
+      "exp_id": "EXP_055",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-02-18T08:39:34.955095",
+      "conditions": {
+        "Temp": 270.0,
+        "Time": 83.0,
+        "VOacac": 0.184,
+        "DDT": 3.4,
+        "OAm": 1.4
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 59
+    },
+    {
+      "exp_id": "EXP_056",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-02-18T08:39:34.955124",
+      "conditions": {
+        "Temp": 279.0,
+        "Time": 84.0,
+        "VOacac": 0.198,
+        "DDT": 2.7,
+        "OAm": 6.2
+      },
+      "results": {
+        "Size": 18.558,
+        "GSD": 1.1731,
+        "Squareness": 0.606,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 60
+    },
+    {
+      "exp_id": "EXP_057",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-02-18T08:39:34.955155",
+      "conditions": {
+        "Temp": 277.0,
+        "Time": 71.0,
+        "VOacac": 0.339,
+        "DDT": 2.1,
+        "OAm": 5.4
+      },
+      "results": {
+        "Size": 21.168,
+        "GSD": 1.1865,
+        "Squareness": 0.426,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 61
+    },
+    {
+      "exp_id": "EXP_058",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-02-18T08:39:34.955186",
+      "conditions": {
+        "Temp": 283.0,
+        "Time": 69.0,
+        "VOacac": 0.562,
+        "DDT": 3.5,
+        "OAm": 1.4
+      },
+      "results": {
+        "Size": 31.627,
+        "GSD": 1.8371,
+        "Squareness": 0.453,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 62
     }
   ]
 }

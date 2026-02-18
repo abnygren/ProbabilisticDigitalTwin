@@ -260,7 +260,7 @@ def get_solvent_dielectric(solvent_name: str, default: float = 2.5) -> float:
 def calculate_mixture_dielectric(
     volumes: dict,
     total_volume: float = None,
-    method: str = 'volume_weighted'
+    method: str = 'bruggeman'
 ) -> float:
     """
     Calculate effective dielectric constant of a solvent mixture.
@@ -269,23 +269,18 @@ def calculate_mixture_dielectric(
     ----------
     volumes : dict
         Dictionary of {solvent_name: volume_in_mL}
-        e.g., {'DDT': 3.0, 'OAm': 4.0, 'ODE': 5.0}
     total_volume : float, optional
-        Total volume (if None, calculated from sum of volumes)
+        Total volume (if None, calculated from sum)
     method : str
-        'volume_weighted' - simple linear mixing (default)
-        'log_weighted' - logarithmic mixing rule (better for large ε differences)
+        'volume_weighted' - linear mixing (fast, approximate)
+        'log_weighted' - logarithmic mixing
+        'bruggeman' - Bruggeman effective medium (best for homogeneous mixtures)
+        'maxwell_garnett' - Maxwell Garnett (requires dominant_solvent arg)
         
     Returns
     -------
     float
-        Effective dielectric constant of mixture
-        
-    Notes
-    -----
-    The volume-weighted average is a first approximation. For more accurate
-    mixing, consider Onsager or Clausius-Mossotti equations, but for the
-    relatively similar ε values in NC synthesis solvents, linear is adequate.
+        Effective dielectric constant
     """
     if total_volume is None:
         total_volume = sum(volumes.values())
@@ -293,21 +288,37 @@ def calculate_mixture_dielectric(
     if total_volume <= 0:
         raise ValueError("Total volume must be positive")
     
+    # Calculate volume fractions
+    vol_fractions = {s: v/total_volume for s, v in volumes.items()}
+    
     if method == 'volume_weighted':
-        eps_mix = 0.0
-        for solvent, vol in volumes.items():
-            eps = get_solvent_dielectric(solvent)
-            eps_mix += (vol / total_volume) * eps
+        eps_mix = sum(vol_fractions[s] * get_solvent_dielectric(s) 
+                      for s in volumes.keys())
         return eps_mix
     
     elif method == 'log_weighted':
-        # Logarithmic mixing: ln(ε_mix) = Σ φᵢ ln(εᵢ)
         import numpy as np
-        ln_eps_mix = 0.0
-        for solvent, vol in volumes.items():
-            eps = get_solvent_dielectric(solvent)
-            ln_eps_mix += (vol / total_volume) * np.log(eps)
+        ln_eps_mix = sum(vol_fractions[s] * np.log(get_solvent_dielectric(s))
+                        for s in volumes.keys())
         return np.exp(ln_eps_mix)
+    
+    elif method == 'bruggeman':
+        from scipy.optimize import fsolve
+        
+        # Build components dict
+        components = {
+            s: (get_solvent_dielectric(s), vol_fractions[s])
+            for s in volumes.keys()
+        }
+        
+        def bruggeman_eq(eps_eff):
+            return sum(f * (eps - eps_eff)/(eps + 2*eps_eff)
+                      for eps, f in components.values())
+        
+        # Initial guess
+        eps_init = sum(f * eps for eps, f in components.values())
+        eps_eff = fsolve(bruggeman_eq, eps_init)[0]
+        return eps_eff
     
     else:
         raise ValueError(f"Unknown method: {method}")
