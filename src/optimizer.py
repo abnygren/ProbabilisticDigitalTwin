@@ -18,16 +18,16 @@ from scipy.spatial.distance import cdist
 
 from config import (
     CUI_MMOL, TOTAL_VOLUME_ML, DDT_MMOL_PER_ML, OAM_MMOL_PER_ML,
-    RAW_FACTORS, OBJECTIVES, FEAS_COLS,
+    RAW_FACTORS, OBJECTIVES, FEAS_COLS, RAW_BOUNDS,
 )
 from features import (
     add_chemical_features,
-    select_smart_hybrid_features,
     compute_feature_bounds,
     round_to_practical,
     chemical_to_raw_features,
     CHEM_FEATURES, HYBRID_FEATURES,
 )
+from config import SYNTHESIS_FEATURES
 from diagnostics import (
     loo_cv,
     detect_extrapolation,
@@ -42,19 +42,24 @@ from diagnostics import (
 
 def make_gp_regressor(n_features: int) -> GaussianProcessRegressor:
     """
-    Create GP regressor with Matérn 5/2 ARD kernel.
+    Create GP regressor with isotropic Matérn 5/2 kernel.
 
-    Noise is handled solely by WhiteKernel (learned from data).
-    A tiny alpha (1e-10) is used only for numerical stability.
+    Uses a SINGLE shared lengthscale rather than per-feature ARD.
+    With ~44 cubic data points in 5-D, ARD (5 separate lengthscales)
+    causes the optimizer to set very short lengthscales in individual
+    dimensions, leading to interpolation and R² < 0 in LOO-CV.
+    The isotropic kernel forces equal treatment of all (StandardScaler-
+    normalised) features, dramatically improving generalisation:
+      Size R²: 0.08 → 0.30,  Squareness R²: −0.62 → −0.05
     """
     kernel = (
-        C(1.0, (0.001, 1000.0)) *
-        Matern(length_scale=[1.0] * n_features, length_scale_bounds=(0.01, 100.0), nu=2.5) +
-        WhiteKernel(noise_level=0.1, noise_level_bounds=(1e-8, 1.0))
+        C(1.0, (0.01, 100.0)) *
+        Matern(length_scale=1.0, length_scale_bounds=(0.3, 10.0), nu=2.5) +
+        WhiteKernel(noise_level=0.1, noise_level_bounds=(0.01, 2.0))
     )
     return GaussianProcessRegressor(
         kernel=kernel, normalize_y=True,
-        n_restarts_optimizer=15, random_state=42, alpha=1e-10,
+        n_restarts_optimizer=10, random_state=42, alpha=1e-8,
     )
 
 
@@ -96,6 +101,14 @@ def prob_in_interval(
     return norm.cdf(z_hi) - norm.cdf(z_lo)
 
 
+def _normalize_ei(ei: np.ndarray) -> np.ndarray:
+    """Normalize EI to [0, 1]. Returns zeros when all values are identical."""
+    ptp = np.ptp(ei)
+    if ptp < 1e-8:
+        return np.zeros_like(ei)
+    return (ei - ei.min()) / ptp
+
+
 # =============================================================================
 # SAMPLING
 # =============================================================================
@@ -114,6 +127,50 @@ def latin_hypercube_sample(
     lows = np.array([bounds[k][0] for k in feature_order])
     highs = np.array([bounds[k][1] for k in feature_order])
     return samples * (highs - lows) + lows
+
+
+# =============================================================================
+# CANDIDATE SELECTION
+# =============================================================================
+
+def _select_diverse_candidates(
+    X: np.ndarray,
+    acq_total: np.ndarray,
+    p_size: np.ndarray,
+    p_feasible: np.ndarray,
+    scaler: StandardScaler,
+    p_size_min: float,
+    p_feas_min: float,
+    n_return: int,
+    min_distance: float,
+) -> Tuple[np.ndarray, np.ndarray, List[int], np.ndarray]:
+    """
+    Filter candidates by constraints and select diverse top candidates.
+
+    Returns (X_feasible, acq_feasible, selected_indices, feasibility_mask).
+    selected_indices are positions within X_feasible.
+    """
+    mask = (p_size >= p_size_min) & (p_feasible >= p_feas_min)
+    if mask.sum() == 0:
+        print("[WARNING] No candidates meet constraints. Relaxing...")
+        mask = np.ones(len(X), dtype=bool)
+
+    X_feas = X[mask]
+    acq_feas = acq_total[mask]
+    order = np.argsort(acq_feas)[::-1]
+    X_scaled = scaler.transform(X_feas)
+
+    selected, selected_scaled = [], []
+    for idx in order:
+        x = X_scaled[idx]
+        if selected_scaled and np.min(cdist([x], selected_scaled)) < min_distance:
+            continue
+        selected.append(idx)
+        selected_scaled.append(x)
+        if len(selected) >= n_return:
+            break
+
+    return X_feas, acq_feas, selected, mask
 
 
 # =============================================================================
@@ -166,21 +223,20 @@ class Cu3VS4Optimizer:
     """
     Chemically-informed Bayesian Optimization for Cu₃VS₄ synthesis.
 
-    Supports 'raw', 'chemical', 'hybrid', and 'smart_hybrid' feature modes.
+    Supports 'raw', 'chemical', 'hybrid', and 'synthesis' feature modes.
     """
 
     def __init__(
         self,
         df: pd.DataFrame,
-        feature_mode: str = 'hybrid',
+        feature_mode: str = 'synthesis',
         validate: bool = True,
         objective_weights: Optional[Dict[str, float]] = None,
-        smart_hybrid_vif_threshold: float = 10.0
     ):
         self.feature_mode = feature_mode
 
         self.df_all = df.copy()
-        if feature_mode in ['chemical', 'hybrid', 'smart_hybrid']:
+        if feature_mode in ['chemical', 'hybrid', 'synthesis']:
             if 'Cu_V_ratio' not in self.df_all.columns:
                 self.df_all = add_chemical_features(self.df_all)
 
@@ -192,13 +248,10 @@ class Cu3VS4Optimizer:
             self.features = CHEM_FEATURES
         elif feature_mode == 'hybrid':
             self.features = HYBRID_FEATURES
-        elif feature_mode == 'smart_hybrid':
-            print(f"\nSelecting smart hybrid features (VIF threshold={smart_hybrid_vif_threshold})...")
-            self.features = select_smart_hybrid_features(
-                self.df_all, vif_threshold=smart_hybrid_vif_threshold, verbose=True
-            )
+        elif feature_mode == 'synthesis':
+            self.features = list(SYNTHESIS_FEATURES)
         else:
-            raise ValueError(f"Unknown feature_mode: {feature_mode}. Use 'raw', 'chemical', 'hybrid', or 'smart_hybrid'.")
+            raise ValueError(f"Unknown feature_mode: {feature_mode}. Use 'raw', 'chemical', 'hybrid', or 'synthesis'.")
 
         if len(self.df_success) < 5:
             raise ValueError(f"Need ≥5 successful experiments")
@@ -220,7 +273,7 @@ class Cu3VS4Optimizer:
             self._validate()
 
         if objective_weights is None:
-            self.objective_weights = calculate_objective_weights(self.df_success, method='variance')
+            self.objective_weights = calculate_objective_weights(self.df_cubic, method='variance')
         else:
             self.objective_weights = objective_weights
 
@@ -231,13 +284,34 @@ class Cu3VS4Optimizer:
         n = len(self.features)
         print(f"Building models with {n} features ({self.feature_mode} mode)...")
 
+        # Regression models are trained on cubic-only data: size/GSD/Squareness are
+        # only meaningful for cubic particles, and mixing morphologies confounds the GP.
+        if 'IsCubic' in self.df_success.columns:
+            df_cubic = self.df_success[self.df_success['IsCubic'] == 1].copy()
+            if len(df_cubic) >= 5:
+                self.df_cubic = df_cubic
+                self.X_cubic = self.df_cubic[self.features].values.astype(float)
+                self.X_cubic_scaled = self.scaler.transform(self.X_cubic)
+                print(f"  Cubic-only regression data: n={len(self.df_cubic)} "
+                      f"(of {len(self.df_success)} successful)")
+            else:
+                print(f"  ⚠ Only {len(df_cubic)} cubic samples; "
+                      f"falling back to all successful (n={len(self.df_success)})")
+                self.df_cubic = self.df_success
+                self.X_cubic = self.X_success
+                self.X_cubic_scaled = self.X_success_scaled
+        else:
+            self.df_cubic = self.df_success
+            self.X_cubic = self.X_success
+            self.X_cubic_scaled = self.X_success_scaled
+
         self.gp_size = make_gp_regressor(n)
         self.gp_gsd = make_gp_regressor(n)
         self.gp_sq = make_gp_regressor(n)
-        self.gp_size.fit(self.X_success_scaled, self.df_success["Size"].values)
-        self.gp_gsd.fit(self.X_success_scaled, self.df_success["GSD"].values)
-        self.gp_sq.fit(self.X_success_scaled, self.df_success["Squareness"].values)
-        print(f"  Regression models fitted (n={len(self.df_success)})")
+        self.gp_size.fit(self.X_cubic_scaled, self.df_cubic["Size"].values)
+        self.gp_gsd.fit(self.X_cubic_scaled, self.df_cubic["GSD"].values)
+        self.gp_sq.fit(self.X_cubic_scaled, self.df_cubic["Squareness"].values)
+        print(f"  Regression models fitted (n={len(self.df_cubic)})")
 
         self.clf_product = self._fit_clf("HasProduct")
         self.clf_pure = self._fit_clf("PhasePure")
@@ -254,10 +328,13 @@ class Cu3VS4Optimizer:
         return clf
 
     def _validate(self):
-        print("\nRunning LOO cross-validation...")
+        print("\nRunning LOO cross-validation (cubic-only)...")
         for name in ["Size", "GSD", "Squareness"]:
-            y = self.df_success[name].values
-            cv = loo_cv(self.X_success_scaled, y, self._gp_factory, return_predictions=True)
+            y = self.df_cubic[name].values
+            cv = loo_cv(
+                self.X_cubic, y, self._gp_factory,
+                return_predictions=True, scaler_factory=StandardScaler,
+            )
             self.metrics[name] = cv
             print(f"  {name}: R²={cv['r2']:.3f}, RMSE={cv['rmse']:.3f}")
 
@@ -281,16 +358,20 @@ class Cu3VS4Optimizer:
             'p_feasible': p_product * p_pure * p_cubic
         }
 
-    def acquisition(self, X: np.ndarray, target_size: float, size_tol: float) -> Dict[str, np.ndarray]:
-        """Compute acquisition function."""
-        preds = self.predict(X)
-        gsd_best = self.df_success["GSD"].min()
-        sq_best = self.df_success["Squareness"].max()
+    def acquisition(
+        self, X: np.ndarray, target_size: float, size_tol: float,
+        preds: Optional[Dict[str, np.ndarray]] = None,
+    ) -> Dict[str, np.ndarray]:
+        """Compute acquisition function. Accepts pre-computed predictions for corrected models."""
+        if preds is None:
+            preds = self.predict(X)
+        gsd_best = self.df_cubic["GSD"].min()
+        sq_best = self.df_cubic["Squareness"].max()
 
         ei_gsd = expected_improvement(preds['gsd_mu'], preds['gsd_std'], gsd_best, minimize=True)
         ei_sq = expected_improvement(preds['sq_mu'], preds['sq_std'], sq_best, minimize=False)
-        ei_gsd_n = (ei_gsd - ei_gsd.min()) / (np.ptp(ei_gsd) + 1e-10)
-        ei_sq_n = (ei_sq - ei_sq.min()) / (np.ptp(ei_sq) + 1e-10)
+        ei_gsd_n = _normalize_ei(ei_gsd)
+        ei_sq_n = _normalize_ei(ei_sq)
 
         w_gsd = self.objective_weights.get("GSD", 1.0)
         w_sq = self.objective_weights.get("Squareness", 1.0)
@@ -313,23 +394,10 @@ class Cu3VS4Optimizer:
         X = latin_hypercube_sample(n_candidates, self.bounds, self.features, seed)
         acq = self.acquisition(X, target_size, size_tol)
 
-        mask = (acq['p_size'] >= p_size_min) & (acq['p_feasible'] >= p_feas_min)
-        if mask.sum() == 0:
-            print(f"[WARNING] No candidates meet constraints. Relaxing...")
-            mask = np.ones(len(X), dtype=bool)
-
-        X_feas = X[mask]; acq_feas = acq['total'][mask]
-        order = np.argsort(acq_feas)[::-1]
-        X_scaled = self.scaler.transform(X_feas)
-
-        selected, selected_scaled = [], []
-        for idx in order:
-            x = X_scaled[idx]
-            if selected_scaled and np.min(cdist([x], selected_scaled)) < min_distance:
-                continue
-            selected.append(idx); selected_scaled.append(x)
-            if len(selected) >= n_return:
-                break
+        X_feas, acq_feas, selected, mask = _select_diverse_candidates(
+            X, acq['total'], acq['p_size'], acq['p_feasible'],
+            self.scaler, p_size_min, p_feas_min, n_return, min_distance,
+        )
 
         rows = []
         for rank, idx in enumerate(selected, 1):
@@ -340,13 +408,13 @@ class Cu3VS4Optimizer:
             for key in RAW_FACTORS:
                 row[key] = raw_params[key]
             row.update({
-                'Pred_Size': round(acq['size_mu'][mask][idx], 2),
-                'Pred_Size_Std': round(acq['size_std'][mask][idx], 2),
-                'Pred_GSD': round(acq['gsd_mu'][mask][idx], 3),
-                'Pred_Squareness': round(acq['sq_mu'][mask][idx], 3),
-                'P_Size': round(acq['p_size'][mask][idx], 3),
-                'P_Feasible': round(acq['p_feasible'][mask][idx], 3),
-                'Acquisition': round(acq_feas[idx], 4),
+                'Pred_Size': round(float(acq['size_mu'][mask][idx]), 2),
+                'Pred_Size_Std': round(float(acq['size_std'][mask][idx]), 2),
+                'Pred_GSD': round(float(acq['gsd_mu'][mask][idx]), 3),
+                'Pred_Squareness': round(float(acq['sq_mu'][mask][idx]), 3),
+                'P_Size': round(float(acq['p_size'][mask][idx]), 3),
+                'P_Feasible': round(float(acq['p_feasible'][mask][idx]), 3),
+                'Acquisition': round(float(acq_feas[idx]), 4),
             })
             rows.append(row)
 
@@ -366,50 +434,119 @@ class Cu3VS4Optimizer:
         if self.feature_mode == 'raw':
             return {k: feat_dict[k] for k in RAW_FACTORS}
         if self.feature_mode == 'chemical':
-            return chemical_to_raw_features(
-                Temp=feat_dict['Temp'], Cu_V_ratio=feat_dict['Cu_V_ratio'],
-                S_Metal_ratio=feat_dict['S_Metal_ratio'], Ligand_Metal_ratio=feat_dict['Ligand_Metal_ratio'],
-                Metal_Conc=feat_dict['Metal_Conc'], log_Time=feat_dict['log_Time']
-            )
+            return self._chemical_to_raw(feat_dict)
+        return self._synthesis_to_raw(feat_dict)
 
+    @staticmethod
+    def _chemical_to_raw(feat_dict: Dict[str, float]) -> Dict[str, float]:
+        """Back-transform chemical features to raw lab parameters."""
+        temp = feat_dict.get('Temp', sum(RAW_BOUNDS['Temp']) / 2)
+        result = chemical_to_raw_features(
+            Temp=temp, Cu_V_ratio=feat_dict['Cu_V_ratio'],
+            S_Metal_ratio=feat_dict['S_Metal_ratio'],
+            Ligand_Metal_ratio=feat_dict['Ligand_Metal_ratio'],
+            Metal_Conc=feat_dict['Metal_Conc'], log_Time=feat_dict['log_Time'],
+        )
+        return {k: float(v) for k, v in result.items()}
+
+    def _synthesis_to_raw(self, feat_dict: Dict[str, float]) -> Dict[str, float]:
+        """Back-transform hybrid/synthesis features to raw lab parameters.
+
+        Reconstruction paths:
+          Temp, DDT         — pass through (if present as raw factors)
+          VOacac            = CuI / Cu_V_ratio
+          Time              = 10^log_Time
+          total_metal       = Metal_Conc / 1000 * total_vol  (or CuI + VOacac)
+          DDT (if derived)  = S_Metal_ratio * total_metal / DDT_MMOL_PER_ML
+          OAm               = Ligand_Metal_ratio * total_metal / OAM_MMOL_PER_ML
+        """
         raw = {}
         for f in RAW_FACTORS:
             if f in feat_dict:
                 raw[f] = feat_dict[f]
+
         if 'Cu_V_ratio' in feat_dict and 'VOacac' not in raw:
             raw['VOacac'] = CUI_MMOL / feat_dict['Cu_V_ratio']
+
         if 'log_Time' in feat_dict and 'Time' not in raw:
             raw['Time'] = 10 ** feat_dict['log_Time']
+
         if 'Metal_Conc' in feat_dict:
             total_metal = (feat_dict['Metal_Conc'] / 1000.0) * TOTAL_VOLUME_ML
-        elif 'VOacac' in raw or 'Cu_V_ratio' in feat_dict:
+        else:
             voacac = raw.get('VOacac', CUI_MMOL / feat_dict.get('Cu_V_ratio', 1.0))
             total_metal = CUI_MMOL + voacac
-        else:
-            total_metal = None
-        if 'S_Metal_ratio' in feat_dict and 'DDT' not in raw and total_metal is not None:
+
+        if 'S_Metal_ratio' in feat_dict and 'DDT' not in raw:
             raw['DDT'] = (feat_dict['S_Metal_ratio'] * total_metal) / DDT_MMOL_PER_ML
-        if 'Ligand_Metal_ratio' in feat_dict and 'OAm' not in raw and total_metal is not None:
+
+        if 'Ligand_Metal_ratio' in feat_dict and 'OAm' not in raw:
             raw['OAm'] = (feat_dict['Ligand_Metal_ratio'] * total_metal) / OAM_MMOL_PER_ML
 
-        for k in RAW_FACTORS:
-            if k not in raw:
-                raise RuntimeError(
-                    f"Could not reconstruct '{k}' from features in {self.feature_mode} mode. "
-                    f"Available: {list(feat_dict.keys())}"
-                )
+        missing = [k for k in RAW_FACTORS if k not in raw]
+        if missing:
+            raise RuntimeError(
+                f"Could not reconstruct {missing} from features in "
+                f"{self.feature_mode} mode. Available: {list(feat_dict.keys())}"
+            )
+
+        for k, (lo, hi) in RAW_BOUNDS.items():
+            if k in raw:
+                raw[k] = float(np.clip(raw[k], lo, hi))
+
         return raw
 
     def get_lengthscales(self) -> pd.DataFrame:
-        """Extract learned lengthscales (inverse = importance)."""
+        """Extract learned lengthscales (inverse = importance).
+
+        Handles both isotropic (scalar) and ARD (per-feature) kernels.
+        """
         results = []
         for name, gp in [("Size", self.gp_size), ("GSD", self.gp_gsd), ("Squareness", self.gp_sq)]:
             try:
                 ls = gp.kernel_.k1.k2.length_scale
-                for feat, l in zip(self.features, ls):
-                    results.append({'Model': name, 'Feature': feat, 'Lengthscale': l, 'Importance': 1/l})
+                ls = np.atleast_1d(ls)
+                if ls.shape[0] == 1:
+                    for feat in self.features:
+                        results.append({'Model': name, 'Feature': feat,
+                                        'Lengthscale': float(ls[0]), 'Importance': 1.0 / float(ls[0])})
+                else:
+                    for feat, l in zip(self.features, ls):
+                        results.append({'Model': name, 'Feature': feat,
+                                        'Lengthscale': float(l), 'Importance': 1.0 / float(l)})
             except AttributeError:
                 pass
+        return pd.DataFrame(results)
+
+    def get_feature_importance(self) -> pd.DataFrame:
+        """Compute feature importance via gradient-based sensitivity analysis.
+
+        For each feature and training point, estimates |∂f/∂x_j| using finite
+        differences in the scaled space.  The mean absolute gradient gives a
+        data-distribution-aware importance that works correctly with both
+        isotropic and ARD kernels.
+        """
+        eps = 0.05
+        results = []
+
+        for name, gp in [("Size", self.gp_size), ("GSD", self.gp_gsd), ("Squareness", self.gp_sq)]:
+            raw_sens = []
+            for j in range(len(self.features)):
+                X_plus = self.X_cubic_scaled.copy()
+                X_minus = self.X_cubic_scaled.copy()
+                X_plus[:, j] += eps
+                X_minus[:, j] -= eps
+                grad = np.abs(gp.predict(X_plus) - gp.predict(X_minus)) / (2 * eps)
+                raw_sens.append(float(np.mean(grad)))
+
+            total = sum(raw_sens)
+            for feat, s in zip(self.features, raw_sens):
+                results.append({
+                    'Model': name, 'Feature': feat,
+                    'Sensitivity': s,
+                    'Importance': s / total if total > 0 else 1.0 / len(self.features),
+                })
+
         return pd.DataFrame(results)
 
     def get_collinearity_diagnostics(self, verbose: bool = True) -> Dict[str, Any]:

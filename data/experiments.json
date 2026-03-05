@@ -1,11 +1,11 @@
 {
-  "next_id": 59,
+  "next_id": 69,
   "experiments": [
     {
       "exp_id": "EXP_001",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952139",
+      "timestamp": "2026-03-05T10:42:37.727237",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -27,7 +27,7 @@
       "exp_id": "EXP_002",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952401",
+      "timestamp": "2026-03-05T10:42:37.727398",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -49,7 +49,7 @@
       "exp_id": "EXP_003",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952442",
+      "timestamp": "2026-03-05T10:42:37.727467",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -71,7 +71,7 @@
       "exp_id": "EXP_004",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952476",
+      "timestamp": "2026-03-05T10:42:37.727511",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -93,7 +93,7 @@
       "exp_id": "EXP_005",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952508",
+      "timestamp": "2026-03-05T10:42:37.727542",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -102,9 +102,9 @@
         "OAm": 1.0
       },
       "results": {
-        "Size": 11.241,
-        "GSD": 1.7058,
-        "Squareness": 0.502,
+        "Size": 11.2,
+        "GSD": 1.71,
+        "Squareness": 0.5,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
@@ -115,7 +115,7 @@
       "exp_id": "EXP_006",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952544",
+      "timestamp": "2026-03-05T10:42:37.727576",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -137,7 +137,7 @@
       "exp_id": "EXP_007",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952574",
+      "timestamp": "2026-03-05T10:42:37.727605",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -159,7 +159,7 @@
       "exp_id": "EXP_008",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952604",
+      "timestamp": "2026-03-05T10:42:37.727632",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -168,9 +168,9 @@
         "OAm": 1.0
       },
       "results": {
-        "Size": 44.961,
-        "GSD": 1.3403,
-        "Squareness": 0.479,
+        "Size": 45.0,
+        "GSD": 1.34,
+        "Squareness": 0.48,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
@@ -181,7 +181,7 @@
       "exp_id": "EXP_009",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952637",
+      "timestamp": "2026-03-05T10:42:37.727666",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -190,9 +190,9 @@
         "OAm": 1.0
       },
       "results": {
-        "Size": 11.426,
-        "GSD": 1.4999,
-        "Squareness": 0.568,
+        "Size": 11.4,
+        "GSD": 1.5,
+        "Squareness": 0.57,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
@@ -203,7 +203,7 @@
       "exp_id": "EXP_010",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952671",
+      "timestamp": "2026-03-05T10:42:37.727699",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -212,9 +212,9 @@
         "OAm": 7.0
       },
       "results": {
-        "Size": 17.385,
-        "GSD": 1.4189,
-        "Squareness": 0.462,
+        "Size": 17.4,
+        "GSD": 1.42,
+        "Squareness": 0.46,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
@@ -225,7 +225,7 @@
       "exp_id": "EXP_011",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952704",
+      "timestamp": "2026-03-05T10:42:37.727729",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -234,9 +234,9 @@
         "OAm": 7.0
       },
       "results": {
-        "Size": 14.865,
-        "GSD": 1.1319,
-        "Squareness": 0.525,
+        "Size": 14.9,
+        "GSD": 1.13,
+        "Squareness": 0.53,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
@@ -247,7 +247,7 @@
       "exp_id": "EXP_012",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952735",
+      "timestamp": "2026-03-05T10:42:37.727759",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -256,9 +256,9 @@
         "OAm": 1.0
       },
       "results": {
-        "Size": 22.118,
-        "GSD": 1.1563,
-        "Squareness": 0.535,
+        "Size": 22.1,
+        "GSD": 1.16,
+        "Squareness": 0.54,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
@@ -269,7 +269,7 @@
       "exp_id": "EXP_013",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952767",
+      "timestamp": "2026-03-05T10:42:37.727789",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -278,9 +278,9 @@
         "OAm": 7.0
       },
       "results": {
-        "Size": 14.544,
-        "GSD": 1.2458,
-        "Squareness": 0.577,
+        "Size": 14.5,
+        "GSD": 1.25,
+        "Squareness": 0.58,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
@@ -291,7 +291,7 @@
       "exp_id": "EXP_014",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952798",
+      "timestamp": "2026-03-05T10:42:37.727818",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -300,9 +300,9 @@
         "OAm": 1.0
       },
       "results": {
-        "Size": 17.451,
-        "GSD": 1.223,
-        "Squareness": 0.569,
+        "Size": 17.5,
+        "GSD": 1.22,
+        "Squareness": 0.57,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
@@ -313,7 +313,7 @@
       "exp_id": "EXP_015",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952830",
+      "timestamp": "2026-03-05T10:42:37.727848",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -322,9 +322,9 @@
         "OAm": 1.0
       },
       "results": {
-        "Size": 30.947,
-        "GSD": 1.5099,
-        "Squareness": 0.525,
+        "Size": 30.9,
+        "GSD": 1.51,
+        "Squareness": 0.53,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
@@ -335,7 +335,7 @@
       "exp_id": "EXP_016",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952862",
+      "timestamp": "2026-03-05T10:42:37.727878",
       "conditions": {
         "Temp": 285.0,
         "Time": 49.0,
@@ -344,9 +344,31 @@
         "OAm": 4.0
       },
       "results": {
-        "Size": 21.038,
-        "GSD": 1.1591,
-        "Squareness": 0.521,
+        "Size": 21.0,
+        "GSD": 1.16,
+        "Squareness": 0.52,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 16
+    },
+    {
+      "exp_id": "EXP_017",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.727907",
+      "conditions": {
+        "Temp": 285.0,
+        "Time": 49.0,
+        "VOacac": 0.37,
+        "DDT": 3.0,
+        "OAm": 4.0
+      },
+      "results": {
+        "Size": 21.6,
+        "GSD": 1.23,
+        "Squareness": 0.55,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
@@ -354,10 +376,10 @@
       "run_id_original": 17
     },
     {
-      "exp_id": "EXP_017",
+      "exp_id": "EXP_018",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952894",
+      "timestamp": "2026-03-05T10:42:37.727937",
       "conditions": {
         "Temp": 285.0,
         "Time": 49.0,
@@ -366,9 +388,9 @@
         "OAm": 4.0
       },
       "results": {
-        "Size": 21.57,
-        "GSD": 1.2347,
-        "Squareness": 0.552,
+        "Size": 21.5,
+        "GSD": 1.17,
+        "Squareness": 0.54,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
@@ -376,32 +398,10 @@
       "run_id_original": 18
     },
     {
-      "exp_id": "EXP_018",
-      "source": "imported",
-      "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952926",
-      "conditions": {
-        "Temp": 285.0,
-        "Time": 49.0,
-        "VOacac": 0.37,
-        "DDT": 3.0,
-        "OAm": 4.0
-      },
-      "results": {
-        "Size": 21.524,
-        "GSD": 1.1709,
-        "Squareness": 0.544,
-        "HasProduct": 1,
-        "PhasePure": 1,
-        "Polymorph": "cubic"
-      },
-      "run_id_original": 19
-    },
-    {
       "exp_id": "EXP_019",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952958",
+      "timestamp": "2026-03-05T10:42:37.727967",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -410,20 +410,20 @@
         "OAm": 1.0
       },
       "results": {
-        "Size": 12.024,
-        "GSD": 1.556,
-        "Squareness": 0.505,
+        "Size": 12.0,
+        "GSD": 1.56,
+        "Squareness": 0.51,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 21
+      "run_id_original": 19
     },
     {
       "exp_id": "EXP_020",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.952990",
+      "timestamp": "2026-03-05T10:42:37.727998",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -439,19 +439,63 @@
         "PhasePure": 0,
         "Polymorph": null
       },
-      "run_id_original": 22
+      "run_id_original": 20
     },
     {
       "exp_id": "EXP_021",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953018",
+      "timestamp": "2026-03-05T10:42:37.728024",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
         "VOacac": 0.66,
         "DDT": 1.0,
         "OAm": 1.0
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 21
+    },
+    {
+      "exp_id": "EXP_022",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.728050",
+      "conditions": {
+        "Temp": 260.0,
+        "Time": 90.0,
+        "VOacac": 0.66,
+        "DDT": 5.0,
+        "OAm": 7.0
+      },
+      "results": {
+        "Size": 24.4,
+        "GSD": 1.26,
+        "Squareness": 0.39,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "multipod"
+      },
+      "run_id_original": 22
+    },
+    {
+      "exp_id": "EXP_023",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.728080",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 8.0,
+        "VOacac": 0.08,
+        "DDT": 1.0,
+        "OAm": 7.0
       },
       "results": {
         "Size": null,
@@ -464,21 +508,21 @@
       "run_id_original": 23
     },
     {
-      "exp_id": "EXP_022",
+      "exp_id": "EXP_024",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953047",
+      "timestamp": "2026-03-05T10:42:37.728107",
       "conditions": {
-        "Temp": 260.0,
-        "Time": 90.0,
+        "Temp": 310.0,
+        "Time": 8.0,
         "VOacac": 0.66,
         "DDT": 5.0,
         "OAm": 7.0
       },
       "results": {
-        "Size": 24.359,
-        "GSD": 1.2629,
-        "Squareness": 0.39,
+        "Size": 20.6,
+        "GSD": 1.27,
+        "Squareness": 0.37,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "multipod"
@@ -486,54 +530,10 @@
       "run_id_original": 24
     },
     {
-      "exp_id": "EXP_023",
-      "source": "imported",
-      "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953079",
-      "conditions": {
-        "Temp": 310.0,
-        "Time": 8.0,
-        "VOacac": 0.08,
-        "DDT": 1.0,
-        "OAm": 7.0
-      },
-      "results": {
-        "Size": null,
-        "GSD": null,
-        "Squareness": null,
-        "HasProduct": 0,
-        "PhasePure": 0,
-        "Polymorph": null
-      },
-      "run_id_original": 25
-    },
-    {
-      "exp_id": "EXP_024",
-      "source": "imported",
-      "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953107",
-      "conditions": {
-        "Temp": 310.0,
-        "Time": 8.0,
-        "VOacac": 0.66,
-        "DDT": 5.0,
-        "OAm": 7.0
-      },
-      "results": {
-        "Size": 20.588,
-        "GSD": 1.2743,
-        "Squareness": 0.368,
-        "HasProduct": 1,
-        "PhasePure": 1,
-        "Polymorph": "multipod"
-      },
-      "run_id_original": 26
-    },
-    {
       "exp_id": "EXP_025",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953139",
+      "timestamp": "2026-03-05T10:42:37.728136",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -542,9 +542,53 @@
         "OAm": 1.0
       },
       "results": {
-        "Size": 12.545,
-        "GSD": 1.2964,
-        "Squareness": 0.428,
+        "Size": 12.5,
+        "GSD": 1.3,
+        "Squareness": 0.43,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 25
+    },
+    {
+      "exp_id": "EXP_026",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.728165",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 8.0,
+        "VOacac": 0.66,
+        "DDT": 1.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 19.5,
+        "GSD": 1.32,
+        "Squareness": 0.61,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 26
+    },
+    {
+      "exp_id": "EXP_027",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.728193",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 90.0,
+        "VOacac": 0.08,
+        "DDT": 1.0,
+        "OAm": 1.0
+      },
+      "results": {
+        "Size": 22.0,
+        "GSD": 1.92,
+        "Squareness": 0.54,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
@@ -552,54 +596,10 @@
       "run_id_original": 27
     },
     {
-      "exp_id": "EXP_026",
-      "source": "imported",
-      "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953170",
-      "conditions": {
-        "Temp": 310.0,
-        "Time": 8.0,
-        "VOacac": 0.66,
-        "DDT": 1.0,
-        "OAm": 1.0
-      },
-      "results": {
-        "Size": 19.535,
-        "GSD": 1.3225,
-        "Squareness": 0.605,
-        "HasProduct": 1,
-        "PhasePure": 1,
-        "Polymorph": "cubic"
-      },
-      "run_id_original": 28
-    },
-    {
-      "exp_id": "EXP_027",
-      "source": "imported",
-      "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953201",
-      "conditions": {
-        "Temp": 310.0,
-        "Time": 90.0,
-        "VOacac": 0.08,
-        "DDT": 1.0,
-        "OAm": 1.0
-      },
-      "results": {
-        "Size": 22.039,
-        "GSD": 1.2093,
-        "Squareness": 0.598,
-        "HasProduct": 1,
-        "PhasePure": 0,
-        "Polymorph": "cubic"
-      },
-      "run_id_original": 29
-    },
-    {
       "exp_id": "EXP_028",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953294",
+      "timestamp": "2026-03-05T10:42:37.728222",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -608,20 +608,20 @@
         "OAm": 7.0
       },
       "results": {
-        "Size": 16.81,
-        "GSD": 1.9185,
-        "Squareness": 0.535,
+        "Size": 16.8,
+        "GSD": 1.21,
+        "Squareness": 0.6,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
       },
-      "run_id_original": 30
+      "run_id_original": 28
     },
     {
       "exp_id": "EXP_029",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953338",
+      "timestamp": "2026-03-05T10:42:37.728250",
       "conditions": {
         "Temp": 265.0,
         "Time": 32.0,
@@ -630,20 +630,20 @@
         "OAm": 6.5
       },
       "results": {
-        "Size": 29.751,
-        "GSD": 1.2551,
-        "Squareness": 0.437,
+        "Size": 29.8,
+        "GSD": 1.26,
+        "Squareness": 0.44,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "multipod"
       },
-      "run_id_original": 31
+      "run_id_original": 29
     },
     {
       "exp_id": "EXP_030",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953374",
+      "timestamp": "2026-03-05T10:42:37.728279",
       "conditions": {
         "Temp": 260.0,
         "Time": 71.0,
@@ -652,20 +652,20 @@
         "OAm": 2.8
       },
       "results": {
-        "Size": 10.188,
-        "GSD": 1.5282,
-        "Squareness": 0.555,
+        "Size": 10.2,
+        "GSD": 1.53,
+        "Squareness": 0.56,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 32
+      "run_id_original": 30
     },
     {
       "exp_id": "EXP_031",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953408",
+      "timestamp": "2026-03-05T10:42:37.728307",
       "conditions": {
         "Temp": 280.0,
         "Time": 25.0,
@@ -674,20 +674,20 @@
         "OAm": 3.7
       },
       "results": {
-        "Size": 12.589,
-        "GSD": 1.7954,
-        "Squareness": 0.538,
+        "Size": 12.6,
+        "GSD": 1.8,
+        "Squareness": 0.54,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 33
+      "run_id_original": 31
     },
     {
       "exp_id": "EXP_032",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953441",
+      "timestamp": "2026-03-05T10:42:37.728336",
       "conditions": {
         "Temp": 299.0,
         "Time": 47.0,
@@ -696,20 +696,20 @@
         "OAm": 5.6
       },
       "results": {
-        "Size": 24.927,
-        "GSD": 1.4306,
-        "Squareness": 0.514,
+        "Size": 24.9,
+        "GSD": 1.43,
+        "Squareness": 0.51,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
       },
-      "run_id_original": 34
+      "run_id_original": 32
     },
     {
       "exp_id": "EXP_033",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953475",
+      "timestamp": "2026-03-05T10:42:37.728365",
       "conditions": {
         "Temp": 305.0,
         "Time": 41.0,
@@ -718,20 +718,20 @@
         "OAm": 1.7
       },
       "results": {
-        "Size": 22.185,
-        "GSD": 1.179,
-        "Squareness": 0.541,
+        "Size": 22.2,
+        "GSD": 1.18,
+        "Squareness": 0.54,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 35
+      "run_id_original": 33
     },
     {
       "exp_id": "EXP_034",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953507",
+      "timestamp": "2026-03-05T10:42:37.728394",
       "conditions": {
         "Temp": 271.0,
         "Time": 50.0,
@@ -747,13 +747,13 @@
         "PhasePure": 0,
         "Polymorph": null
       },
-      "run_id_original": 36
+      "run_id_original": 34
     },
     {
       "exp_id": "EXP_035",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953536",
+      "timestamp": "2026-03-05T10:42:37.728420",
       "conditions": {
         "Temp": 293.0,
         "Time": 69.0,
@@ -762,20 +762,20 @@
         "OAm": 4.2
       },
       "results": {
-        "Size": 41.641,
-        "GSD": 1.2092,
-        "Squareness": 0.433,
+        "Size": 41.6,
+        "GSD": 1.21,
+        "Squareness": 0.43,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "multipod"
       },
-      "run_id_original": 37
+      "run_id_original": 35
     },
     {
       "exp_id": "EXP_036",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953875",
+      "timestamp": "2026-03-05T10:42:37.728448",
       "conditions": {
         "Temp": 286.0,
         "Time": 60.0,
@@ -784,52 +784,8 @@
         "OAm": 6.9
       },
       "results": {
-        "Size": 18.242,
-        "GSD": 1.5262,
-        "Squareness": 0.518,
-        "HasProduct": 1,
-        "PhasePure": 1,
-        "Polymorph": "cubic"
-      },
-      "run_id_original": 38
-    },
-    {
-      "exp_id": "EXP_037",
-      "source": "imported",
-      "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.953913",
-      "conditions": {
-        "Temp": 273.0,
-        "Time": 87.0,
-        "VOacac": 0.259,
-        "DDT": 1.8,
-        "OAm": 3.4
-      },
-      "results": {
-        "Size": 13.149,
-        "GSD": 1.2517,
-        "Squareness": 0.407,
-        "HasProduct": 1,
-        "PhasePure": 0,
-        "Polymorph": "cubic"
-      },
-      "run_id_original": 40
-    },
-    {
-      "exp_id": "EXP_038",
-      "source": "imported",
-      "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954074",
-      "conditions": {
-        "Temp": 284.0,
-        "Time": 80.0,
-        "VOacac": 0.416,
-        "DDT": 2.6,
-        "OAm": 1.2
-      },
-      "results": {
-        "Size": 16.92,
-        "GSD": 1.3011,
+        "Size": 18.2,
+        "GSD": 1.53,
         "Squareness": 0.52,
         "HasProduct": 1,
         "PhasePure": 1,
@@ -838,10 +794,54 @@
       "run_id_original": 36
     },
     {
+      "exp_id": "EXP_037",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.728477",
+      "conditions": {
+        "Temp": 273.0,
+        "Time": 87.0,
+        "VOacac": 0.259,
+        "DDT": 1.8,
+        "OAm": 3.4
+      },
+      "results": {
+        "Size": 13.1,
+        "GSD": 1.25,
+        "Squareness": 0.41,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 37
+    },
+    {
+      "exp_id": "EXP_038",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.728505",
+      "conditions": {
+        "Temp": 284.0,
+        "Time": 80.0,
+        "VOacac": 0.416,
+        "DDT": 2.6,
+        "OAm": 1.2
+      },
+      "results": {
+        "Size": 16.9,
+        "GSD": 1.3,
+        "Squareness": 0.52,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 38
+    },
+    {
       "exp_id": "EXP_039",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954234",
+      "timestamp": "2026-03-05T10:42:37.728533",
       "conditions": {
         "Temp": 309.0,
         "Time": 9.0,
@@ -850,20 +850,20 @@
         "OAm": 4.8
       },
       "results": {
-        "Size": 12.904,
-        "GSD": 1.2641,
-        "Squareness": 0.574,
+        "Size": 12.9,
+        "GSD": 1.26,
+        "Squareness": 0.57,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
       },
-      "run_id_original": 33
+      "run_id_original": 39
     },
     {
       "exp_id": "EXP_040",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954284",
+      "timestamp": "2026-03-05T10:42:37.728561",
       "conditions": {
         "Temp": 294.0,
         "Time": 15.0,
@@ -872,20 +872,20 @@
         "OAm": 5.3
       },
       "results": {
-        "Size": 21.204,
-        "GSD": 1.623,
+        "Size": 21.2,
+        "GSD": 1.62,
         "Squareness": 0.53,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 37
+      "run_id_original": 40
     },
     {
       "exp_id": "EXP_041",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954324",
+      "timestamp": "2026-03-05T10:42:37.728590",
       "conditions": {
         "Temp": 297.0,
         "Time": 14.0,
@@ -894,20 +894,20 @@
         "OAm": 6.2
       },
       "results": {
-        "Size": 18.242,
-        "GSD": 1.2143,
-        "Squareness": 0.578,
+        "Size": 18.2,
+        "GSD": 1.21,
+        "Squareness": 0.58,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
       },
-      "run_id_original": 45
+      "run_id_original": 41
     },
     {
       "exp_id": "EXP_042",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954364",
+      "timestamp": "2026-03-05T10:42:37.728618",
       "conditions": {
         "Temp": 300.0,
         "Time": 14.0,
@@ -916,20 +916,20 @@
         "OAm": 5.4
       },
       "results": {
-        "Size": 22.055,
-        "GSD": 1.3807,
-        "Squareness": 0.527,
+        "Size": 22.1,
+        "GSD": 1.38,
+        "Squareness": 0.53,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 46
+      "run_id_original": 42
     },
     {
       "exp_id": "EXP_043",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954398",
+      "timestamp": "2026-03-05T10:42:37.728646",
       "conditions": {
         "Temp": 289.0,
         "Time": 79.0,
@@ -938,20 +938,20 @@
         "OAm": 2.7
       },
       "results": {
-        "Size": 14.399,
-        "GSD": 1.2746,
-        "Squareness": 0.369,
+        "Size": 14.4,
+        "GSD": 1.27,
+        "Squareness": 0.37,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 47
+      "run_id_original": 43
     },
     {
       "exp_id": "EXP_044",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954433",
+      "timestamp": "2026-03-05T10:42:37.728675",
       "conditions": {
         "Temp": 270.0,
         "Time": 75.0,
@@ -960,20 +960,20 @@
         "OAm": 5.0
       },
       "results": {
-        "Size": 18.368,
-        "GSD": 1.2553,
-        "Squareness": 0.362,
+        "Size": 18.4,
+        "GSD": 1.26,
+        "Squareness": 0.36,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 48
+      "run_id_original": 44
     },
     {
       "exp_id": "EXP_045",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954465",
+      "timestamp": "2026-03-05T10:42:37.728703",
       "conditions": {
         "Temp": 280.0,
         "Time": 67.0,
@@ -982,20 +982,20 @@
         "OAm": 6.0
       },
       "results": {
-        "Size": 22.873,
-        "GSD": 1.3006,
-        "Squareness": 0.558,
+        "Size": 22.9,
+        "GSD": 1.3,
+        "Squareness": 0.56,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
       },
-      "run_id_original": 49
+      "run_id_original": 45
     },
     {
       "exp_id": "EXP_046",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954497",
+      "timestamp": "2026-03-05T10:42:37.728731",
       "conditions": {
         "Temp": 285.0,
         "Time": 60.0,
@@ -1004,20 +1004,20 @@
         "OAm": 4.0
       },
       "results": {
-        "Size": 11.716,
-        "GSD": 1.4786,
+        "Size": 11.7,
+        "GSD": 1.48,
         "Squareness": 0.4,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 50
+      "run_id_original": 46
     },
     {
       "exp_id": "EXP_047",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954528",
+      "timestamp": "2026-03-05T10:42:37.728760",
       "conditions": {
         "Temp": 267.0,
         "Time": 86.0,
@@ -1026,20 +1026,20 @@
         "OAm": 1.3
       },
       "results": {
-        "Size": 35.678,
-        "GSD": 1.3542,
-        "Squareness": 0.469,
+        "Size": 35.7,
+        "GSD": 1.35,
+        "Squareness": 0.47,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
       },
-      "run_id_original": 51
+      "run_id_original": 47
     },
     {
       "exp_id": "EXP_048",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954559",
+      "timestamp": "2026-03-05T10:42:37.728788",
       "conditions": {
         "Temp": 284.0,
         "Time": 89.0,
@@ -1048,20 +1048,20 @@
         "OAm": 2.9
       },
       "results": {
-        "Size": 16.084,
-        "GSD": 1.3044,
-        "Squareness": 0.497,
+        "Size": 16.1,
+        "GSD": 1.3,
+        "Squareness": 0.5,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 52
+      "run_id_original": 48
     },
     {
       "exp_id": "EXP_049",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954591",
+      "timestamp": "2026-03-05T10:42:37.728817",
       "conditions": {
         "Temp": 304.0,
         "Time": 34.0,
@@ -1070,20 +1070,20 @@
         "OAm": 3.8
       },
       "results": {
-        "Size": 15.62,
+        "Size": 15.6,
         "GSD": 1.15,
-        "Squareness": 0.609,
+        "Squareness": 0.61,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
       },
-      "run_id_original": 53
+      "run_id_original": 49
     },
     {
       "exp_id": "EXP_050",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954623",
+      "timestamp": "2026-03-05T10:42:37.728845",
       "conditions": {
         "Temp": 290.0,
         "Time": 30.0,
@@ -1092,20 +1092,20 @@
         "OAm": 2.0
       },
       "results": {
-        "Size": 15.279,
-        "GSD": 1.4297,
-        "Squareness": 0.526,
+        "Size": 15.3,
+        "GSD": 1.43,
+        "Squareness": 0.53,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 54
+      "run_id_original": 50
     },
     {
       "exp_id": "EXP_051",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954951",
+      "timestamp": "2026-03-05T10:42:37.728876",
       "conditions": {
         "Temp": 292.0,
         "Time": 42.0,
@@ -1114,20 +1114,20 @@
         "OAm": 1.8
       },
       "results": {
-        "Size": 40.781,
-        "GSD": 1.3374,
-        "Squareness": 0.464,
+        "Size": 40.8,
+        "GSD": 1.34,
+        "Squareness": 0.46,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "multipod"
       },
-      "run_id_original": 55
+      "run_id_original": 51
     },
     {
       "exp_id": "EXP_052",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.954993",
+      "timestamp": "2026-03-05T10:42:37.728904",
       "conditions": {
         "Temp": 300.0,
         "Time": 39.0,
@@ -1136,20 +1136,20 @@
         "OAm": 5.4
       },
       "results": {
-        "Size": 27.977,
-        "GSD": 1.3691,
-        "Squareness": 0.418,
+        "Size": 28.0,
+        "GSD": 1.37,
+        "Squareness": 0.42,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "multipod"
       },
-      "run_id_original": 56
+      "run_id_original": 52
     },
     {
       "exp_id": "EXP_053",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.955029",
+      "timestamp": "2026-03-05T10:42:37.728933",
       "conditions": {
         "Temp": 289.0,
         "Time": 57.0,
@@ -1158,20 +1158,20 @@
         "OAm": 4.0
       },
       "results": {
-        "Size": 14.444,
-        "GSD": 1.6664,
+        "Size": 14.4,
+        "GSD": 1.67,
         "Squareness": 0.51,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
       },
-      "run_id_original": 57
+      "run_id_original": 53
     },
     {
       "exp_id": "EXP_054",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.955062",
+      "timestamp": "2026-03-05T10:42:37.728962",
       "conditions": {
         "Temp": 300.0,
         "Time": 45.0,
@@ -1180,20 +1180,20 @@
         "OAm": 3.0
       },
       "results": {
-        "Size": 16.373,
-        "GSD": 1.284,
-        "Squareness": 0.572,
+        "Size": 16.4,
+        "GSD": 1.28,
+        "Squareness": 0.57,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
       },
-      "run_id_original": 58
+      "run_id_original": 54
     },
     {
       "exp_id": "EXP_055",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.955095",
+      "timestamp": "2026-03-05T10:42:37.728991",
       "conditions": {
         "Temp": 270.0,
         "Time": 83.0,
@@ -1209,13 +1209,13 @@
         "PhasePure": 0,
         "Polymorph": null
       },
-      "run_id_original": 59
+      "run_id_original": 55
     },
     {
       "exp_id": "EXP_056",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.955124",
+      "timestamp": "2026-03-05T10:42:37.729016",
       "conditions": {
         "Temp": 279.0,
         "Time": 84.0,
@@ -1224,20 +1224,20 @@
         "OAm": 6.2
       },
       "results": {
-        "Size": 18.558,
-        "GSD": 1.1731,
-        "Squareness": 0.606,
+        "Size": 18.6,
+        "GSD": 1.17,
+        "Squareness": 0.61,
         "HasProduct": 1,
         "PhasePure": 1,
         "Polymorph": "cubic"
       },
-      "run_id_original": 60
+      "run_id_original": 56
     },
     {
       "exp_id": "EXP_057",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.955155",
+      "timestamp": "2026-03-05T10:42:37.729066",
       "conditions": {
         "Temp": 277.0,
         "Time": 71.0,
@@ -1246,20 +1246,20 @@
         "OAm": 5.4
       },
       "results": {
-        "Size": 21.168,
-        "GSD": 1.1865,
-        "Squareness": 0.426,
+        "Size": 21.2,
+        "GSD": 1.19,
+        "Squareness": 0.43,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 61
+      "run_id_original": 57
     },
     {
       "exp_id": "EXP_058",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-02-18T08:39:34.955186",
+      "timestamp": "2026-03-05T10:42:37.729095",
       "conditions": {
         "Temp": 283.0,
         "Time": 69.0,
@@ -1268,14 +1268,234 @@
         "OAm": 1.4
       },
       "results": {
-        "Size": 31.627,
-        "GSD": 1.8371,
-        "Squareness": 0.453,
+        "Size": 31.6,
+        "GSD": 1.84,
+        "Squareness": 0.45,
         "HasProduct": 1,
         "PhasePure": 0,
         "Polymorph": "cubic"
       },
-      "run_id_original": 62
+      "run_id_original": 58
+    },
+    {
+      "exp_id": "EXP_059",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.729123",
+      "conditions": {
+        "Temp": 290.0,
+        "Time": 54.0,
+        "VOacac": 0.579,
+        "DDT": 3.8,
+        "OAm": 5.0
+      },
+      "results": {
+        "Size": 22.6,
+        "GSD": 1.65,
+        "Squareness": 0.41,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "multipod"
+      },
+      "run_id_original": 59
+    },
+    {
+      "exp_id": "EXP_060",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.729151",
+      "conditions": {
+        "Temp": 280.0,
+        "Time": 58.0,
+        "VOacac": 0.25,
+        "DDT": 4.0,
+        "OAm": 3.8
+      },
+      "results": {
+        "Size": 31.1,
+        "GSD": 1.3,
+        "Squareness": 0.42,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 64
+    },
+    {
+      "exp_id": "EXP_061",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.729180",
+      "conditions": {
+        "Temp": 280.0,
+        "Time": 47.0,
+        "VOacac": 0.611,
+        "DDT": 1.3,
+        "OAm": 3.8
+      },
+      "results": {
+        "Size": null,
+        "GSD": null,
+        "Squareness": null,
+        "HasProduct": 0,
+        "PhasePure": 0,
+        "Polymorph": null
+      },
+      "run_id_original": 65
+    },
+    {
+      "exp_id": "EXP_062",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.729204",
+      "conditions": {
+        "Temp": 294.0,
+        "Time": 43.0,
+        "VOacac": 0.314,
+        "DDT": 2.4,
+        "OAm": 1.3
+      },
+      "results": {
+        "Size": 18.0,
+        "GSD": 1.6,
+        "Squareness": 0.47,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 66
+    },
+    {
+      "exp_id": "EXP_063",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.729235",
+      "conditions": {
+        "Temp": 296.0,
+        "Time": 36.0,
+        "VOacac": 0.54,
+        "DDT": 4.2,
+        "OAm": 1.5
+      },
+      "results": {
+        "Size": 31.2,
+        "GSD": 1.32,
+        "Squareness": 0.54,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 67
+    },
+    {
+      "exp_id": "EXP_064",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.729263",
+      "conditions": {
+        "Temp": 303.0,
+        "Time": 34.0,
+        "VOacac": 0.106,
+        "DDT": 4.9,
+        "OAm": 2.3
+      },
+      "results": {
+        "Size": 16.0,
+        "GSD": 1.32,
+        "Squareness": 0.55,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 68
+    },
+    {
+      "exp_id": "EXP_065",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.729292",
+      "conditions": {
+        "Temp": 308.0,
+        "Time": 22.0,
+        "VOacac": 0.503,
+        "DDT": 2.9,
+        "OAm": 1.9
+      },
+      "results": {
+        "Size": 22.1,
+        "GSD": 1.59,
+        "Squareness": 0.49,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 69
+    },
+    {
+      "exp_id": "EXP_066",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.729321",
+      "conditions": {
+        "Temp": 297.0,
+        "Time": 24.0,
+        "VOacac": 0.217,
+        "DDT": 1.0,
+        "OAm": 4.3
+      },
+      "results": {
+        "Size": 20.5,
+        "GSD": 1.53,
+        "Squareness": 0.44,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 70
+    },
+    {
+      "exp_id": "EXP_067",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.729349",
+      "conditions": {
+        "Temp": 298.0,
+        "Time": 11.0,
+        "VOacac": 0.47,
+        "DDT": 3.4,
+        "OAm": 1.4
+      },
+      "results": {
+        "Size": 28.1,
+        "GSD": 1.3,
+        "Squareness": 0.54,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 71
+    },
+    {
+      "exp_id": "EXP_068",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-03-05T10:42:37.729378",
+      "conditions": {
+        "Temp": 302.0,
+        "Time": 17.0,
+        "VOacac": 0.418,
+        "DDT": 3.7,
+        "OAm": 5.8
+      },
+      "results": {
+        "Size": 24.9,
+        "GSD": 1.25,
+        "Squareness": 0.55,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": 72
     }
   ]
 }

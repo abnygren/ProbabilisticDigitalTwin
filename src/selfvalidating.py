@@ -30,13 +30,10 @@ from features import (
 from experiment_store import ExperimentStore, RecommendationStore
 from optimizer import (
     Cu3VS4Optimizer,
-    expected_improvement,
-    prob_in_interval,
     latin_hypercube_sample,
+    _select_diverse_candidates,
 )
 from diagnostics import detect_extrapolation, compare_feature_modes
-
-from scipy.spatial.distance import cdist
 
 
 # =============================================================================
@@ -113,7 +110,7 @@ class ErrorLearner:
 
             if len(z_array) >= self.min_samples:
                 rms_z = np.sqrt(np.mean(z_array**2))
-                self.calibration_factors[prop] = max(1.0, rms_z)
+                self.calibration_factors[prop] = max(0.5, rms_z)
                 print(f"  {prop}: Mean bias = {self.mean_bias[prop]:.3f}, "
                       f"Calibration factor = {self.calibration_factors[prop]:.2f}")
 
@@ -161,7 +158,7 @@ class ErrorLearner:
         }
 
     def save(self, json_path: Path):
-        import json
+        from experiment_store import _atomic_json_save
         data = {
             'is_fitted': self.is_fitted,
             'n_training_samples': self.n_training_samples,
@@ -169,8 +166,7 @@ class ErrorLearner:
             'mean_bias': self.mean_bias,
             'calibration_factors': self.calibration_factors,
         }
-        with open(json_path, 'w') as f:
-            json.dump(data, f, indent=2)
+        _atomic_json_save(json_path, data)
 
     def load(self, json_path: Path):
         import json
@@ -226,6 +222,7 @@ class SelfValidatingOptimizer:
 
         self.base_optimizer = base_optimizer
         self._feature_mode_cache = None
+        self._loo_calibration_done = False
 
         if len(self.exp_store) > 0:
             self._build_models()
@@ -285,6 +282,40 @@ class SelfValidatingOptimizer:
                     feature_mode=self.base_optimizer.feature_mode,
                     feature_names=self.base_optimizer.features
                 )
+        elif self.base_optimizer is not None and not self._loo_calibration_done:
+            self._warm_start_calibration_from_loo()
+            self._loo_calibration_done = True
+
+    def _warm_start_calibration_from_loo(self):
+        """Set calibration factors from LOO-CV coverage before real completions are available.
+
+        Uses cal_68 (fraction of predictions within 1σ): if the model captures
+        only 53% instead of the expected 68%, the intervals are too tight by a
+        factor of 0.68/0.53 ≈ 1.28, so we inflate accordingly.
+        """
+        if self.base_optimizer is None:
+            return
+
+        if not self.base_optimizer.metrics:
+            print("[ErrorLearner] Running LOO-CV for calibration warm-start...")
+            self.base_optimizer._validate()
+
+        updated = {}
+        for prop in ['Size', 'GSD', 'Squareness']:
+            if prop not in self.base_optimizer.metrics:
+                continue
+            cal_68 = self.base_optimizer.metrics[prop].get('cal_68', 0.0)
+            if cal_68 < 0.1:
+                continue
+            factor = round(max(0.5, 0.68 / cal_68), 3)
+            self.error_learner.calibration_factors[prop] = factor
+            updated[prop] = (cal_68, factor)
+
+        if updated:
+            print("[ErrorLearner] Warm-started calibration factors from LOO-CV coverage:")
+            for prop, (cal, fac) in updated.items():
+                direction = "overconfident → inflating" if fac > 1.0 else "underconfident → shrinking"
+                print(f"  {prop}: cal_68={cal:.2f} (target 0.68) → factor={fac:.3f}x ({direction})")
 
     def predict(self, X: np.ndarray, apply_correction: bool = True) -> Dict[str, np.ndarray]:
         """Predict with optional error correction."""
@@ -295,7 +326,10 @@ class SelfValidatingOptimizer:
             )
         preds = self.base_optimizer.predict(X)
 
-        if apply_correction and self.error_learner.is_fitted:
+        calibration_active = apply_correction and self.error_learner.is_fitted
+        loo_calibration_active = apply_correction and self._loo_calibration_done and not self.error_learner.is_fitted
+
+        if calibration_active:
             X_scaled = self.base_optimizer.scaler.transform(X)
             bias = self.error_learner.predict_bias(X_scaled)
             preds['size_mu'] = preds['size_mu'] + bias['Size']
@@ -304,8 +338,12 @@ class SelfValidatingOptimizer:
             preds['size_std'] = preds['size_std'] * self.error_learner.get_calibration_factor('Size')
             preds['gsd_std'] = preds['gsd_std'] * self.error_learner.get_calibration_factor('GSD')
             preds['sq_std'] = preds['sq_std'] * self.error_learner.get_calibration_factor('Squareness')
+        elif loo_calibration_active:
+            preds['size_std'] = preds['size_std'] * self.error_learner.get_calibration_factor('Size')
+            preds['gsd_std'] = preds['gsd_std'] * self.error_learner.get_calibration_factor('GSD')
+            preds['sq_std'] = preds['sq_std'] * self.error_learner.get_calibration_factor('Squareness')
 
-        preds['correction_applied'] = apply_correction and self.error_learner.is_fitted
+        preds['correction_applied'] = calibration_active or loo_calibration_active
         return preds
 
     def validate_models(self) -> Dict[str, Any]:
@@ -361,40 +399,12 @@ class SelfValidatingOptimizer:
         base = self.base_optimizer
         X = latin_hypercube_sample(n_candidates, base.bounds, base.features, seed)
         preds = self.predict(X, apply_correction=True)
+        acq = base.acquisition(X, target_size, size_tol, preds=preds)
 
-        df_success = self.exp_store.get_training_data()
-        gsd_best = df_success["GSD"].min()
-        sq_best = df_success["Squareness"].max()
-
-        ei_gsd = expected_improvement(preds['gsd_mu'], preds['gsd_std'], gsd_best, minimize=True)
-        ei_sq = expected_improvement(preds['sq_mu'], preds['sq_std'], sq_best, minimize=False)
-        ei_gsd_n = (ei_gsd - ei_gsd.min()) / (np.ptp(ei_gsd) + 1e-10)
-        ei_sq_n = (ei_sq - ei_sq.min()) / (np.ptp(ei_sq) + 1e-10)
-
-        w_gsd = base.objective_weights.get('GSD', 1.0)
-        w_sq = base.objective_weights.get('Squareness', 1.0)
-        acq_obj = (w_gsd * ei_gsd_n + w_sq * ei_sq_n) / (w_gsd + w_sq)
-        p_size = prob_in_interval(preds['size_mu'], preds['size_std'], target_size, size_tol)
-        total_acq = acq_obj * p_size * preds['p_feasible']
-
-        mask = (p_size >= p_size_min) & (preds['p_feasible'] >= p_feas_min)
-        if mask.sum() == 0:
-            print("[WARNING] No candidates meet constraints. Relaxing...")
-            mask = np.ones(len(X), dtype=bool)
-
-        X_feas = X[mask]; acq_feas = total_acq[mask]
-        preds_feas = {k: v[mask] if isinstance(v, np.ndarray) else v for k, v in preds.items()}
-
-        order = np.argsort(acq_feas)[::-1]
-        X_scaled = base.scaler.transform(X_feas)
-        selected, selected_scaled = [], []
-        for idx in order:
-            x = X_scaled[idx]
-            if selected_scaled and np.min(cdist([x], selected_scaled)) < min_distance:
-                continue
-            selected.append(idx); selected_scaled.append(x)
-            if len(selected) >= n_return:
-                break
+        X_feas, acq_feas, selected, mask = _select_diverse_candidates(
+            X, acq['total'], acq['p_size'], acq['p_feasible'],
+            base.scaler, p_size_min, p_feas_min, n_return, min_distance,
+        )
 
         rows, rec_ids, X_selected_list = [], [], []
         for rank, sel_idx in enumerate(selected, 1):
@@ -403,18 +413,18 @@ class SelfValidatingOptimizer:
             raw_params = round_to_practical(raw_params)
 
             predictions = {
-                'size_mu': float(preds_feas['size_mu'][sel_idx]),
-                'size_std': float(preds_feas['size_std'][sel_idx]),
-                'gsd_mu': float(preds_feas['gsd_mu'][sel_idx]),
-                'gsd_std': float(preds_feas['gsd_std'][sel_idx]),
-                'sq_mu': float(preds_feas['sq_mu'][sel_idx]),
-                'sq_std': float(preds_feas['sq_std'][sel_idx]),
-                'p_feasible': float(preds_feas['p_feasible'][sel_idx]),
+                'size_mu': float(acq['size_mu'][mask][sel_idx]),
+                'size_std': float(acq['size_std'][mask][sel_idx]),
+                'gsd_mu': float(acq['gsd_mu'][mask][sel_idx]),
+                'gsd_std': float(acq['gsd_std'][mask][sel_idx]),
+                'sq_mu': float(acq['sq_mu'][mask][sel_idx]),
+                'sq_std': float(acq['sq_std'][mask][sel_idx]),
+                'p_feasible': float(acq['p_feasible'][mask][sel_idx]),
             }
 
             rec_id = self.rec_store.save_recommendation(
                 target_size=target_size, size_tolerance=size_tol,
-                conditions=raw_params, predictions=predictions, rank=rank
+                conditions=raw_params, predictions=predictions, rank=rank,
             )
             rec_ids.append(rec_id)
             X_selected_list.append(X_feas[sel_idx])

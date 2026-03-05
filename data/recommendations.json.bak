@@ -1,0 +1,36 @@
+{
+  "next_id": 2,
+  "recommendations": [
+    {
+      "rec_id": "REC_001",
+      "status": "pending",
+      "rank": 1,
+      "timestamp": "2026-03-05T10:43:42.473659",
+      "target": {
+        "size": 16.0,
+        "tolerance": 2.0
+      },
+      "conditions": {
+        "Temp": 282.0,
+        "Time": 77.0,
+        "VOacac": 0.193,
+        "DDT": 2.9,
+        "OAm": 6.0
+      },
+      "predictions": {
+        "size_mu": 18.036868108183402,
+        "size_std": 4.621270394300954,
+        "gsd_mu": 1.3557904756213748,
+        "gsd_std": 0.19863922238512044,
+        "sq_mu": 0.5762406332039187,
+        "sq_std": 0.05178573028965956,
+        "p_feasible": 0.638926525526981
+      },
+      "actual_results": null,
+      "completed_timestamp": null,
+      "errors": null,
+      "skip_reason": null,
+      "skipped_timestamp": null
+    }
+  ]
+}

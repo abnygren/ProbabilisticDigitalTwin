@@ -2,8 +2,8 @@
 Feature engineering for Cu₃VS₄ Bayesian Optimization
 
 Transforms raw synthesis parameters (Temp, Time, VOacac, DDT, OAm) into
-chemically meaningful features (ratios, concentrations, dielectric constants).
-Also handles smart hybrid feature selection via VIF elimination.
+chemically meaningful features (ratios, concentrations).
+Provides VIF calculation for collinearity diagnostics.
 """
 
 import numpy as np
@@ -13,8 +13,9 @@ from pathlib import Path
 
 from config import (
     CUI_MMOL, TOTAL_VOLUME_ML, DDT_MMOL_PER_ML, OAM_MMOL_PER_ML,
-    RAW_FACTORS, RAW_BOUNDS, RAW_ROUNDING,
+    RAW_FACTORS, RAW_BOUNDS, RAW_ROUNDING, CHEMICAL_BOUNDS,
     CHEM_FEATURES_BASIC, ENHANCED_FEATURE_CONFIG, CURRENT_PRECURSORS,
+    SYNTHESIS_FEATURES,
 )
 
 # Try to import chemical constants for enhanced features
@@ -38,9 +39,6 @@ CHEM_FEATURES = CHEM_FEATURES_BASIC + CHEM_FEATURES_ENHANCED
 HYBRID_FEATURES = RAW_FACTORS + ["Cu_V_ratio", "Metal_Conc"]
 if 'effective_dielectric' in CHEM_FEATURES_ENHANCED:
     HYBRID_FEATURES.append('effective_dielectric')
-
-# Smart hybrid is computed dynamically (see select_smart_hybrid_features)
-SMART_HYBRID_FEATURES = None
 
 
 # =============================================================================
@@ -175,7 +173,7 @@ def add_chemical_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # =============================================================================
-# SMART HYBRID FEATURE SELECTION (VIF-based)
+# COLLINEARITY DIAGNOSTICS (VIF)
 # =============================================================================
 
 def calculate_vif(X: np.ndarray, feature_names: List[str] = None) -> pd.DataFrame:
@@ -235,116 +233,26 @@ def calculate_vif(X: np.ndarray, feature_names: List[str] = None) -> pd.DataFram
     return results.sort_values('VIF', ascending=False)
 
 
-def select_smart_hybrid_features(
-    df: pd.DataFrame,
-    vif_threshold: float = 10.0,
-    verbose: bool = True
-) -> List[str]:
-    """
-    Select hybrid features using iterative VIF elimination.
-
-    Strategy:
-    1. Start with all raw factors + all chemical features
-    2. Compute VIF for every feature
-    3. If highest VIF > threshold, drop that feature — preferring raw features
-       when their chemical substitute is present
-    4. Repeat until all VIF <= threshold
-    """
-    if 'Cu_V_ratio' not in df.columns:
-        df = add_chemical_features(df)
-
-    reconstruction_map = {
-        'VOacac': 'Cu_V_ratio',
-        'DDT': 'S_Metal_ratio',
-        'OAm': 'Ligand_Metal_ratio',
-        'Time': 'log_Time',
-    }
-    reverse_map = {v: k for k, v in reconstruction_map.items()}
-
-    chemical_candidates = [
-        "Cu_V_ratio", "S_Metal_ratio", "Ligand_Metal_ratio",
-        "Metal_Conc", "log_Time",
-    ]
-    if 'effective_dielectric' in df.columns:
-        chemical_candidates.append('effective_dielectric')
-
-    candidates = RAW_FACTORS.copy() + chemical_candidates
-    candidates = [f for f in candidates if f in df.columns]
-    seen = set()
-    candidates = [f for f in candidates if not (f in seen or seen.add(f))]
-
-    dropped = []
-
-    while True:
-        X = df[candidates].values.astype(float)
-        vif_df = calculate_vif(X, candidates)
-        worst = vif_df.iloc[0]
-
-        if worst['VIF'] <= vif_threshold:
-            break
-
-        droppable = []
-        for _, row in vif_df.iterrows():
-            feat = row['Feature']
-            vif_val = row['VIF']
-            if vif_val <= vif_threshold:
-                break
-            if feat in reconstruction_map and reconstruction_map[feat] in candidates:
-                droppable.append((feat, vif_val, 'raw_with_substitute'))
-            elif feat in reverse_map and reverse_map[feat] in candidates:
-                droppable.append((feat, vif_val, 'chem_with_raw_present'))
-            elif feat in RAW_FACTORS and feat not in reconstruction_map:
-                droppable.append((feat, vif_val, 'raw_no_substitute'))
-            elif feat not in RAW_FACTORS and feat not in reverse_map:
-                droppable.append((feat, vif_val, 'chem_extra'))
-
-        if not droppable:
-            if verbose:
-                print(f"  Cannot drop further without losing reconstruction ability "
-                      f"(worst VIF: {worst['VIF']:.1f} on {worst['Feature']})")
-            break
-
-        priority = {'raw_with_substitute': 0, 'chem_extra': 1,
-                     'chem_with_raw_present': 2, 'raw_no_substitute': 3}
-        droppable.sort(key=lambda x: (priority[x[2]], -x[1]))
-        to_drop, drop_vif, reason = droppable[0]
-
-        candidates.remove(to_drop)
-        dropped.append((to_drop, drop_vif, reason))
-        if verbose:
-            print(f"  ✗ Drop {to_drop:20s} (VIF={drop_vif:>7.1f}, {reason})")
-
-        if to_drop in reconstruction_map:
-            sub = reconstruction_map[to_drop]
-            if sub not in candidates and sub in df.columns:
-                candidates.append(sub)
-
-    has_ratio = any(f in candidates for f in ['Cu_V_ratio', 'S_Metal_ratio', 'Ligand_Metal_ratio'])
-    if has_ratio and 'Metal_Conc' not in candidates and 'Metal_Conc' in df.columns:
-        candidates.append('Metal_Conc')
-
-    if verbose:
-        print(f"\n✓ Smart Hybrid Mode: {len(candidates)} features selected (VIF threshold={vif_threshold})")
-        print(f"  Raw features kept: {[f for f in candidates if f in RAW_FACTORS]}")
-        print(f"  Chemical features: {[f for f in candidates if f not in RAW_FACTORS]}")
-        if dropped:
-            print(f"  Dropped {len(dropped)} collinear features:")
-            for feat, vif_val, reason in dropped:
-                print(f"    {feat} (VIF={vif_val:.1f})")
-
-    return candidates
-
-
 # =============================================================================
 # BOUNDS & FEATURE VECTOR HELPERS
 # =============================================================================
 
 def compute_feature_bounds(feature_list: List[str], df: pd.DataFrame) -> Dict[str, Tuple[float, float]]:
-    """Compute bounds for any feature list from observed data."""
+    """
+    Compute search bounds for a list of features.
+
+    Priority order:
+      1. RAW_BOUNDS      — hard lab limits for raw parameters (Temp, Time, DDT, ...)
+      2. CHEMICAL_BOUNDS — analytically derived limits for chemical features; these
+                           guarantee the reconstructed raw values stay inside RAW_BOUNDS
+      3. Data-derived    — 5% outward margin on observed data (fallback only)
+    """
     bounds = {}
     for feat in feature_list:
         if feat in RAW_BOUNDS:
             bounds[feat] = RAW_BOUNDS[feat]
+        elif feat in CHEMICAL_BOUNDS:
+            bounds[feat] = CHEMICAL_BOUNDS[feat]
         elif feat in df.columns:
             vals = df[feat].dropna()
             if len(vals) == 0:
@@ -395,3 +303,58 @@ def build_feature_vector_from_raw(
             raise KeyError(f"Feature '{feat}' not available for mode '{feature_mode}'")
         vector.append(float(feat_dict[feat]))
     return vector
+
+
+# =============================================================================
+# BOUNDS ROUND-TRIP VALIDATION
+# =============================================================================
+
+def validate_bounds_roundtrip(n_samples: int = 500, seed: int = 42):
+    """Verify that points within CHEMICAL_BOUNDS back-transform to within RAW_BOUNDS.
+
+    Tests the synthesis-mode reconstruction path:
+      VOacac      = CuI / Cu_V_ratio
+      Time        = 10^log_Time
+      total_metal = CuI + VOacac
+      DDT         = S_Metal_ratio * total_metal / DDT_MMOL_PER_ML
+      OAm         = Ligand_Metal_ratio * total_metal / OAM_MMOL_PER_ML
+    """
+    rng = np.random.RandomState(seed)
+    all_bounds = {**RAW_BOUNDS, **CHEMICAL_BOUNDS}
+    synthesis_feats = list(SYNTHESIS_FEATURES)
+
+    violations = []
+    for _ in range(n_samples):
+        feat_dict = {}
+        for feat in synthesis_feats:
+            lo, hi = all_bounds[feat]
+            feat_dict[feat] = rng.uniform(lo, hi)
+
+        raw = {}
+        raw['Temp'] = feat_dict['Temp']
+        raw['VOacac'] = CUI_MMOL / feat_dict['Cu_V_ratio']
+        raw['Time'] = 10 ** feat_dict['log_Time']
+        total_metal = CUI_MMOL + raw['VOacac']
+        raw['DDT'] = (feat_dict['S_Metal_ratio'] * total_metal) / DDT_MMOL_PER_ML
+        raw['OAm'] = (feat_dict['Ligand_Metal_ratio'] * total_metal) / OAM_MMOL_PER_ML
+
+        for k in RAW_FACTORS:
+            if k not in raw:
+                continue
+            lo, hi = RAW_BOUNDS[k]
+            if raw[k] < lo - 1e-6 or raw[k] > hi + 1e-6:
+                violations.append(k)
+
+    if violations:
+        from collections import Counter
+        import warnings
+        counts = Counter(violations)
+        warnings.warn(
+            f"Bounds round-trip: {len(violations)} out-of-bounds values in {n_samples} samples "
+            f"(by param: {dict(counts)}). The optimizer clamps these, but CHEMICAL_BOUNDS "
+            f"could be tightened to avoid.",
+            stacklevel=2,
+        )
+
+
+validate_bounds_roundtrip()

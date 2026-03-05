@@ -51,7 +51,7 @@ Uses only chemically meaningful derived features, discarding raw parameters.
 
 ---
 
-### 3. **Hybrid Mode** (8 features) — **Default**
+### 3. **Hybrid Mode** (8 features)
 Combines raw parameters with key chemical features.
 
 **Features:**
@@ -70,92 +70,74 @@ Combines raw parameters with key chemical features.
   - `DDT` and `OAm` appear in `Metal_Conc` and `effective_dielectric`
 - Inflates VIF (Variance Inflation Factor) → unreliable lengthscale interpretation
 - Can destabilize GP hyperparameter optimization
-- **Only 4.8 samples per feature** with 38 successful experiments (recommend ≥10)
-
-**Current Issues (from diagnostics):**
-```
-High VIF features: VOacac, DDT, OAm, Metal_Conc, effective_dielectric
-All have VIF = 10,000+ (perfect collinearity)
-```
+- Only ~5 samples per feature at n=47
 
 ---
 
-### 4. **Smart Hybrid Mode** (4-6 features) — **NEW**
-Automatically removes raw features that are highly correlated with chemical features.
+### 4. **Synthesis Mode** (7 features) — **RECOMMENDED**
+Uses mechanistically motivated features that combine chemical ratios with the raw DDT
+volume needed for GP predictive performance.
 
-**Algorithm:**
-1. Start with all raw factors
-2. Add chemical features: `Cu_V_ratio`, `Metal_Conc`, `effective_dielectric`
-3. For each raw feature, compute correlation with chemical features
-4. If `|correlation| > threshold` (default: 0.8), **drop** the raw feature
-5. Keep all chemical features (they replace the dropped raw features)
+**Features:**
 
-**Example Output:**
-```
-✓ Keep Temp        (max |r| = 0.12 with Metal_Conc)
-✓ Keep Time        (max |r| = 0.05 with Cu_V_ratio)
-✗ Drop VOacac      (|r| = 0.98 with Cu_V_ratio)  → replaced
-✗ Drop DDT         (|r| = 0.95 with Metal_Conc)  → replaced
-✗ Drop OAm         (|r| = 0.92 with Metal_Conc)  → replaced
+| Feature | Physical Role | Controls |
+|---|---|---|
+| `Temp` | Arrhenius-driven burst nucleation | Dominant driver of GSD |
+| `DDT` | Raw sulfur-source volume (mL) | Near-linear relationship with Size |
+| `Cu_V_ratio` | Metal stoichiometry (CuI / VOacac) | Cu₃VS₄ phase purity, IsCubic |
+| `S_Metal_ratio` | Sulfur excess (DDT_mmol / total_metal) | Shape control (cubic vs multipod) |
+| `Ligand_Metal_ratio` | OAm surface passivation density | Growth rate, colloidal stability |
+| `Metal_Conc` | Total ion concentration (mM) | Supersaturation → nucleation → size |
+| `log_Time` | Linearised reaction extent | Ostwald ripening at long times |
 
-Smart Hybrid: 5 features selected
-  Raw features kept: ['Temp', 'Time']
-  Chemical features: ['Cu_V_ratio', 'Metal_Conc', 'effective_dielectric']
-```
-
-**Resulting Features (typical):**
-- `Temp`, `Time` — Kept (low correlation)
-- `Cu_V_ratio` — Replaces `VOacac`
-- `Metal_Conc` — Replaces `DDT` and `OAm`
-- `effective_dielectric` — Additional chemical insight
+**Why DDT is kept as a raw feature:**
+DDT volume has a near-linear relationship with particle size. The ratio form
+(`S_Metal_ratio = DDT_mmol / total_metal`) divides by `total_metal` which varies with
+VOacac, introducing a nonlinearity the GP struggles to resolve with limited data (n~47).
+The GP's ARD kernel handles the moderate collinearity between DDT and S_Metal_ratio
+gracefully via lengthscales. Removing DDT to achieve theoretical orthogonality actually
+degrades predictive performance.
 
 **Pros:**
-- **Eliminates collinearity automatically**
-- Better samples-per-feature ratio (38/5 = 7.6 vs 38/8 = 4.8)
-- More stable GP hyperparameter fitting
-- Interpretable lengthscales
-- Retains chemical insight where it's orthogonal to raw factors
+- Mechanistically motivated — every feature has a clear chemical meaning
+- DDT provides the GP with a direct, learnable signal for Size prediction
+- 6.7 samples per feature at n=47 (better than hybrid's 5.9)
+- Stable GP hyperparameter fitting with interpretable lengthscales
 
 **Cons:**
-- Selection is data-dependent (may vary if dataset changes)
-- Threshold choice (0.8) is somewhat arbitrary
-- Still makes chemical assumptions for derived features
+- Moderate collinearity between DDT and S_Metal_ratio (VIF ~7, acceptable)
+- Requires the raw→chemical transformation (inverse is provided)
+- Feature set is fixed (not data-adaptive), but this is intentional for reproducibility
 
 ---
 
 ## Recommendations
 
-### For Your Current Dataset (38 successful experiments)
+### For Your Current Dataset (~47 successful experiments)
 
-**Best choice: `smart_hybrid`**
+**Best choice: `synthesis`**
 
 **Rationale:**
-1. Your LOO-CV shows weak predictive performance across all modes (many negative R²)
-2. Hybrid mode has severe collinearity (VIF = 10,000+)
-3. Only 4.8 samples/feature in hybrid mode is underpowered
-4. Smart hybrid reduces to ~5 features → 7.6 samples/feature
-5. Removes redundant raw features while keeping chemical insight
+1. Six features with clear physical meaning, zero redundancy
+2. Best samples-per-feature ratio of any chemical mode
+3. Eliminates collinearity issues that plagued hybrid mode
+4. Interpretable GP lengthscales map directly to synthesis mechanisms
 
 **How to use:**
 ```python
 optimizer = SelfValidatingOptimizer(
     data_dir=DATA_DIR,
     initialize_from_csv=True,
-    feature_mode='smart_hybrid'  # Auto-removes collinear features
+    feature_mode='synthesis'
 )
 ```
-
-### If You Collect More Data (>100 successful experiments)
-
-**Consider: `chemical` mode**
-
-With more data, you can afford to test if chemical features truly generalize better than raw factors. The chemical mode makes the strongest assumptions but may reward you with better extrapolation to new precursors or unseen regions of the design space.
 
 ### For Conservative Baseline
 
 **Use: `raw` mode**
 
-If you want the most defensible model with fewest assumptions, stick to raw factors. This is safest for publication if reviewers question your chemical feature engineering.
+If you want the most defensible model with fewest assumptions, stick to raw factors.
+This is safest for publication if reviewers question your chemical feature engineering.
 
 ---
 
@@ -165,7 +147,7 @@ Use the built-in comparison function:
 
 ```python
 comparison_df = optimizer.compare_feature_modes(
-    modes=['raw', 'chemical', 'hybrid', 'smart_hybrid']
+    modes=['raw', 'chemical', 'hybrid', 'synthesis']
 )
 
 # View results
@@ -181,17 +163,18 @@ Look for:
 
 ## Summary Table
 
-| Mode | # Features | Collinearity | Samples/Feature | Best For |
-|------|------------|--------------|-----------------|----------|
-| `raw` | 5 | ✓ None | 7.6 | Conservative baseline, interpretability |
-| `chemical` | 6-7 | ✓ Low | 5.4-6.3 | Chemical insight, generalization |
-| `hybrid` | 8 | ✗ Severe (VIF>10k) | 4.8 | ❌ Not recommended (collinearity) |
-| `smart_hybrid` | 4-6 | ✓ Low (auto-removed) | 6.3-9.5 | **Recommended** — balances insight & stability |
+| Mode | # Features | Collinearity | Samples/Feature (n=47) | Best For |
+|------|------------|--------------|------------------------|----------|
+| `raw` | 5 | ✓ None | 9.4 | Conservative baseline, interpretability |
+| `chemical` | 6-7 | ✓ Low | 6.7–7.8 | Chemical insight, generalization |
+| `hybrid` | 8 | ✗ Severe (VIF>10k) | 5.9 | ❌ Not recommended (collinearity) |
+| `synthesis` | 7 | ✓ Low–moderate | 6.7 | **Recommended** — mechanistic + empirically validated |
 
 ---
 
 ## Related Files
 
-- **Implementation**: `src/cuvs_optimizer.py` (see `select_smart_hybrid_features`)
+- **Feature definitions**: `src/config.py` (see `SYNTHESIS_FEATURES`)
+- **Feature transforms**: `src/features.py`
 - **Constants**: `src/chemical_constants.py` (chemical descriptors)
-- **Notebook**: `Notebooks/Cu3VS4_BO_Execute.ipynb` (cell 3 for initialization)
+- **Notebook**: `Notebooks/Cu3VS4_BO_Execute.ipynb`

@@ -6,6 +6,8 @@ optimization behavior, or plot styling. This is the single "knobs and dials"
 file — everything user-facing lives here.
 """
 
+import math
+
 # =============================================================================
 # SYNTHESIS SYSTEM CONSTANTS
 # =============================================================================
@@ -34,6 +36,34 @@ RAW_BOUNDS = {
     "OAm":    (1.0, 7.0),       # mL
 }
 
+# Bounds for derived (chemical) features, computed analytically from RAW_BOUNDS
+# so they never produce raw parameters outside the experimental limits.
+# These are used by compute_feature_bounds() in place of the data-derived + margin values.
+_time_lo, _time_hi     = RAW_BOUNDS["Time"]
+_voacac_lo, _voacac_hi = RAW_BOUNDS["VOacac"]
+_ddt_lo, _ddt_hi       = RAW_BOUNDS["DDT"]
+_oam_lo, _oam_hi       = RAW_BOUNDS["OAm"]
+
+CHEMICAL_BOUNDS = {
+    # log10(Time): strict inversion of the Time bounds — no margin added
+    "log_Time":          (math.log10(_time_lo),   math.log10(_time_hi)),
+
+    # Cu_V_ratio = CuI / VOacac  →  bounds invert (larger VOacac = smaller ratio)
+    "Cu_V_ratio":        (CUI_MMOL / _voacac_hi,  CUI_MMOL / _voacac_lo),
+
+    # Metal_Conc (mM) = (CuI + VOacac) / total_vol * 1000
+    "Metal_Conc":        ((CUI_MMOL + _voacac_lo) / TOTAL_VOLUME_ML * 1000,
+                          (CUI_MMOL + _voacac_hi) / TOTAL_VOLUME_ML * 1000),
+
+    # S_Metal_ratio = DDT_mmol / total_metal  →  worst-case lo/hi from DDT and VOacac extremes
+    "S_Metal_ratio":     (_ddt_lo * DDT_MMOL_PER_ML / (CUI_MMOL + _voacac_hi),
+                          _ddt_hi * DDT_MMOL_PER_ML / (CUI_MMOL + _voacac_lo)),
+
+    # Ligand_Metal_ratio = OAm_mmol / total_metal
+    "Ligand_Metal_ratio":(_oam_lo * OAM_MMOL_PER_ML / (CUI_MMOL + _voacac_hi),
+                          _oam_hi * OAM_MMOL_PER_ML / (CUI_MMOL + _voacac_lo)),
+}
+
 # Rounding precision for lab-practical recommendations
 RAW_ROUNDING = {
     "Temp":   0,      # 1 °C
@@ -59,11 +89,35 @@ CHEM_FEATURES_BASIC = [
 # Enhanced chemical features (toggle on/off).
 # These require chemical_constants.py and are computed only when enabled.
 ENHANCED_FEATURE_CONFIG = {
-    'effective_dielectric': True,
+    'effective_dielectric': False,
     'Cu_precursor_hardness': False,
     'hsab_mismatch': False,
     'S_BDE': False,
 }
+
+# Synthesis-driven feature set: 5 mechanistically orthogonal features.
+#
+# DDT and Metal_Conc are EXCLUDED to avoid severe collinearity:
+#   - DDT ↔ S_Metal_ratio: S_Metal_ratio = DDT*DDT_MMOL_PER_ML/(CuI+VOacac),
+#     near-perfectly correlated (r>0.95) because CuI is fixed.
+#   - Cu_V_ratio ↔ Metal_Conc: both determined solely by VOacac (CuI and
+#     total volume are fixed), giving r≈-0.99.
+# Including collinear pairs destabilises GP lengthscales, causing overfitting
+# and negative R² in LOO-CV.  The chemical ratios already encode the same
+# physical information in a more meaningful form.
+#
+#   Temp               – Arrhenius-driven burst nucleation; dominant GSD driver
+#   Cu_V_ratio         – Metal stoichiometry; controls Cu₃VS₄ phase purity
+#   S_Metal_ratio      – Sulfur excess; controls crystallisation / shape
+#   Ligand_Metal_ratio – OAm surface passivation density; growth-rate control
+#   log_Time           – Linearised reaction extent; Ostwald ripening at long times
+SYNTHESIS_FEATURES = [
+    "Temp",
+    "Cu_V_ratio",
+    "S_Metal_ratio",
+    "Ligand_Metal_ratio",
+    "log_Time",
+]
 
 # =============================================================================
 # OBJECTIVES & FEASIBILITY
@@ -76,8 +130,7 @@ CUBIC_LABEL = "cubic"
 # =============================================================================
 # OPTIMIZATION SETTINGS
 # =============================================================================
-DEFAULT_FEATURE_MODE = 'smart_hybrid'
-VIF_THRESHOLD = 10.0
+DEFAULT_FEATURE_MODE = 'synthesis'
 N_RECOMMENDATIONS = 2
 MIN_COMPLETED_FOR_ERROR_MODEL = 10
 

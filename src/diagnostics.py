@@ -35,17 +35,29 @@ def loo_cv(
     X: np.ndarray,
     y: np.ndarray,
     gp_factory: Callable,
-    return_predictions: bool = False
+    return_predictions: bool = False,
+    scaler_factory: Optional[Callable] = None,
 ) -> Dict[str, Any]:
-    """Leave-One-Out CV with proper re-fitting."""
+    """Leave-One-Out CV with proper re-fitting.
+
+    If scaler_factory is provided, a fresh scaler is fit on the training fold
+    each iteration to avoid information leakage from the test point.
+    """
     n = len(y)
     y_pred = np.zeros(n)
     y_std = np.zeros(n)
 
     for train_idx, test_idx in LeaveOneOut().split(X):
+        if scaler_factory is not None:
+            scaler = scaler_factory()
+            X_train = scaler.fit_transform(X[train_idx])
+            X_test = scaler.transform(X[test_idx])
+        else:
+            X_train = X[train_idx]
+            X_test = X[test_idx]
         gp = gp_factory()
-        gp.fit(X[train_idx], y[train_idx])
-        mu, std = gp.predict(X[test_idx], return_std=True)
+        gp.fit(X_train, y[train_idx])
+        mu, std = gp.predict(X_test, return_std=True)
         y_pred[test_idx] = mu
         y_std[test_idx] = std
 
@@ -82,7 +94,7 @@ def compare_feature_modes(
     from optimizer import Cu3VS4Optimizer
 
     if modes is None:
-        modes = ['raw', 'chemical', 'hybrid', 'smart_hybrid']
+        modes = ['raw', 'chemical', 'hybrid', 'synthesis']
 
     results = []
 
@@ -217,16 +229,14 @@ def diagnose_collinearity(
         features = CHEM_FEATURES
     elif feature_mode == 'hybrid':
         features = HYBRID_FEATURES
-    elif feature_mode == 'smart_hybrid':
-        raise ValueError(
-            "For smart_hybrid mode, you must provide feature_list parameter. "
-            "Use optimizer.get_collinearity_diagnostics() which handles this automatically."
-        )
+    elif feature_mode == 'synthesis':
+        from config import SYNTHESIS_FEATURES
+        features = list(SYNTHESIS_FEATURES)
     else:
         raise ValueError(f"Unknown feature_mode: {feature_mode}")
 
     df_work = df.copy()
-    needs_chem = feature_mode in ['chemical', 'hybrid', 'smart_hybrid'] or (
+    needs_chem = feature_mode in ['chemical', 'hybrid', 'synthesis'] or (
         feature_list is not None and any(f in CHEM_FEATURES for f in feature_list)
     )
     if needs_chem and 'Cu_V_ratio' not in df_work.columns:
@@ -260,15 +270,12 @@ def diagnose_collinearity(
         if raw_in_hybrid and derived_in_hybrid:
             recommendations.append(
                 "Hybrid mode includes both raw factors and derived features. "
-                "Consider using 'smart_hybrid' mode to auto-remove collinear features."
+                "Consider using 'synthesis' mode for mechanistically orthogonal features."
             )
-    if feature_mode == 'smart_hybrid':
-        raw_kept = [f for f in RAW_FACTORS if f in available]
-        derived_used = [f for f in available if f not in RAW_FACTORS]
+    if feature_mode == 'synthesis':
         recommendations.append(
-            f"Smart hybrid mode: Kept {len(raw_kept)} raw features {raw_kept}, "
-            f"using {len(derived_used)} chemical features {derived_used} "
-            f"to replace collinear raw parameters."
+            f"Synthesis mode: {len(available)} mechanistically orthogonal features {available}. "
+            f"Each maps to an independent physical control of nanoparticle synthesis."
         )
     if not recommendations:
         recommendations.append("✓ No major collinearity issues detected.")

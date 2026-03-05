@@ -372,14 +372,18 @@ def plot_target_achievement(optimizer, figsize: Tuple[int, int] = (12, 5)):
 # =============================================================================
 
 def plot_feature_importance(optimizer, figsize: Tuple[int, int] = (10, 6)):
-    """Visualize feature importance from GP lengthscales."""
+    """Visualize feature importance from GP sensitivity analysis.
+
+    Uses gradient-based sensitivity (mean |∂f/∂x_j| over training data) which
+    gives meaningful per-feature importance even with isotropic kernels.
+    """
     if optimizer.base_optimizer is None:
         print("Base optimizer not initialized.")
         return None
     try:
-        importance_df = optimizer.base_optimizer.get_lengthscales()
+        importance_df = optimizer.base_optimizer.get_feature_importance()
     except (AttributeError, ValueError):
-        print("Could not extract feature importance from GP models.")
+        print("Could not compute feature importance from GP models.")
         return None
     if importance_df.empty:
         print("No feature importance data available.")
@@ -402,12 +406,12 @@ def plot_feature_importance(optimizer, figsize: Tuple[int, int] = (10, 6)):
             else:
                 bars[i].set_color(COLORS['tertiary'])
         ax.set_yticks(y_pos); ax.set_yticklabels(prop_data['Feature'], fontsize=9)
-        ax.set_xlabel('Importance (1 / Lengthscale)'); ax.set_title(f'{prop} Feature Importance')
+        ax.set_xlabel('Relative Importance'); ax.set_title(f'{prop} Feature Importance')
         ax.invert_yaxis()
         for i, (idx, row) in enumerate(prop_data.iterrows()):
-            ax.text(row['Importance'], i, f" {row['Importance']:.2f}", va='center', fontsize=8)
+            ax.text(row['Importance'], i, f" {row['Importance']:.0%}", va='center', fontsize=8)
 
-    plt.suptitle('Feature Importance from GP Lengthscales', y=1.02)
+    plt.suptitle('Feature Importance (GP Sensitivity Analysis)', y=1.02)
     plt.tight_layout()
     return fig
 
@@ -561,23 +565,23 @@ def plot_dataset_quality_dashboard(optimizer, figsize: Tuple[int, int] = (14, 10
     ax3.set_ylabel('Number of Experiments')
     ax3.set_title(f'Dataset Composition (Success Rate: {success_rate:.0f}%)')
     ax3.set_ylim(0, max(counts) * 1.15)
-    n_features_smart = len(optimizer.base_optimizer.features) if optimizer.base_optimizer else 7
+    n_features_active = len(optimizer.base_optimizer.features) if optimizer.base_optimizer else 6
     ax3.text(0.98, 0.95,
-            f'Samples per feature:\n  Raw: {n_success/5:.1f}\n  Hybrid: {n_success/8:.1f}\n  Smart: {n_success/n_features_smart:.1f}\n  (recommend ≥10)',
+            f'Samples per feature:\n  Raw: {n_success/5:.1f}\n  Synthesis: {n_success/7:.1f}\n  Active: {n_success/n_features_active:.1f}\n  (recommend ≥10)',
             transform=ax3.transAxes, fontsize=8, va='top', ha='right',
             bbox=dict(boxstyle='round', facecolor='white', alpha=0.9, edgecolor='gray'))
 
     # Panel 4: LOO-CV Performance by Mode
     ax4 = fig.add_subplot(gs[1, 1])
     try:
-        comparison_df = optimizer.compare_feature_modes(modes=['raw', 'chemical', 'hybrid', 'smart_hybrid'], verbose=False)
+        comparison_df = optimizer.compare_feature_modes(modes=['raw', 'chemical', 'hybrid', 'synthesis'], verbose=False)
         if not comparison_df.empty:
             pivot = comparison_df.pivot(index='Property', columns='Mode', values='R2')
             x = np.arange(len(pivot.index)); n_modes = 4; width = 0.8 / n_modes
             mode_colors = {'raw': COLORS['primary'], 'chemical': COLORS['secondary'],
-                          'hybrid': COLORS['tertiary'], 'smart_hybrid': '#2ecc71'}
-            mode_labels = {'raw': 'Raw', 'chemical': 'Chemical', 'hybrid': 'Hybrid', 'smart_hybrid': 'Smart Hybrid'}
-            for i, mode in enumerate(['raw', 'chemical', 'hybrid', 'smart_hybrid']):
+                          'hybrid': COLORS['tertiary'], 'synthesis': '#2ecc71'}
+            mode_labels = {'raw': 'Raw', 'chemical': 'Chemical', 'hybrid': 'Hybrid', 'synthesis': 'Synthesis'}
+            for i, mode in enumerate(['raw', 'chemical', 'hybrid', 'synthesis']):
                 if mode in pivot.columns:
                     ax4.bar(x + i*width, pivot[mode], width, label=mode_labels[mode], color=mode_colors[mode], edgecolor='black', alpha=0.8)
             ax4.axhline(0, color='black', linewidth=0.8)
@@ -611,14 +615,13 @@ def plot_loo_residuals(optimizer, figsize: Tuple[int, int] = (12, 10)) -> Option
     if optimizer.base_optimizer is None:
         return None
     base = optimizer.base_optimizer
-    df_success = base.df_success
     if not base.metrics or 'y_pred' not in base.metrics.get('Size', {}):
         optimizer.validate_models()
     fig, axes = plt.subplots(3, 2, figsize=figsize)
     for row, (prop, _) in enumerate([('Size', 'size_mu'), ('GSD', 'gsd_mu'), ('Squareness', 'sq_mu')]):
         if prop not in base.metrics or 'y_pred' not in base.metrics[prop]:
             continue
-        y_actual = df_success[prop].values
+        y_actual = base.df_cubic[prop].values
         y_pred = base.metrics[prop]['y_pred']
         residual = y_actual - y_pred
 

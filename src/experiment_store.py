@@ -11,6 +11,24 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 from pathlib import Path
 import json
+import shutil
+
+
+def _atomic_json_save(filepath: Path, data: dict):
+    """Write JSON atomically: temp file + rename, keeping a .bak backup."""
+    filepath = Path(filepath)
+    tmp_path = filepath.parent / (filepath.name + '.tmp')
+    bak_path = filepath.parent / (filepath.name + '.bak')
+    try:
+        with open(tmp_path, 'w') as f:
+            json.dump(data, f, indent=2)
+        if filepath.exists():
+            shutil.copy2(filepath, bak_path)
+        tmp_path.replace(filepath)
+    except BaseException:
+        if tmp_path.exists():
+            tmp_path.unlink()
+        raise
 
 
 # =============================================================================
@@ -44,10 +62,47 @@ class ExperimentStore:
         return exp_id
 
     def import_from_csv(self, csv_path: Path, source: str = 'imported') -> int:
-        """Bulk import experiments from CSV file. Returns count imported."""
+        """Bulk import experiments from CSV file. Returns count imported.
+
+        Deduplicates by Run_ID when available (preserving replicates with
+        identical conditions but different results).  Falls back to
+        condition-based dedup only when Run_ID is absent.
+        """
         df = pd.read_csv(csv_path)
+
+        existing_run_ids = set()
+        existing_conditions = set()
+        for exp in self.experiments:
+            rid = exp.get('run_id_original')
+            if rid is not None:
+                existing_run_ids.add(rid)
+            c = exp['conditions']
+            existing_conditions.add(
+                (round(c['Temp'], 4), round(c['Time'], 4), round(c['VOacac'], 6),
+                 round(c['DDT'], 4), round(c['OAm'], 4))
+            )
+
+        has_run_id_col = 'Run_ID' in df.columns
+
         count = 0
+        skipped = 0
         for _, row in df.iterrows():
+            run_id = int(row['Run_ID']) if has_run_id_col and pd.notna(row.get('Run_ID')) else None
+
+            if run_id is not None and run_id in existing_run_ids:
+                skipped += 1
+                continue
+            if run_id is None:
+                cond_key = (
+                    round(float(row['Temp']), 4), round(float(row['Time']), 4),
+                    round(float(row['VOacac']), 6), round(float(row['DDT']), 4),
+                    round(float(row['OAm']), 4),
+                )
+                if cond_key in existing_conditions:
+                    skipped += 1
+                    continue
+                existing_conditions.add(cond_key)
+
             exp = {
                 'exp_id': self._generate_id(),
                 'source': source,
@@ -68,10 +123,15 @@ class ExperimentStore:
                     'PhasePure': int(row.get('PhasePure', 0)),
                     'Polymorph': str(row.get('Polymorph', '')) if pd.notna(row.get('Polymorph')) else None,
                 },
-                'run_id_original': int(row.get('Run_ID', 0)) if pd.notna(row.get('Run_ID')) else None,
+                'run_id_original': run_id,
             }
+            if run_id is not None:
+                existing_run_ids.add(run_id)
             self.experiments.append(exp)
             count += 1
+
+        if skipped > 0:
+            print(f"[INFO] Skipped {skipped} duplicate experiments during import")
         self.save()
         return count
 
@@ -158,8 +218,7 @@ class ExperimentStore:
 
     def save(self):
         data = {'next_id': self._next_id, 'experiments': self.experiments}
-        with open(self.json_path, 'w') as f:
-            json.dump(data, f, indent=2)
+        _atomic_json_save(self.json_path, data)
 
     def load(self):
         if self.json_path.exists():
@@ -365,7 +424,7 @@ class RecommendationStore:
                 stats[f'{prop}_std_error'] = np.std(errors)
             if z_scores:
                 stats[f'{prop}_mean_z'] = np.mean(np.abs(z_scores))
-                stats[f'{prop}_calibration_factor'] = max(1.0, np.sqrt(np.mean(np.array(z_scores)**2)))
+                stats[f'{prop}_calibration_factor'] = max(0.5, np.sqrt(np.mean(np.array(z_scores)**2)))
             if within_1s:
                 stats[f'{prop}_within_1sigma_rate'] = np.mean(within_1s)
             if within_2s:
@@ -382,8 +441,7 @@ class RecommendationStore:
 
     def save(self):
         data = {'next_id': self._next_id, 'recommendations': self.recommendations}
-        with open(self.json_path, 'w') as f:
-            json.dump(data, f, indent=2)
+        _atomic_json_save(self.json_path, data)
 
     def load(self):
         if self.json_path.exists():
