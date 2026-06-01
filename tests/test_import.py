@@ -15,7 +15,7 @@ print("="*70)
 
 try:
     print("\n1. Importing config...")
-    from config import RAW_FACTORS, RAW_BOUNDS, OBJECTIVES, COLORS, CUI_MMOL
+    from config import RAW_FACTORS, RAW_BOUNDS, OBJECTIVES, COLORS, CU_PRECURSOR_MMOL
     print(f"   ✓ RAW_FACTORS: {RAW_FACTORS}")
     print(f"   ✓ OBJECTIVES: {OBJECTIVES}")
 

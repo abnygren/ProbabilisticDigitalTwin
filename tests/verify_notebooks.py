@@ -71,16 +71,16 @@ def main():
     print("NOTEBOOK VERIFICATION TOOL")
     print("="*70)
     
-    notebooks_dir = Path(__file__).parent / "Notebooks"
+    notebooks_dir = Path(__file__).parent.parent / "Notebooks"
     
     if not notebooks_dir.exists():
         print(f"❌ ERROR: Notebooks directory not found at {notebooks_dir}")
         return
     
-    notebooks = [
-        notebooks_dir / "Cu3VS4_BO_Final.ipynb",
-        notebooks_dir / "Cu3VS4_SelfValidating_BO.ipynb"
-    ]
+    notebooks = sorted(notebooks_dir.glob("*.ipynb"))
+    if not notebooks:
+        print(f"❌ ERROR: No notebooks found in {notebooks_dir}")
+        return
     
     results = {}
     for nb_path in notebooks:
@@ -105,10 +105,9 @@ def main():
         print("\n🎉 All notebooks are valid and ready to use!")
         print("\nNEXT STEPS:")
         print("1. Open Jupyter Lab/Notebook")
-        print("2. Open Cu3VS4_BO_Final.ipynb")
-        print("3. Run 'Run All'")
-        print("4. Open Cu3VS4_SelfValidating_BO.ipynb (same session)")
-        print("5. Run 'Run All'")
+        print("2. Open Notebooks/Cu3VS4_BO_Execute.ipynb")
+        print("3. Run the setup and diagnostics cells first")
+        print("4. Generate recommendations only after reviewing diagnostics")
     else:
         print("\n⚠️  Some notebooks have issues. Please check the errors above.")
     

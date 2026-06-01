@@ -1,8 +1,7 @@
-"""
-Cu₃VS₄ Bayesian Optimizer (base class)
+"""Base Cu3VS4 Bayesian optimizer.
 
-Contains the Cu3VS4Optimizer class and GP/acquisition helpers.
-Feature engineering, diagnostics, and visualization live in their own modules.
+Contains the ``Cu3VS4Optimizer`` class together with the GP factories and the
+acquisition / sampling / candidate-selection helpers that it uses.
 """
 
 import numpy as np
@@ -17,8 +16,11 @@ from scipy.stats import norm
 from scipy.spatial.distance import cdist
 
 from config import (
-    CUI_MMOL, TOTAL_VOLUME_ML, DDT_MMOL_PER_ML, OAM_MMOL_PER_ML,
+    CU_PRECURSOR_MMOL, TOTAL_VOLUME_ML, DDT_MMOL_PER_ML, OAM_MMOL_PER_ML,
     RAW_FACTORS, OBJECTIVES, FEAS_COLS, RAW_BOUNDS,
+    SQUARENESS_BINS, DEFAULT_SQUARENESS_BIN, OTSU_N_THRESHOLDS,
+    SYNTHESIS_FEATURES, TRANSFER_MODE, TRANSFER_FEATURES,
+    PRECURSOR_DESCRIPTOR_FEATURES,
 )
 from features import (
     add_chemical_features,
@@ -27,7 +29,6 @@ from features import (
     chemical_to_raw_features,
     CHEM_FEATURES, HYBRID_FEATURES,
 )
-from config import SYNTHESIS_FEATURES
 from diagnostics import (
     loo_cv,
     detect_extrapolation,
@@ -36,25 +37,29 @@ from diagnostics import (
 )
 
 
-# =============================================================================
-# GP BUILDERS
-# =============================================================================
+def make_gp_regressor(n_features: int, use_ard: bool = False) -> GaussianProcessRegressor:
+    """GP regressor with a Matern-5/2 kernel.
 
-def make_gp_regressor(n_features: int) -> GaussianProcessRegressor:
+    Parameters
+    ----------
+    n_features : int
+        Number of input features.
+    use_ard : bool
+        Use per-feature lengthscales (ARD). Helpful when transfer learning is
+        active and synthesis features sit on different scales than precursor
+        descriptors. The default (False) uses a single shared lengthscale,
+        which is better behaved on small homogeneous datasets.
     """
-    Create GP regressor with isotropic Matérn 5/2 kernel.
+    if use_ard:
+        length_scale = [1.0] * n_features
+        ls_bounds = (0.1, 10.0)
+    else:
+        length_scale = 1.0
+        ls_bounds = (0.3, 10.0)
 
-    Uses a SINGLE shared lengthscale rather than per-feature ARD.
-    With ~44 cubic data points in 5-D, ARD (5 separate lengthscales)
-    causes the optimizer to set very short lengthscales in individual
-    dimensions, leading to interpolation and R² < 0 in LOO-CV.
-    The isotropic kernel forces equal treatment of all (StandardScaler-
-    normalised) features, dramatically improving generalisation:
-      Size R²: 0.08 → 0.30,  Squareness R²: −0.62 → −0.05
-    """
     kernel = (
         C(1.0, (0.01, 100.0)) *
-        Matern(length_scale=1.0, length_scale_bounds=(0.3, 10.0), nu=2.5) +
+        Matern(length_scale=length_scale, length_scale_bounds=ls_bounds, nu=2.5) +
         WhiteKernel(noise_level=0.1, noise_level_bounds=(0.01, 2.0))
     )
     return GaussianProcessRegressor(
@@ -64,7 +69,7 @@ def make_gp_regressor(n_features: int) -> GaussianProcessRegressor:
 
 
 def make_gp_classifier(n_features: int) -> GaussianProcessClassifier:
-    """Create GP classifier for feasibility."""
+    """GP classifier used for the feasibility (HasProduct / PhasePure / IsCubic) targets."""
     kernel = C(1.0, (0.01, 100.0)) * Matern(
         length_scale=[1.0] * n_features, length_scale_bounds=(0.1, 10.0), nu=2.5
     )
@@ -74,15 +79,11 @@ def make_gp_classifier(n_features: int) -> GaussianProcessClassifier:
     )
 
 
-# =============================================================================
-# ACQUISITION FUNCTIONS
-# =============================================================================
-
 def expected_improvement(
     mu: np.ndarray, sigma: np.ndarray,
     y_best: float, xi: float = 0.01, minimize: bool = True
 ) -> np.ndarray:
-    """Expected Improvement acquisition function."""
+    """Expected Improvement acquisition."""
     sigma = np.maximum(sigma, 1e-9)
     improvement = (y_best - mu - xi) if minimize else (mu - y_best - xi)
     z = improvement / sigma
@@ -94,7 +95,7 @@ def prob_in_interval(
     mu: np.ndarray, sigma: np.ndarray,
     target: float, tolerance: float
 ) -> np.ndarray:
-    """P(target - tol <= Y <= target + tol)."""
+    """``P(target - tol <= Y <= target + tol)`` under N(mu, sigma)."""
     sigma = np.maximum(sigma, 1e-9)
     z_hi = (target + tolerance - mu) / sigma
     z_lo = (target - tolerance - mu) / sigma
@@ -102,16 +103,12 @@ def prob_in_interval(
 
 
 def _normalize_ei(ei: np.ndarray) -> np.ndarray:
-    """Normalize EI to [0, 1]. Returns zeros when all values are identical."""
+    """Min-max normalize EI to [0, 1]; returns zeros when all values are equal."""
     ptp = np.ptp(ei)
     if ptp < 1e-8:
         return np.zeros_like(ei)
     return (ei - ei.min()) / ptp
 
-
-# =============================================================================
-# SAMPLING
-# =============================================================================
 
 def latin_hypercube_sample(
     n_samples: int,
@@ -119,7 +116,7 @@ def latin_hypercube_sample(
     feature_order: List[str],
     seed: Optional[int] = None
 ) -> np.ndarray:
-    """Generate LHS samples."""
+    """Generate Latin-hypercube samples on the box defined by ``bounds``."""
     from scipy.stats.qmc import LatinHypercube
     n_dims = len(feature_order)
     sampler = LatinHypercube(d=n_dims, seed=seed)
@@ -128,10 +125,6 @@ def latin_hypercube_sample(
     highs = np.array([bounds[k][1] for k in feature_order])
     return samples * (highs - lows) + lows
 
-
-# =============================================================================
-# CANDIDATE SELECTION
-# =============================================================================
 
 def _select_diverse_candidates(
     X: np.ndarray,
@@ -143,12 +136,19 @@ def _select_diverse_candidates(
     p_feas_min: float,
     n_return: int,
     min_distance: float,
+    X_history_scaled: Optional[np.ndarray] = None,
 ) -> Tuple[np.ndarray, np.ndarray, List[int], np.ndarray]:
-    """
-    Filter candidates by constraints and select diverse top candidates.
+    """Filter candidates by P(size)/P(feasible) thresholds, then greedily pick
+    diverse top-acquisition points.
 
-    Returns (X_feasible, acq_feasible, selected_indices, feasibility_mask).
-    selected_indices are positions within X_feasible.
+    Candidates must be at least ``min_distance`` (scaled-space) away from each
+    other and from any points in ``X_history_scaled`` (previously recommended
+    conditions).
+
+    Returns
+    -------
+    (X_feasible, acq_feasible, selected_indices, feasibility_mask)
+        ``selected_indices`` are positions within ``X_feasible``.
     """
     mask = (p_size >= p_size_min) & (p_feasible >= p_feas_min)
     if mask.sum() == 0:
@@ -160,10 +160,18 @@ def _select_diverse_candidates(
     order = np.argsort(acq_feas)[::-1]
     X_scaled = scaler.transform(X_feas)
 
+    # Seed the exclusion set with past recommendations so new candidates are
+    # forced away from previously explored conditions.
+    if X_history_scaled is not None and len(X_history_scaled) > 0:
+        excluded_scaled = list(X_history_scaled)
+    else:
+        excluded_scaled = []
+
     selected, selected_scaled = [], []
     for idx in order:
         x = X_scaled[idx]
-        if selected_scaled and np.min(cdist([x], selected_scaled)) < min_distance:
+        all_existing = selected_scaled + excluded_scaled
+        if all_existing and np.min(cdist([x], all_existing)) < min_distance:
             continue
         selected.append(idx)
         selected_scaled.append(x)
@@ -173,57 +181,71 @@ def _select_diverse_candidates(
     return X_feas, acq_feas, selected, mask
 
 
-# =============================================================================
-# WEIGHT CALCULATION
-# =============================================================================
+def otsu_threshold(values: np.ndarray, n_thresholds: int = OTSU_N_THRESHOLDS) -> float:
+    """Otsu threshold (between-class variance maximizer).
 
-def calculate_objective_weights(
-    df_success: pd.DataFrame,
-    model_metrics: Optional[Dict[str, Dict[str, float]]] = None,
-    method: str = 'variance'
-) -> Dict[str, float]:
+    Used on the squareness values of cubic-only particles to split them into
+    ``highly_cubic`` (>= threshold) and ``poorly_cubic`` (< threshold) bins.
     """
-    Calculate objective weights for GSD and Squareness.
+    thresholds = np.linspace(values.min(), values.max(), n_thresholds)
+    best_thresh = thresholds[0]
+    best_variance = 0.0
 
-    Default method ('variance') uses the coefficient of variation.
+    for t in thresholds:
+        below = values[values <= t]
+        above = values[values > t]
+        if len(below) == 0 or len(above) == 0:
+            continue
+        w_below = len(below) / len(values)
+        w_above = len(above) / len(values)
+        between_variance = w_below * w_above * (below.mean() - above.mean()) ** 2
+        if between_variance > best_variance:
+            best_variance = between_variance
+            best_thresh = t
+
+    return float(best_thresh)
+
+
+def compute_bin_probability(
+    sq_mu: np.ndarray,
+    sq_std: np.ndarray,
+    p_cubic: np.ndarray,
+    threshold: float,
+    squareness_bin: str = DEFAULT_SQUARENESS_BIN,
+) -> np.ndarray:
+    """Probability that a candidate falls in the requested squareness bin.
+
+    Combines the squareness GP posterior with the IsCubic classifier::
+
+        highly_cubic = P(IsCubic) * P(Squareness >= threshold)
+        poorly_cubic = P(IsCubic) * P(Squareness <  threshold)
+        multipod     = 1 - P(IsCubic)
     """
-    gsd_data = df_success['GSD'].values
-    sq_data = df_success['Squareness'].values
-
-    if method == 'variance':
-        w_gsd = np.std(gsd_data) / (np.mean(gsd_data) + 1e-10)
-        w_sq = np.std(sq_data) / (np.mean(sq_data) + 1e-10)
-    elif method == 'equal':
-        w_gsd = 1.0; w_sq = 1.0
-    elif method == 'uncertainty':
-        if model_metrics is None:
-            raise ValueError("model_metrics required for 'uncertainty' method")
-        rmse_gsd = model_metrics.get('GSD', {}).get('rmse', 0.1)
-        rmse_sq = model_metrics.get('Squareness', {}).get('rmse', 0.1)
-        w_gsd = rmse_gsd / (np.mean(gsd_data) + 1e-10)
-        w_sq = rmse_sq / (np.mean(sq_data) + 1e-10)
+    sq_std = np.maximum(sq_std, 1e-9)
+    if squareness_bin == 'highly_cubic':
+        p_above = 1.0 - norm.cdf((threshold - sq_mu) / sq_std)
+        return p_cubic * p_above
+    elif squareness_bin == 'poorly_cubic':
+        p_below = norm.cdf((threshold - sq_mu) / sq_std)
+        return p_cubic * p_below
+    elif squareness_bin == 'multipod':
+        return 1.0 - p_cubic
     else:
-        raise ValueError(f"Unknown method: {method}. Use 'variance', 'equal', or 'uncertainty'.")
+        raise ValueError(
+            f"Unknown squareness_bin '{squareness_bin}'. "
+            f"Choose from {SQUARENESS_BINS}"
+        )
 
-    total = w_gsd + w_sq
-    if total > 0:
-        scale = 2.0 / total
-        w_gsd *= scale; w_sq *= scale
-    else:
-        w_gsd = 1.0; w_sq = 1.0
-
-    return {'GSD': float(w_gsd), 'Squareness': float(w_sq)}
-
-
-# =============================================================================
-# Cu₃VS₄ BAYESIAN OPTIMIZER
-# =============================================================================
 
 class Cu3VS4Optimizer:
-    """
-    Chemically-informed Bayesian Optimization for Cu₃VS₄ synthesis.
+    """Chemically-informed Bayesian optimizer for Cu3MS4 synthesis.
 
-    Supports 'raw', 'chemical', 'hybrid', and 'synthesis' feature modes.
+    Size is the only regression objective in the acquisition. The CV and
+    Squareness GPs are kept for informational predictions only. Squareness
+    binning (``multipod`` / ``highly_cubic`` / ``poorly_cubic``) enters as a
+    feasibility-style constraint with the Otsu threshold.
+
+    Feature modes: ``raw``, ``chemical``, ``hybrid``, ``synthesis``, ``transfer``.
     """
 
     def __init__(
@@ -231,12 +253,20 @@ class Cu3VS4Optimizer:
         df: pd.DataFrame,
         feature_mode: str = 'synthesis',
         validate: bool = True,
-        objective_weights: Optional[Dict[str, float]] = None,
+        frozen_otsu_threshold: Optional[float] = None,
     ):
         self.feature_mode = feature_mode
+        self.use_ard = (
+            feature_mode == 'transfer'
+            and TRANSFER_MODE.get('use_ard_kernel', True)
+        )
 
         self.df_all = df.copy()
-        if feature_mode in ['chemical', 'hybrid', 'synthesis']:
+        # Backwards compatibility: allow callers that still pass a 'GSD' column
+        # by aliasing it to 'CV'.
+        if 'CV' not in self.df_all.columns and 'GSD' in self.df_all.columns:
+            self.df_all['CV'] = self.df_all['GSD']
+        if feature_mode in ['chemical', 'hybrid', 'synthesis', 'transfer']:
             if 'Cu_V_ratio' not in self.df_all.columns:
                 self.df_all = add_chemical_features(self.df_all)
 
@@ -250,8 +280,13 @@ class Cu3VS4Optimizer:
             self.features = HYBRID_FEATURES
         elif feature_mode == 'synthesis':
             self.features = list(SYNTHESIS_FEATURES)
+        elif feature_mode == 'transfer':
+            self.features = list(TRANSFER_FEATURES)
         else:
-            raise ValueError(f"Unknown feature_mode: {feature_mode}. Use 'raw', 'chemical', 'hybrid', or 'synthesis'.")
+            raise ValueError(
+                f"Unknown feature_mode: {feature_mode}. "
+                f"Use 'raw', 'chemical', 'hybrid', 'synthesis', or 'transfer'."
+            )
 
         if len(self.df_success) < 5:
             raise ValueError(f"Need ≥5 successful experiments")
@@ -266,26 +301,24 @@ class Cu3VS4Optimizer:
 
         self.bounds = compute_feature_bounds(self.features, self.df_all)
 
+        self._frozen_otsu_threshold = frozen_otsu_threshold
         self._build_models()
 
         self.metrics = {}
         if validate:
             self._validate()
 
-        if objective_weights is None:
-            self.objective_weights = calculate_objective_weights(self.df_cubic, method='variance')
-        else:
-            self.objective_weights = objective_weights
-
     def _gp_factory(self):
-        return make_gp_regressor(len(self.features))
+        return make_gp_regressor(len(self.features), use_ard=self.use_ard)
 
     def _build_models(self):
         n = len(self.features)
-        print(f"Building models with {n} features ({self.feature_mode} mode)...")
+        ard_str = " [ARD]" if self.use_ard else ""
+        print(f"Building models with {n} features ({self.feature_mode}{ard_str} mode)...")
 
-        # Regression models are trained on cubic-only data: size/GSD/Squareness are
-        # only meaningful for cubic particles, and mixing morphologies confounds the GP.
+        # Regression GPs are trained on cubic-only data: size, CV and squareness
+        # are only meaningful for cubic particles, and mixing morphologies
+        # confounds the GP.
         if 'IsCubic' in self.df_success.columns:
             df_cubic = self.df_success[self.df_success['IsCubic'] == 1].copy()
             if len(df_cubic) >= 5:
@@ -305,11 +338,21 @@ class Cu3VS4Optimizer:
             self.X_cubic = self.X_success
             self.X_cubic_scaled = self.X_success_scaled
 
-        self.gp_size = make_gp_regressor(n)
-        self.gp_gsd = make_gp_regressor(n)
-        self.gp_sq = make_gp_regressor(n)
+        # Use the frozen Otsu threshold if one was supplied, else compute it
+        # from the current cubic data (standalone usage without
+        # SelfValidatingOptimizer).
+        if self._frozen_otsu_threshold is not None:
+            self.sq_threshold = self._frozen_otsu_threshold
+        else:
+            sq_vals = self.df_cubic['Squareness'].dropna().values
+            self.sq_threshold = otsu_threshold(sq_vals) if len(sq_vals) >= 4 else 0.81
+        print(f"  Squareness Otsu threshold: {self.sq_threshold:.3f}")
+
+        self.gp_size = make_gp_regressor(n, use_ard=self.use_ard)
+        self.gp_cv = make_gp_regressor(n, use_ard=self.use_ard)
+        self.gp_sq = make_gp_regressor(n, use_ard=self.use_ard)
         self.gp_size.fit(self.X_cubic_scaled, self.df_cubic["Size"].values)
-        self.gp_gsd.fit(self.X_cubic_scaled, self.df_cubic["GSD"].values)
+        self.gp_cv.fit(self.X_cubic_scaled, self.df_cubic["CV"].values)
         self.gp_sq.fit(self.X_cubic_scaled, self.df_cubic["Squareness"].values)
         print(f"  Regression models fitted (n={len(self.df_cubic)})")
 
@@ -329,7 +372,7 @@ class Cu3VS4Optimizer:
 
     def _validate(self):
         print("\nRunning LOO cross-validation (cubic-only)...")
-        for name in ["Size", "GSD", "Squareness"]:
+        for name in ["Size", "CV", "Squareness"]:
             y = self.df_cubic[name].values
             cv = loo_cv(
                 self.X_cubic, y, self._gp_factory,
@@ -338,21 +381,50 @@ class Cu3VS4Optimizer:
             self.metrics[name] = cv
             print(f"  {name}: R²={cv['r2']:.3f}, RMSE={cv['rmse']:.3f}")
 
+        if (self.feature_mode == 'transfer'
+                and 'Cu_precursor' in self.df_cubic.columns
+                and self.df_cubic['Cu_precursor'].nunique() > 1):
+            self._validate_per_precursor()
+
+    def _validate_per_precursor(self):
+        """Print LOO-CV R² broken out by Cu precursor."""
+        from sklearn.metrics import r2_score, mean_squared_error
+        print("\n  Per-precursor LOO breakdown:")
+        cu_labels = self.df_cubic['Cu_precursor'].values
+        for name in ["Size", "CV", "Squareness"]:
+            cv = self.metrics.get(name)
+            if cv is None or 'y_pred' not in cv:
+                continue
+            y_true = self.df_cubic[name].values
+            y_pred = cv['y_pred']
+            for prec in sorted(self.df_cubic['Cu_precursor'].unique()):
+                mask = cu_labels == prec
+                n_prec = mask.sum()
+                if n_prec < 3:
+                    print(f"    {name}/{prec}: n={n_prec} (too few for R²)")
+                    continue
+                r2 = r2_score(y_true[mask], y_pred[mask])
+                rmse = np.sqrt(mean_squared_error(y_true[mask], y_pred[mask]))
+                print(f"    {name}/{prec}: R²={r2:.3f}, RMSE={rmse:.3f} (n={n_prec})")
+
     def predict(self, X: np.ndarray) -> Dict[str, np.ndarray]:
         """Predict all properties and feasibility."""
         X_scaled = self.scaler.transform(X)
         size_mu, size_std = self.gp_size.predict(X_scaled, return_std=True)
-        gsd_mu, gsd_std = self.gp_gsd.predict(X_scaled, return_std=True)
+        cv_mu, cv_std = self.gp_cv.predict(X_scaled, return_std=True)
         sq_mu, sq_std = self.gp_sq.predict(X_scaled, return_std=True)
 
         n = len(X)
-        p_product = np.ones(n) if self.clf_product is None else self.clf_product.predict_proba(X_scaled)[:, 1]
-        p_pure = np.ones(n) if self.clf_pure is None else self.clf_pure.predict_proba(X_scaled)[:, 1]
-        p_cubic = np.ones(n) if self.clf_cubic is None else self.clf_cubic.predict_proba(X_scaled)[:, 1]
+        p_product = (np.ones(n) if self.clf_product is None
+                     else self.clf_product.predict_proba(X_scaled)[:, 1])
+        p_pure = (np.ones(n) if self.clf_pure is None
+                  else self.clf_pure.predict_proba(X_scaled)[:, 1])
+        p_cubic = (np.ones(n) if self.clf_cubic is None
+                   else self.clf_cubic.predict_proba(X_scaled)[:, 1])
 
         return {
             'size_mu': size_mu, 'size_std': size_std,
-            'gsd_mu': gsd_mu, 'gsd_std': gsd_std,
+            'cv_mu': cv_mu, 'cv_std': cv_std,
             'sq_mu': sq_mu, 'sq_std': sq_std,
             'p_product': p_product, 'p_pure': p_pure, 'p_cubic': p_cubic,
             'p_feasible': p_product * p_pure * p_cubic
@@ -361,38 +433,59 @@ class Cu3VS4Optimizer:
     def acquisition(
         self, X: np.ndarray, target_size: float, size_tol: float,
         preds: Optional[Dict[str, np.ndarray]] = None,
+        squareness_bin: str = DEFAULT_SQUARENESS_BIN,
     ) -> Dict[str, np.ndarray]:
-        """Compute acquisition function. Accepts pre-computed predictions for corrected models."""
+        """Compute the acquisition score.
+
+        ``total = P(size in target interval) * P(HasProduct) * P(PhasePure) * P(squareness_bin)``
+
+        CV and squareness GP predictions are included in the return dict for
+        informational display but do not enter the acquisition.
+        """
         if preds is None:
             preds = self.predict(X)
-        gsd_best = self.df_cubic["GSD"].min()
-        sq_best = self.df_cubic["Squareness"].max()
 
-        ei_gsd = expected_improvement(preds['gsd_mu'], preds['gsd_std'], gsd_best, minimize=True)
-        ei_sq = expected_improvement(preds['sq_mu'], preds['sq_std'], sq_best, minimize=False)
-        ei_gsd_n = _normalize_ei(ei_gsd)
-        ei_sq_n = _normalize_ei(ei_sq)
+        p_size = prob_in_interval(
+            preds['size_mu'], preds['size_std'], target_size, size_tol
+        )
+        p_feasible = preds['p_product'] * preds['p_pure']
+        p_bin = compute_bin_probability(
+            preds['sq_mu'], preds['sq_std'], preds['p_cubic'],
+            self.sq_threshold, squareness_bin,
+        )
 
-        w_gsd = self.objective_weights.get("GSD", 1.0)
-        w_sq = self.objective_weights.get("Squareness", 1.0)
-        acq_obj = (w_gsd * ei_gsd_n + w_sq * ei_sq_n) / (w_gsd + w_sq)
-        p_size = prob_in_interval(preds['size_mu'], preds['size_std'], target_size, size_tol)
-        total = acq_obj * p_size * preds['p_feasible']
+        total = p_size * p_feasible * p_bin
 
-        return {'total': total, 'acq_obj': acq_obj, 'p_size': p_size, **preds}
+        return {
+            **preds,
+            'total': total, 'p_size': p_size,
+            'p_feasible': p_feasible, 'p_bin': p_bin,
+        }
 
     def recommend(
         self,
         target_size: float, size_tol: float = 2.5,
+        squareness_bin: str = DEFAULT_SQUARENESS_BIN,
         p_size_min: float = 0.2, p_feas_min: float = 0.3,
         n_candidates: int = 20000, n_return: int = 2,
         min_distance: float = 0.3,
         seed: Optional[int] = None,
         warn_extrapolation: bool = True, extrapolation_threshold: float = 2.0
     ) -> pd.DataFrame:
-        """Recommend synthesis conditions for target size."""
-        X = latin_hypercube_sample(n_candidates, self.bounds, self.features, seed)
-        acq = self.acquisition(X, target_size, size_tol)
+        """Recommend synthesis conditions for target size and squareness bin."""
+        if self.feature_mode == 'transfer':
+            synth_feats = [f for f in self.features if f not in PRECURSOR_DESCRIPTOR_FEATURES]
+            synth_bounds = {k: v for k, v in self.bounds.items() if k in synth_feats}
+            X_synth = latin_hypercube_sample(n_candidates, synth_bounds, synth_feats, seed)
+            extra_cols = []
+            for feat in self.features:
+                if feat in PRECURSOR_DESCRIPTOR_FEATURES:
+                    val = self.bounds[feat][0]  # point bound (lo == hi)
+                    extra_cols.append(np.full(n_candidates, val))
+            X = np.column_stack([X_synth] + extra_cols) if extra_cols else X_synth
+        else:
+            X = latin_hypercube_sample(n_candidates, self.bounds, self.features, seed)
+        acq = self.acquisition(X, target_size, size_tol, squareness_bin=squareness_bin)
 
         X_feas, acq_feas, selected, mask = _select_diverse_candidates(
             X, acq['total'], acq['p_size'], acq['p_feasible'],
@@ -410,10 +503,12 @@ class Cu3VS4Optimizer:
             row.update({
                 'Pred_Size': round(float(acq['size_mu'][mask][idx]), 2),
                 'Pred_Size_Std': round(float(acq['size_std'][mask][idx]), 2),
-                'Pred_GSD': round(float(acq['gsd_mu'][mask][idx]), 3),
+                'Pred_CV': round(float(acq['cv_mu'][mask][idx]), 3),
                 'Pred_Squareness': round(float(acq['sq_mu'][mask][idx]), 3),
+                'Squareness_Bin': squareness_bin,
                 'P_Size': round(float(acq['p_size'][mask][idx]), 3),
                 'P_Feasible': round(float(acq['p_feasible'][mask][idx]), 3),
+                'P_Bin': round(float(acq['p_bin'][mask][idx]), 3),
                 'Acquisition': round(float(acq_feas[idx]), 4),
             })
             rows.append(row)
@@ -435,6 +530,7 @@ class Cu3VS4Optimizer:
             return {k: feat_dict[k] for k in RAW_FACTORS}
         if self.feature_mode == 'chemical':
             return self._chemical_to_raw(feat_dict)
+        # 'synthesis', 'hybrid', and 'transfer' all go through _synthesis_to_raw
         return self._synthesis_to_raw(feat_dict)
 
     @staticmethod
@@ -450,23 +546,30 @@ class Cu3VS4Optimizer:
         return {k: float(v) for k, v in result.items()}
 
     def _synthesis_to_raw(self, feat_dict: Dict[str, float]) -> Dict[str, float]:
-        """Back-transform hybrid/synthesis features to raw lab parameters.
+        """Back-transform hybrid/synthesis/transfer features to raw lab parameters.
 
-        Reconstruction paths:
-          Temp, DDT         — pass through (if present as raw factors)
-          VOacac            = CuI / Cu_V_ratio
-          Time              = 10^log_Time
-          total_metal       = Metal_Conc / 1000 * total_vol  (or CuI + VOacac)
-          DDT (if derived)  = S_Metal_ratio * total_metal / DDT_MMOL_PER_ML
-          OAm               = Ligand_Metal_ratio * total_metal / OAM_MMOL_PER_ML
+        Precursor descriptor features (``Cu_precursor_hardness`` etc.) are
+        dropped silently -- they describe precursor identity, not a synthesis
+        parameter that maps to a raw lab setting.
+
+        Reconstruction::
+
+            Temp, DDT         pass through if present as raw factors
+            VOacac            = CuI / Cu_V_ratio
+            Time              = 10 ** log_Time
+            total_metal       = Metal_Conc / 1000 * total_vol   (else CuI + VOacac)
+            DDT (if derived)  = S_Metal_ratio      * total_metal / DDT_MMOL_PER_ML
+            OAm               = Ligand_Metal_ratio * total_metal / OAM_MMOL_PER_ML
         """
+        feat_dict = {k: v for k, v in feat_dict.items()
+                     if k not in PRECURSOR_DESCRIPTOR_FEATURES}
         raw = {}
         for f in RAW_FACTORS:
             if f in feat_dict:
                 raw[f] = feat_dict[f]
 
         if 'Cu_V_ratio' in feat_dict and 'VOacac' not in raw:
-            raw['VOacac'] = CUI_MMOL / feat_dict['Cu_V_ratio']
+            raw['VOacac'] = CU_PRECURSOR_MMOL / feat_dict['Cu_V_ratio']
 
         if 'log_Time' in feat_dict and 'Time' not in raw:
             raw['Time'] = 10 ** feat_dict['log_Time']
@@ -474,8 +577,8 @@ class Cu3VS4Optimizer:
         if 'Metal_Conc' in feat_dict:
             total_metal = (feat_dict['Metal_Conc'] / 1000.0) * TOTAL_VOLUME_ML
         else:
-            voacac = raw.get('VOacac', CUI_MMOL / feat_dict.get('Cu_V_ratio', 1.0))
-            total_metal = CUI_MMOL + voacac
+            voacac = raw.get('VOacac', CU_PRECURSOR_MMOL / feat_dict.get('Cu_V_ratio', 1.0))
+            total_metal = CU_PRECURSOR_MMOL + voacac
 
         if 'S_Metal_ratio' in feat_dict and 'DDT' not in raw:
             raw['DDT'] = (feat_dict['S_Metal_ratio'] * total_metal) / DDT_MMOL_PER_ML
@@ -497,39 +600,48 @@ class Cu3VS4Optimizer:
         return raw
 
     def get_lengthscales(self) -> pd.DataFrame:
-        """Extract learned lengthscales (inverse = importance).
+        """Extract learned lengthscales (inverse interpreted as importance).
 
         Handles both isotropic (scalar) and ARD (per-feature) kernels.
         """
         results = []
-        for name, gp in [("Size", self.gp_size), ("GSD", self.gp_gsd), ("Squareness", self.gp_sq)]:
+        gp_models = [("Size", self.gp_size), ("CV", self.gp_cv),
+                     ("Squareness", self.gp_sq)]
+        for name, gp in gp_models:
             try:
-                ls = gp.kernel_.k1.k2.length_scale
-                ls = np.atleast_1d(ls)
+                ls = np.atleast_1d(gp.kernel_.k1.k2.length_scale)
                 if ls.shape[0] == 1:
                     for feat in self.features:
-                        results.append({'Model': name, 'Feature': feat,
-                                        'Lengthscale': float(ls[0]), 'Importance': 1.0 / float(ls[0])})
+                        results.append({
+                            'Model': name, 'Feature': feat,
+                            'Lengthscale': float(ls[0]),
+                            'Importance': 1.0 / float(ls[0]),
+                        })
                 else:
                     for feat, l in zip(self.features, ls):
-                        results.append({'Model': name, 'Feature': feat,
-                                        'Lengthscale': float(l), 'Importance': 1.0 / float(l)})
+                        results.append({
+                            'Model': name, 'Feature': feat,
+                            'Lengthscale': float(l),
+                            'Importance': 1.0 / float(l),
+                        })
             except AttributeError:
                 pass
         return pd.DataFrame(results)
 
     def get_feature_importance(self) -> pd.DataFrame:
-        """Compute feature importance via gradient-based sensitivity analysis.
+        """Gradient-based feature importance.
 
-        For each feature and training point, estimates |∂f/∂x_j| using finite
-        differences in the scaled space.  The mean absolute gradient gives a
-        data-distribution-aware importance that works correctly with both
+        For every feature and training point we estimate ``|df/dx_j|`` with
+        central finite differences in the scaled space; the mean absolute
+        gradient is a data-distribution-aware importance that works for both
         isotropic and ARD kernels.
         """
         eps = 0.05
         results = []
+        gp_models = [("Size", self.gp_size), ("CV", self.gp_cv),
+                     ("Squareness", self.gp_sq)]
 
-        for name, gp in [("Size", self.gp_size), ("GSD", self.gp_gsd), ("Squareness", self.gp_sq)]:
+        for name, gp in gp_models:
             raw_sens = []
             for j in range(len(self.features)):
                 X_plus = self.X_cubic_scaled.copy()
@@ -556,25 +668,28 @@ class Cu3VS4Optimizer:
         return evaluate_all_classifiers(self, verbose)
 
     def full_diagnostics(self) -> Dict[str, Any]:
-        """Run all diagnostic checks and return comprehensive report."""
+        """Run all diagnostic checks and return a single report dict."""
         print(f"\n{'='*70}")
-        print("COMPREHENSIVE MODEL DIAGNOSTICS")
+        print("MODEL DIAGNOSTICS")
         print(f"{'='*70}")
         print(f"\nFeature mode: {self.feature_mode}")
         print(f"Features ({len(self.features)}): {self.features}")
-        print(f"Training samples: {len(self.df_all)} total, {len(self.df_success)} successful")
+        print(f"Training samples: {len(self.df_all)} total, "
+              f"{len(self.df_success)} successful, "
+              f"{len(self.df_cubic)} cubic for regression")
 
-        ratio = len(self.df_success) / len(self.features)
+        ratio = len(self.df_cubic) / len(self.features)
         if ratio < 5:
-            print(f"⚠️ Warning: Only {ratio:.1f} samples per feature (recommend ≥10)")
+            print(f"[warning] Only {ratio:.1f} cubic regression samples per feature (recommend >= 10)")
         else:
-            print(f"✓ Samples per feature ratio: {ratio:.1f}")
+            print(f"Cubic regression samples per feature: {ratio:.1f}")
 
         diagnostics = {
             'feature_mode': self.feature_mode,
             'n_features': len(self.features),
             'n_samples': len(self.df_all),
             'n_successful': len(self.df_success),
+            'n_cubic_regression': len(self.df_cubic),
             'samples_per_feature': ratio,
         }
 
@@ -593,9 +708,9 @@ class Cu3VS4Optimizer:
         vif_df = diagnostics['collinearity']['vif']
         high_vif = vif_df[vif_df['VIF'] >= 10]
         if len(high_vif) > 0:
-            print(f"⚠️ High VIF features: {high_vif['Feature'].tolist()}")
+            print(f"[warning] High VIF features: {high_vif['Feature'].tolist()}")
         else:
-            print("✓ No severe collinearity detected")
+            print("No severe collinearity detected")
         print(vif_df.to_string(index=False))
 
         print(f"\n--- Classifier Calibration ---")

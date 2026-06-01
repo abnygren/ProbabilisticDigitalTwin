@@ -16,7 +16,7 @@ try:
     print("\n1. Testing module imports...")
     from optimizer import Cu3VS4Optimizer
     from features import raw_to_chemical_features, add_chemical_features, CHEM_FEATURES, HYBRID_FEATURES
-    from config import RAW_FACTORS, RAW_BOUNDS, OBJECTIVES, CUI_MMOL, TOTAL_VOLUME_ML
+    from config import RAW_FACTORS, RAW_BOUNDS, OBJECTIVES, CU_PRECURSOR_MMOL, TOTAL_VOLUME_ML
     print("   ✓ Module imports successful")
 
     print("\n2. Checking configuration constants...")
