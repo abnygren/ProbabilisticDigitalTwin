@@ -1,50 +1,34 @@
 #!/usr/bin/env python3
-"""
-Quick test to verify the reorganized modules import correctly and the
-SelfValidating notebook setup works.
-"""
+"""Check that SelfValidatingOptimizer and campaign data directories import."""
+
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT / "src"))
 
-print("="*70)
-print("TESTING: Self-Validating Optimizer Setup (reorganized)")
-print("="*70)
+from optimizer import Cu3VS4Optimizer
+from features import CHEM_FEATURES
+from config import RAW_FACTORS, OBJECTIVES
+from selfvalidating import SelfValidatingOptimizer
 
-try:
-    print("\n1. Testing module imports...")
-    from optimizer import Cu3VS4Optimizer
-    from features import raw_to_chemical_features, add_chemical_features, CHEM_FEATURES, HYBRID_FEATURES
-    from config import RAW_FACTORS, RAW_BOUNDS, OBJECTIVES, CU_PRECURSOR_MMOL, TOTAL_VOLUME_ML
-    print("   ✓ Module imports successful")
+campaigns = {
+    "CuI": ROOT / "data_CuI" / "experiments.json",
+    "CuBr": ROOT / "data_CuBr" / "experiments.json",
+    "CuCl": ROOT / "data_CuCl" / "experiments.json",
+    "Ta": ROOT / "data_Ta" / "experiments.json",
+}
 
-    print("\n2. Checking configuration constants...")
-    DATA_DIR = Path(__file__).parent.parent / "data"
-    OUTPUT_DIR = Path(__file__).parent.parent / "outputs"
-    print(f"   ✓ DATA_DIR: {DATA_DIR}")
+missing = [name for name, path in campaigns.items() if not path.exists()]
+if missing:
+    raise SystemExit(f"Missing campaign data: {missing}")
 
-    print("\n3. Testing Cu3VS4Optimizer availability...")
-    print(f"   ✓ Cu3VS4Optimizer class: {Cu3VS4Optimizer}")
+assert Cu3VS4Optimizer is not None
+assert SelfValidatingOptimizer is not None
+assert RAW_FACTORS == ["Temp", "Time", "VOacac", "DDT", "OAm"]
+assert OBJECTIVES == ["Size", "CV", "Squareness"]
+assert len(CHEM_FEATURES) >= 5
 
-    print("\n4. Testing feature definitions...")
-    print(f"   ✓ RAW_FACTORS: {RAW_FACTORS}")
-    print(f"   ✓ OBJECTIVES: {OBJECTIVES}")
-    print(f"   ✓ Chemical features available: {len(CHEM_FEATURES)} features")
-
-    print("\n5. Testing SelfValidatingOptimizer import...")
-    from selfvalidating import SelfValidatingOptimizer
-    print(f"   ✓ SelfValidatingOptimizer: {SelfValidatingOptimizer}")
-
-    print("\n" + "="*70)
-    print("✅ ALL TESTS PASSED")
-    print("="*70)
-    print("\nYour notebooks should run without errors with the new module structure!")
-
-except Exception as e:
-    print("\n" + "="*70)
-    print(f"❌ TEST FAILED: {e}")
-    print("="*70)
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
+print("SelfValidatingOptimizer import check passed")
+print(f"  Campaign data present: {', '.join(campaigns)}")
+print(f"  Chemical features: {len(CHEM_FEATURES)}")

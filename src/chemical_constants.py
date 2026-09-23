@@ -1,37 +1,14 @@
-"""
-Chemical Constants for Sulvanite (Cu₃MS₄) Nanoparticle Synthesis
+"""Chemical descriptors for Cu3MS4 nanoparticle synthesis.
 
-This module contains physically meaningful descriptors used to encode
-precursor / solvent reactivity as additional features for the GP models.
-References are provided for each tabulated constant.
+Tabulated constants used as optional GP features. Cu precursors use Pearson
+hardness. Group-5 metal precursors use ionic potential (Z/r) and oxophilicity,
+because Pearson hardness is unreliable for d⁰ M⁵⁺ cations.
 
-Supports three material systems:
-  - Cu₃VS₄   (M = V,  precursor VO(acac)₂)
-  - Cu₃NbS₄  (M = Nb, precursor NbCl₅)
-  - Cu₃TaS₄  (M = Ta, precursor TaCl₅)
-
-And multiple Cu precursors: CuI, CuCl, CuBr, Cu(OAc), Cu(OAc)₂, CuCl₂.
-
-TRANSFER LEARNING
------------------
-When running a multi-precursor campaign (e.g. pooling CuI + CuCl data, or
-VO(acac)₂ + NbCl₅ data), enable the relevant descriptors in
-``ENHANCED_FEATURE_CONFIG`` so they become GP features.  The Cu precursor
-descriptors use Pearson hardness (valid for Cu⁺ species).  The Group 5
-metal precursor descriptors use **ionic potential** (Z/r from Shannon
-ionic radii) because Pearson hardness breaks for d⁰ M⁵⁺ cations — see
-the IONIC POTENTIAL section below.
-
-STATUS
-------
-All enhanced features are **disabled by default** in ``src/config.py``
-because single-precursor campaigns produce constant descriptor values.
-Enable them when pooling data across precursors for transfer learning.
+Enhanced features are off by default. Enable them in config.py when pooling
+data across precursors.
 """
 
-# =============================================================================
-# PEARSON ABSOLUTE HARDNESS (η)
-# =============================================================================
+# Pearson absolute hardness (η)
 # Hard-Soft Acid-Base (HSAB) theory: η = (IP - EA) / 2
 # where IP = ionization potential, EA = electron affinity
 # Units: eV
@@ -41,104 +18,50 @@ Enable them when pooling data across precursors for transfer learning.
 # Reference: Parr, R.G. & Pearson, R.G. (1983) J. Am. Chem. Soc. 105, 7512-7516
 
 PEARSON_HARDNESS_CATIONS = {
-    # Copper species (Cu⁺ is a soft acid)
     'Cu+': 6.28,      # Pearson 1988 (Inorg. Chem. 27, 734)
     'Cu2+': 8.27,     # Pearson 1988 (Inorg. Chem. 27, 734)
-
-    # Vanadium — V³⁺ and V⁴⁺ computed from NIST IE data (CRC Handbook);
-    # V⁵⁺ is a d⁰ species where Pearson η breaks (see IONIC_POTENTIAL).
-    'V3+': 8.70,      # (IE4 - IE3)/2 = (46.709 - 29.311)/2  — NIST
-    'V4+': 9.29,      # (IE5 - IE4)/2 = (65.282 - 46.709)/2  — NIST
-    'V5+': 31.42,     # (IE6 - IE5)/2 = (128.13 - 65.282)/2  — NIST; d⁰ core gap, DO NOT use directly
-
-    # Niobium — computed from NIST IE data (CRC Handbook).
-    # Nb⁵⁺ is d⁰; the Pearson value is formally correct but on an
-    # unusable scale for GP features.  Use IONIC_POTENTIAL instead.
-    'Nb3+': 6.63,     # (IE4 - IE3)/2 = (38.3 - 25.04)/2     — NIST
-    'Nb4+': 6.13,     # (IE5 - IE4)/2 = (50.55 - 38.3)/2     — NIST
-    'Nb5+': 25.75,    # (IE6 - IE5)/2 = (102.057 - 50.55)/2   — NIST; d⁰ core gap, DO NOT use directly
-
-    # Tantalum — only IE1 and IE2 available in standard tables.
-    # Higher IEs not in CRC Handbook; cannot compute Pearson η for Ta⁵⁺.
-    'Ta5+': None,     # NOT AVAILABLE — use IONIC_POTENTIAL instead
 }
 
 PEARSON_HARDNESS_ANIONS = {
-    # Halides
-    'I-': 5.0,        # Soft base
-    'Br-': 5.8,       # Soft base
-    'Cl-': 6.3,       # Borderline base
-    'F-': 7.0,        # Hard base
-
-    # Oxygen donors
-    'OAc-': 7.0,      # Acetate - Hard base (carboxylate O donor)
-    'acac-': 6.5,     # Acetylacetonate - Borderline (chelating O donor)
-    'OH-': 7.5,       # Hydroxide - Hard base
-
-    # Sulfur donors
-    'S2-': 4.1,       # Sulfide - Soft base
-    'RS-': 4.5,       # Thiolate - Soft base (approximate)
+    'I-': 3.70,       # Soft base
+    'Br-': 4.24,      # Soft base
+    'Cl-': 4.70,      # Borderline base
+    'OAc-': 7.0,      # Acetate (carboxylate O donor)
+    'acac-': 6.5,     # Acetylacetonate (chelating O donor)
 }
 
-# Combined precursor hardness values (cation + anion average or effective)
-# This represents the overall "hardness character" of the precursor
+# Precursor hardness: (η_cation + η_anion) / 2
 PRECURSOR_HARDNESS = {
-    # Copper precursors
-    'CuI': 5.64,          # (6.28 + 5.0) / 2 — Soft-soft pairing, LOW reactivity
-    'Cu(OAc)': 6.64,      # (6.28 + 7.0) / 2 — Soft-hard mismatch, HIGH reactivity
-    'Cu(OAc)2': 7.64,     # Cu²⁺ with acetate
-    'CuCl': 6.29,         # (6.28 + 6.3) / 2 — Soft-borderline
-    'CuBr': 6.04,         # (6.28 + 5.8) / 2 — Soft-soft
-    'CuCl2': 7.29,        # Cu²⁺ with chloride
-
-    # Vanadium precursors
-    'VO(acac)2': 7.25,    # V⁴⁺ with acac ligands (your VOacac)
-    'VCl3': 7.15,         # V³⁺ with chloride
-
-    # Group 5 metal chloride precursors — cation hardness unreliable for
-    # d⁰ M⁵⁺; these use the same (η_cation + η_anion)/2 formula with the
-    # NIST-derived values above, but prefer IONIC_POTENTIAL for GP features.
-    'NbCl5': None,        # Nb⁵⁺ Pearson η = 25.75 → average = (25.75 + 6.3)/2 ≈ 16.0; not meaningful
-    'TaCl5': None,        # Ta⁵⁺ Pearson η unavailable
+    'CuI': 4.99,          # (6.28 + 3.70) / 2
+    'CuBr': 5.26,         # (6.28 + 4.24) / 2
+    'CuCl': 5.49,         # (6.28 + 4.70) / 2
+    'Cu(OAc)': 6.64,      # (6.28 + 7.0) / 2
+    'Cu(OAc)2': 7.64,     # (8.27 + 7.0) / 2
+    'VO(acac)2': 7.90,    # (9.29 + 6.5) / 2; V⁴⁺ NIST + acac⁻
 }
 
-# HSAB mismatch: larger values indicate a softer/harder mismatch between
-# cation and anion in the precursor and (heuristically) more labile bonding.
-# Calculated as |η_cation - η_anion| using the values above; entries that
-# rely on the V hardness ESTIMATES inherit the same caveat.
+# HSAB mismatch |η_cation − η_anion|
 HSAB_MISMATCH = {
-    'CuI': 1.28,          # |6.28 - 5.0|  — Pearson 1988 values
+    'CuI': 2.58,          # |6.28 - 3.70|
+    'CuBr': 2.04,         # |6.28 - 4.24|
+    'CuCl': 1.58,         # |6.28 - 4.70|
     'Cu(OAc)': 0.72,      # |6.28 - 7.0|
     'Cu(OAc)2': 1.27,     # |8.27 - 7.0|
-    'CuCl': 0.02,         # |6.28 - 6.3|
-    'CuBr': 0.48,         # |6.28 - 5.8|
-    'VO(acac)2': 2.5,     # |9.0  - 6.5|  — uses V⁴⁺ ESTIMATE; treat as approximate
-    'NbCl5': None,        # d⁰ M⁵⁺ — Pearson η unreliable; use METAL_HSAB_MISMATCH
-    'TaCl5': None,        # d⁰ M⁵⁺ — Pearson η unavailable; use METAL_HSAB_MISMATCH
+    'VO(acac)2': 2.79,    # |9.29 - 6.5|
 }
 
 
-# =============================================================================
-# SHANNON IONIC RADII & IONIC POTENTIAL
-# =============================================================================
+# Shannon ionic radii and ionic potential (Z/r).
 # Shannon, R.D. (1976) Acta Cryst. A32, 751-767
-#   "Effective Ionic Radii in Oxides and Fluorides"
-# Coordination number is chosen to match tetrahedral sulfide (CN = 4) or
-# the closest available value.  Units: Å
-#
-# Ionic Potential = Z / r  (charge / Shannon radius)
-# A robust descriptor for comparing high-oxidation-state d⁰ cations where
-# Pearson hardness is unreliable.  Higher ionic potential → harder Lewis
-# acid → more reactive with soft bases (S²⁻).
+# Coordination: tetrahedral sulfide (CN = 4) or the closest tabulated value.
+# Units: Å. Ionic potential is used for d⁰ M⁵⁺ cations, where Pearson η is unreliable.
 
 SHANNON_IONIC_RADII = {
     # Cation     CN    radius (Å)   source
     'Cu+':      0.60,   # CN=4 tetrahedral  — Shannon 1976
     'Cu2+':     0.57,   # CN=4 tetrahedral  — Shannon 1976
-    'V3+':      0.640,  # CN=6 octahedral   — Shannon 1976 (no CN=4 data)
     'V4+':      0.580,  # CN=6 octahedral   — Shannon 1976 (as VO²⁺)
     'V5+':      0.355,  # CN=4 tetrahedral  — Shannon 1976
-    'Nb5+':     0.480,  # CN=4 tetrahedral  — Shannon 1976
     'Ta5+':     0.640,  # CN=6 octahedral   — Shannon 1976 (CN=4 not tabulated)
 }
 
@@ -146,130 +69,65 @@ IONIC_POTENTIAL = {
     ion: _charge / SHANNON_IONIC_RADII[ion]
     for ion, _charge in [
         ('Cu+',  1), ('Cu2+', 2),
-        ('V3+',  3), ('V4+',  4), ('V5+',  5),
-        ('Nb5+', 5), ('Ta5+', 5),
+        ('V4+',  4), ('V5+',  5),
+        ('Ta5+', 5),
     ]
 }
 # Result (Z/r, units = e/Å):
 #   Cu+  ≈ 1.67,  Cu2+ ≈ 3.51
-#   V3+  ≈ 4.69,  V4+  ≈ 6.90,  V5+  ≈ 14.08
-#   Nb5+ ≈ 10.42, Ta5+ ≈ 7.81
+#   V4+  ≈ 6.90,  V5+  ≈ 14.08
+#   Ta5+ ≈ 7.81
 
 
-# =============================================================================
-# METAL PRECURSOR DESCRIPTORS (for transfer learning)
-# =============================================================================
-# These descriptors compare Group 5 metal precursors across campaigns.
-# They use ionic potential (Z/r) rather than Pearson hardness for the
-# metal cation, because η is ill-defined for d⁰ M⁵⁺.
-#
-# Metal_ionic_potential = Z / r of the Group 5 cation
-# Metal_hsab_mismatch  = |Z/r_cation - η_anion|  (mixed-scale mismatch)
-#
-# The mixed-scale mismatch is intentional: the important thing is that
-# the *ordering* V⁵⁺ > Nb⁵⁺ > Ta⁵⁺ is preserved on a GP-friendly scale,
-# and the anion identity (acac⁻ vs Cl⁻) also contributes a shift.
-
+# Group-5 metal precursor descriptors for transfer learning.
+# Ionic potential uses the oxidation state charged into the flask, not the
+# product ion: VO(acac)2 is V(IV), TaCl5 is Ta(V).
+# These precursor-basis values differ from the product-basis IONIC_POTENTIAL table.
 METAL_PRECURSOR_IONIC_POTENTIAL = {
-    'VO(acac)2': IONIC_POTENTIAL['V5+'],     # ≈ 14.08  (V⁵⁺ is formal ox. state in product)
-    'NbCl5':     IONIC_POTENTIAL['Nb5+'],    # ≈ 10.42
-    'TaCl5':     IONIC_POTENTIAL['Ta5+'],    # ≈  7.81
-}
-
-METAL_HSAB_MISMATCH = {
-    'VO(acac)2': abs(IONIC_POTENTIAL['V5+']  - PEARSON_HARDNESS_ANIONS['acac-']),  # |14.08 - 6.5| ≈ 7.58
-    'NbCl5':     abs(IONIC_POTENTIAL['Nb5+'] - PEARSON_HARDNESS_ANIONS['Cl-']),    # |10.42 - 6.3| ≈ 4.12
-    'TaCl5':     abs(IONIC_POTENTIAL['Ta5+'] - PEARSON_HARDNESS_ANIONS['Cl-']),    # | 7.81 - 6.3| ≈ 1.51
+    'VO(acac)2': 7.5472,   # V(IV), CN=5, r=0.53 Å → 4/0.53
+    'TaCl5':     7.8125,   # Ta(V), CN=6, r=0.64 Å → 5/0.64
 }
 
 
-# =============================================================================
-# BOND DISSOCIATION ENERGIES (BDE)
-# =============================================================================
-# For sulfur precursors - affects sulfur release kinetics
-# Units: kJ/mol
-#
-# Reference: Luo, Y.-R. (2007) "Comprehensive Handbook of Chemical Bond Energies"
-# Reference: NIST Chemistry WebBook (webbook.nist.gov)
+# Oxophilicity: per-atom MO2 − MS2 formation-energy difference (eV/atom).
+# More negative = more oxophilic. Trend V < Ta. The GP uses the z-scored
+# value, so only the ordering matters. With two metals this axis is collinear
+# with ionic potential.
+METAL_OXOPHILICITY = {
+    'VO(acac)2': -1.313,   # eV/atom; VO2 mp-19094 vs VS2 mp-557523
+    'TaCl5':     -1.653,   # eV/atom; TaO2 mp-20994 vs TaS2 mp-1984
+}
 
+METAL_OXOPHILICITY_MP_IDS = {
+    'VO2': 'mp-19094',
+    'VS2': 'mp-557523',
+    'TaO2': 'mp-20994',
+    'TaS2': 'mp-1984',
+}
+
+METAL_OXOPHILICITY_SOURCE = (
+    "Per-atom MO2 vs MS2 formation-energy difference from the Materials Project "
+    "(Jain et al., APL Mater. 2013, 1, 011002): "
+    "VO2 mp-19094, VS2 mp-557523, TaO2 mp-20994, TaS2 mp-1984."
+)
+
+
+# Bond dissociation energies (kJ/mol). DDT is the sulfur source in all campaigns.
+# Luo, Y.-R. (2007) Comprehensive Handbook of Chemical Bond Energies.
 BOND_DISSOCIATION_ENERGIES = {
-    # Thiols (R-SH bond)
-    'DDT': 365,           # Dodecanethiol C-S bond (~365 kJ/mol for primary thiols)
-    'octanethiol': 365,   # Similar primary thiol
-    'tert-butylthiol': 355,  # Tertiary, slightly weaker
-
-    # Thioethers / Sulfides
-    'dioctyl_sulfide': 307,   # C-S in dialkyl sulfide
-    'thioanisole': 290,       # Ar-S bond
-
-    # Inorganic sulfur
-    'elemental_S8': 226,      # S-S bond in S₈ ring
-    'CS2': 272,               # C=S double bond
-    'H2S': 381,               # H-S bond
-
-    # Dithiocarbamates (common in NC synthesis)
-    'diethyl_dithiocarbamate': 250,  # Estimated, chelating
+    'DDT': 365,           # primary thiol C–S
 }
 
-# Normalized BDE (scaled 0-1 for ML, higher = harder to release S)
-BDE_NORMALIZED = {k: (v - 220) / (390 - 220) for k, v in BOND_DISSOCIATION_ENERGIES.items()}
-
-
-# =============================================================================
-# SOLVENT PROPERTIES
-# =============================================================================
-# Dielectric constants (ε) and polarity indices
-# Higher ε → better ion dissociation, faster cation exchange
-#
-# Reference: Wohlfarth, C. (2008) "Static Dielectric Constants of Pure Liquids and Binary 
-#            Liquid Mixtures" Landolt-Börnstein IV/17
-# Reference: Snyder, L.R. (1974) J. Chromatogr. 92, 223 (polarity index)
-
+# Solvent dielectric constants. ODE / OAm / DDT are the three liquids in the flask.
+# Wohlfarth, C. (2008) Landolt-Börnstein IV/17.
 SOLVENT_DIELECTRIC = {
-    # Non-polar high-boiling solvents
-    'ODE': 2.1,               # 1-octadecene (very non-polar)
-    'squalane': 2.0,          # Hydrocarbon
-    'hexadecane': 2.05,       # n-alkane
-
-    # Coordinating solvents (amines)
-    'OAm': 3.4,               # Oleylamine (weakly polar, basic)
-    'octylamine': 3.2,        # Primary amine
-    'trioctylamine': 2.8,     # Tertiary amine (less polar)
-    'TOPO': 2.6,              # Trioctylphosphine oxide
-
-    # Thiols (act as both solvent and S source)
-    'DDT': 2.5,               # Dodecanethiol (approximate)
-    'octanethiol': 2.6,       # Similar
-
-    # Polar aprotic (for comparison)
-    'DMF': 36.7,              # Dimethylformamide
-    'DMSO': 46.7,             # Dimethyl sulfoxide
-}
-
-SOLVENT_POLARITY_INDEX = {
-    # Snyder polarity index P' (0 = non-polar, 10 = very polar)
-    'ODE': 0.0,
-    'squalane': 0.0,
-    'OAm': 1.2,               # Estimated (basic amine character)
-    'DDT': 0.1,               # Very weakly polar
-    'trioctylamine': 0.8,
-    'DMF': 6.4,
-    'DMSO': 7.2,
-}
-
-# Boiling points (°C) - relevant for reaction temperature limits
-SOLVENT_BOILING_POINT = {
-    'ODE': 315,
-    'OAm': 364,
-    'DDT': 266,               # Note: lower than typical reaction temps
-    'squalane': 350,
-    'trioctylamine': 365,
+    'ODE': 2.1,               # 1-octadecene
+    'OAm': 3.4,               # oleylamine
+    'DDT': 2.5,               # dodecanethiol (approximate)
 }
 
 
-# =============================================================================
-# MOLECULAR WEIGHTS AND DENSITIES
-# =============================================================================
+# Molecular weights and densities
 # For converting between volume and molar quantities
 
 MOLECULAR_WEIGHTS = {
@@ -284,11 +142,9 @@ MOLECULAR_WEIGHTS = {
     'Cu(OAc)2': 181.63,       # Copper(II) acetate
     'CuCl': 98.99,            # Copper(I) chloride
     'CuBr': 143.45,           # Copper(I) bromide
-    'CuCl2': 134.45,          # Copper(II) chloride
 
     # Group 5 metal precursors
     'VO(acac)2': 265.16,      # Vanadyl acetylacetonate
-    'NbCl5': 270.17,          # Niobium(V) chloride
     'TaCl5': 358.21,          # Tantalum(V) chloride
 
     # Products
@@ -304,14 +160,11 @@ DENSITIES = {
     'CuCl': 4.14,             # Solid
     'CuBr': 4.72,             # Solid
     'VO(acac)2': 1.50,        # Solid (approximate)
-    'NbCl5': 2.75,            # Solid
     'TaCl5': 3.68,            # Solid
 }
 
 
-# =============================================================================
-# HELPER FUNCTIONS
-# =============================================================================
+# Helper functions
 
 _PRECURSOR_ALIASES = {
     'VOacac': 'VO(acac)2',
@@ -319,7 +172,6 @@ _PRECURSOR_ALIASES = {
     'copper_acetate': 'Cu(OAc)',
     'copper_chloride': 'CuCl',
     'copper_bromide': 'CuBr',
-    'niobium_chloride': 'NbCl5',
     'tantalum_chloride': 'TaCl5',
 }
 
@@ -331,11 +183,10 @@ def _resolve_alias(name: str) -> str:
 
 def get_precursor_hardness(precursor_name: str, default: float = 6.0) -> float:
     """
-    Get Pearson hardness for a Cu precursor.
+    Get Pearson hardness for a precursor.
 
-    For Group 5 metal precursors (NbCl5, TaCl5) this returns None because
-    Pearson η is ill-defined for d⁰ M⁵⁺ cations.  Use
-    ``get_metal_ionic_potential`` instead.
+    TaCl5 is not in this table (Pearson η is ill-defined for d⁰ Ta⁵⁺);
+    use ``get_metal_ionic_potential`` instead.
 
     Parameters
     ----------
@@ -349,20 +200,17 @@ def get_precursor_hardness(precursor_name: str, default: float = 6.0) -> float:
     float or None
     """
     name = _resolve_alias(precursor_name)
-    val = PRECURSOR_HARDNESS.get(name, default)
-    return val
+    if name in METAL_PRECURSOR_IONIC_POTENTIAL and name not in PRECURSOR_HARDNESS:
+        return None
+    return PRECURSOR_HARDNESS.get(name, default)
 
 
 def get_hsab_mismatch(precursor_name: str, default: float = 1.0) -> float:
-    """
-    Get HSAB mismatch value for a Cu precursor.
-
-    For Group 5 metal precursors, returns None; use
-    ``get_metal_hsab_mismatch`` instead.
-    """
+    """Get HSAB mismatch for a precursor."""
     name = _resolve_alias(precursor_name)
-    val = HSAB_MISMATCH.get(name, default)
-    return val
+    if name in METAL_PRECURSOR_IONIC_POTENTIAL and name not in HSAB_MISMATCH:
+        return None
+    return HSAB_MISMATCH.get(name, default)
 
 
 def get_shannon_radius(ion: str) -> float:
@@ -372,7 +220,7 @@ def get_shannon_radius(ion: str) -> float:
     Parameters
     ----------
     ion : str
-        Ion name with charge (e.g. 'V5+', 'Nb5+', 'Cu+')
+        Ion name with charge (e.g. 'V5+', 'Ta5+', 'Cu+')
 
     Returns
     -------
@@ -394,7 +242,7 @@ def get_ionic_potential(ion: str) -> float:
     Parameters
     ----------
     ion : str
-        Ion name with charge (e.g. 'V5+', 'Nb5+')
+        Ion name with charge (e.g. 'V5+', 'Ta5+')
 
     Returns
     -------
@@ -406,15 +254,15 @@ def get_ionic_potential(ion: str) -> float:
 
 def get_metal_ionic_potential(precursor_name: str, default: float = 10.0) -> float:
     """
-    Get ionic potential descriptor for a Group 5 metal precursor.
+    Get ionic potential (Z/r) for a Group 5 metal precursor.
 
-    This is the primary cation descriptor for transfer learning across
-    VO(acac)₂ / NbCl₅ / TaCl₅ campaigns.
+    Used with oxophilicity for V/Ta transfer. Oxophilicity is the primary
+    metal-axis descriptor in ``config.TRANSFER_DESCRIPTOR_AXES``.
 
     Parameters
     ----------
     precursor_name : str
-        Metal precursor name (e.g. 'VO(acac)2', 'NbCl5', 'TaCl5')
+        Metal precursor name (e.g. 'VO(acac)2', 'TaCl5')
     default : float
         Default value if precursor not found
 
@@ -427,26 +275,28 @@ def get_metal_ionic_potential(precursor_name: str, default: float = 10.0) -> flo
     return METAL_PRECURSOR_IONIC_POTENTIAL.get(name, default)
 
 
-def get_metal_hsab_mismatch(precursor_name: str, default: float = 4.0) -> float:
+def get_metal_oxophilicity(precursor_name: str, default: float = -1.5) -> float:
     """
-    Get the mixed-scale HSAB mismatch for a Group 5 metal precursor.
+    Get the oxophilicity descriptor for a Group 5 metal precursor.
 
-    Computed as |ionic_potential(M⁵⁺) − η(anion)|, giving a GP-friendly
-    descriptor that captures both cation polarizing power and anion identity.
+    Oxophilicity is the per-atom (MO₂ − MS₂) energy (eV/atom); more negative
+    means more oxophilic.  Used alongside ``get_metal_ionic_potential`` as the
+    two metal-axis transfer-learning descriptors.
 
     Parameters
     ----------
     precursor_name : str
-        Metal precursor name
+        Metal precursor name (e.g. 'VO(acac)2', 'TaCl5')
     default : float
         Default value if precursor not found
 
     Returns
     -------
     float
+        Oxophilicity in eV/atom
     """
     name = _resolve_alias(precursor_name)
-    return METAL_HSAB_MISMATCH.get(name, default)
+    return METAL_OXOPHILICITY.get(name, default)
 
 
 def get_sulfur_bde(precursor_name: str, default: float = 365.0) -> float:
@@ -490,8 +340,7 @@ def calculate_mixture_dielectric(
     method : str
         'volume_weighted' - linear mixing (fast, approximate)
         'log_weighted' - logarithmic mixing
-        'bruggeman' - Bruggeman effective medium (best for homogeneous mixtures)
-        'maxwell_garnett' - Maxwell Garnett (requires dominant_solvent arg)
+        'bruggeman' - Bruggeman effective medium (default)
         
     Returns
     -------
@@ -535,12 +384,10 @@ def calculate_mixture_dielectric(
         raise ValueError(f"Unknown method: {method}")
 
 
-# =============================================================================
-# VALIDATION / SANITY CHECKS
-# =============================================================================
+# Validation / sanity checks
 
 def validate_precursor(name: str) -> bool:
-    """Check if precursor name (or alias) is in our database."""
+    """Return True if the precursor name (or alias) is in the lookup tables."""
     canonical = _resolve_alias(name)
     all_known = set(PRECURSOR_HARDNESS.keys()) | set(METAL_PRECURSOR_IONIC_POTENTIAL.keys())
     return canonical in all_known
@@ -558,26 +405,35 @@ def list_available_solvents() -> dict:
     return dict(SOLVENT_DIELECTRIC)
 
 
-# =============================================================================
-# MODULE INFO
-# =============================================================================
+# Figure palette for method / skill colors (not precursor identity).
+# Orange/brown is reserved for copper halides; purple for V/Ta.
 
-__version__ = '2.0.0'
-__author__ = 'Cu3VS4 BO Project'
+DESCRIPTOR_SKILL_GAIN = '#238B45'
+DESCRIPTOR_SKILL_GAIN_LT = '#74C476'   # lighter bars (Pearson r)
+
+# LOPO: dark = centered R²; light = Pearson r
+LOPO_SYNTHESIS = '#311C2F'
+LOPO_SYNTHESIS_LT = '#A957A1'
+LOPO_ONEHOT = '#6B354C'
+LOPO_ONEHOT_LT = '#C06F91'
+LOPO_HSAB = '#933A3D'
+LOPO_HSAB_LT = '#D58789'
+LOPO_LEGEND_DARK = '#4A4A48'
+LOPO_LEGEND_LIGHT = '#B0B0AD'
 
 if __name__ == '__main__':
-    print("Chemical Constants Module for Cu₃MS₄ Synthesis")
-    print("=" * 55)
+    print("Chemical constants for Cu3MS4 synthesis")
 
     print("\nCu precursors (Pearson hardness):")
     for p, h in PRECURSOR_HARDNESS.items():
         if p.startswith('Cu') and h is not None:
             print(f"  {p:12s}: η = {h:.2f} eV,  HSAB mismatch = {HSAB_MISMATCH.get(p, '—')}")
 
-    print("\nGroup 5 metal precursors (ionic potential):")
+    print("\nGroup 5 metal precursors (transfer descriptors):")
     for p, ip in METAL_PRECURSOR_IONIC_POTENTIAL.items():
-        mm = METAL_HSAB_MISMATCH[p]
-        print(f"  {p:12s}: Z/r = {ip:.2f} e/Å,  Metal HSAB mismatch = {mm:.2f}")
+        ox = METAL_OXOPHILICITY[p]
+        print(f"  {p:12s}: Z/r = {ip:.4f} e/Å,  oxophilicity = {ox:.3f} eV/atom")
+    print(f"  Oxophilicity source: {METAL_OXOPHILICITY_SOURCE}")
 
     print("\nShannon ionic radii → ionic potential:")
     for ion, r in SHANNON_IONIC_RADII.items():

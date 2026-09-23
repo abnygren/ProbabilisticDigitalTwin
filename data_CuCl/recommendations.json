@@ -1,0 +1,377 @@
+{
+  "next_id": 7,
+  "recommendations": [
+    {
+      "rec_id": "REC_001",
+      "status": "completed",
+      "rank": 1,
+      "timestamp": "2026-06-19T14:29:11.605133",
+      "target": {
+        "size": 5.0,
+        "tolerance": 2.0,
+        "squareness_bin": "highly_cubic"
+      },
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 78.0,
+        "VOacac": 0.443,
+        "DDT": 4.3,
+        "OAm": 6.7
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "predictions": {
+        "size_mu": 9.376477847721823,
+        "size_std": 4.777665500343857,
+        "cv_mu": 0.33417502242006325,
+        "cv_std": 0.15924063778450784,
+        "sq_mu": 0.8712034550586419,
+        "sq_std": 0.08714720990072262,
+        "p_feasible": 0.2767664265445983,
+        "p_bin": 0.5922194327478859,
+        "correction_applied": true
+      },
+      "model_context": {
+        "feature_mode": "transfer",
+        "correction_applied": true
+      },
+      "actual_results": {
+        "Size": 13.058,
+        "CV": 0.166,
+        "Squareness": 0.934,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "completed_timestamp": "2026-06-23T14:34:49.714185",
+      "errors": {
+        "size_error": 3.681522152278177,
+        "size_z_score": 0.7705692564733155,
+        "size_within_1sigma": true,
+        "size_within_2sigma": true,
+        "cv_error": -0.16817502242006324,
+        "cv_z_score": -1.0561061847017081,
+        "cv_within_1sigma": false,
+        "cv_within_2sigma": true,
+        "squareness_error": 0.06279654494135811,
+        "squareness_z_score": 0.7205800967454428,
+        "squareness_within_1sigma": true,
+        "squareness_within_2sigma": true
+      },
+      "skip_reason": null,
+      "skipped_timestamp": null
+    },
+    {
+      "rec_id": "REC_002",
+      "status": "completed",
+      "rank": 2,
+      "timestamp": "2026-06-19T14:29:11.605798",
+      "target": {
+        "size": 5.0,
+        "tolerance": 2.0,
+        "squareness_bin": "highly_cubic"
+      },
+      "conditions": {
+        "Temp": 309.0,
+        "Time": 46.0,
+        "VOacac": 0.473,
+        "DDT": 3.4,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "predictions": {
+        "size_mu": 9.433953436498669,
+        "size_std": 4.271957206702646,
+        "cv_mu": 0.3342011155165394,
+        "cv_std": 0.15924055172410345,
+        "sq_mu": 0.8598434568406248,
+        "sq_std": 0.08862454848283756,
+        "p_feasible": 0.2618239209880632,
+        "p_bin": 0.5660551133374767,
+        "correction_applied": true
+      },
+      "model_context": {
+        "feature_mode": "transfer",
+        "correction_applied": true
+      },
+      "actual_results": {
+        "Size": 13.591,
+        "CV": 0.167,
+        "Squareness": 0.854,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "completed_timestamp": "2026-06-23T14:35:45.787535",
+      "errors": {
+        "size_error": 4.15704656350133,
+        "size_z_score": 0.9731011717483916,
+        "size_within_1sigma": true,
+        "size_within_2sigma": true,
+        "cv_error": -0.1672011155165394,
+        "cv_z_score": -1.049990807657011,
+        "cv_within_1sigma": false,
+        "cv_within_2sigma": true,
+        "squareness_error": -0.005843456840624817,
+        "squareness_z_score": -0.06593496881686706,
+        "squareness_within_1sigma": true,
+        "squareness_within_2sigma": true
+      },
+      "skip_reason": null,
+      "skipped_timestamp": null
+    },
+    {
+      "rec_id": "REC_003",
+      "status": "completed",
+      "rank": 1,
+      "timestamp": "2026-06-23T14:42:10.632647",
+      "target": {
+        "size": 12.5,
+        "tolerance": 2.0,
+        "squareness_bin": "highly_cubic"
+      },
+      "conditions": {
+        "Temp": 304.0,
+        "Time": 45.0,
+        "VOacac": 0.504,
+        "DDT": 4.1,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "predictions": {
+        "size_mu": 12.204996579396656,
+        "size_std": 2.501891139635639,
+        "cv_mu": 0.3248244880152335,
+        "cv_std": 0.16003741784412126,
+        "sq_mu": 0.8545691652988924,
+        "sq_std": 0.0591330715618181,
+        "p_feasible": 0.14556094484309848,
+        "p_bin": 0.6655440352879635,
+        "correction_applied": true
+      },
+      "model_context": {
+        "feature_mode": "transfer",
+        "correction_applied": true
+      },
+      "actual_results": {
+        "Size": 13.211,
+        "CV": 0.157,
+        "Squareness": 0.852,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "completed_timestamp": "2026-06-26T15:05:03.923894",
+      "errors": {
+        "size_error": 1.006003420603344,
+        "size_z_score": 0.4020971994608256,
+        "size_within_1sigma": true,
+        "size_within_2sigma": true,
+        "cv_error": -0.1678244880152335,
+        "cv_z_score": -1.04865780937991,
+        "cv_within_1sigma": false,
+        "cv_within_2sigma": true,
+        "squareness_error": -0.002569165298892395,
+        "squareness_z_score": -0.04344718160304886,
+        "squareness_within_1sigma": true,
+        "squareness_within_2sigma": true
+      },
+      "skip_reason": null,
+      "skipped_timestamp": null
+    },
+    {
+      "rec_id": "REC_004",
+      "status": "completed",
+      "rank": 2,
+      "timestamp": "2026-06-23T14:42:10.638594",
+      "target": {
+        "size": 12.5,
+        "tolerance": 2.0,
+        "squareness_bin": "highly_cubic"
+      },
+      "conditions": {
+        "Temp": 305.0,
+        "Time": 85.0,
+        "VOacac": 0.574,
+        "DDT": 4.5,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "predictions": {
+        "size_mu": 14.64538465268884,
+        "size_std": 3.2940057507910363,
+        "cv_mu": 0.3147314486518378,
+        "cv_std": 0.15924853261081878,
+        "sq_mu": 0.9118474515528396,
+        "sq_std": 0.06675232084282587,
+        "p_feasible": 0.17922106777148564,
+        "p_bin": 0.809274648314532,
+        "correction_applied": true
+      },
+      "model_context": {
+        "feature_mode": "transfer",
+        "correction_applied": true
+      },
+      "actual_results": {
+        "Size": 10.582,
+        "CV": 0.182,
+        "Squareness": 0.888,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "completed_timestamp": "2026-06-26T15:08:03.945961",
+      "errors": {
+        "size_error": -4.063384652688839,
+        "size_z_score": -1.2335693863658377,
+        "size_within_1sigma": false,
+        "size_within_2sigma": true,
+        "cv_error": -0.13273144865183778,
+        "cv_z_score": -0.8334861645238197,
+        "cv_within_1sigma": true,
+        "cv_within_2sigma": true,
+        "squareness_error": -0.023847451552839627,
+        "squareness_z_score": -0.35725277041663495,
+        "squareness_within_1sigma": true,
+        "squareness_within_2sigma": true
+      },
+      "skip_reason": null,
+      "skipped_timestamp": null
+    },
+    {
+      "rec_id": "REC_005",
+      "status": "completed",
+      "rank": 1,
+      "timestamp": "2026-06-26T16:32:20.640348",
+      "target": {
+        "size": 12.5,
+        "tolerance": 2.0,
+        "squareness_bin": "highly_cubic"
+      },
+      "conditions": {
+        "Temp": 308.0,
+        "Time": 71.0,
+        "VOacac": 0.585,
+        "DDT": 3.5,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "predictions": {
+        "size_mu": 13.547705336866795,
+        "size_std": 3.195407806651757,
+        "cv_mu": 0.22947572524809484,
+        "cv_std": 0.1458432953805527,
+        "sq_mu": 0.9010533845777499,
+        "sq_std": 0.05574388741702527,
+        "p_feasible": 0.13708605980449926,
+        "p_bin": 0.8162327101356555,
+        "correction_applied": true
+      },
+      "model_context": {
+        "feature_mode": "transfer",
+        "correction_applied": true
+      },
+      "actual_results": {
+        "Size": 12.63,
+        "CV": 0.164,
+        "Squareness": 0.915,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "completed_timestamp": "2026-06-30T15:59:20.251623",
+      "errors": {
+        "size_error": -0.9177053368667938,
+        "size_z_score": -0.2871950600347292,
+        "size_within_1sigma": true,
+        "size_within_2sigma": true,
+        "cv_error": -0.06547572524809483,
+        "cv_z_score": -0.44894573368797874,
+        "cv_within_1sigma": true,
+        "cv_within_2sigma": true,
+        "squareness_error": 0.013946615422250175,
+        "squareness_z_score": 0.25019093695267847,
+        "squareness_within_1sigma": true,
+        "squareness_within_2sigma": true
+      },
+      "skip_reason": null,
+      "skipped_timestamp": null
+    },
+    {
+      "rec_id": "REC_006",
+      "status": "completed",
+      "rank": 2,
+      "timestamp": "2026-06-26T16:32:20.644271",
+      "target": {
+        "size": 12.5,
+        "tolerance": 2.0,
+        "squareness_bin": "highly_cubic"
+      },
+      "conditions": {
+        "Temp": 303.0,
+        "Time": 81.0,
+        "VOacac": 0.568,
+        "DDT": 3.7,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "predictions": {
+        "size_mu": 13.559200200232524,
+        "size_std": 2.8366616047775937,
+        "cv_mu": 0.29914347513496903,
+        "cv_std": 0.16744118895839719,
+        "sq_mu": 0.8991210540927983,
+        "sq_std": 0.06963847787772902,
+        "p_feasible": 0.12332098012931059,
+        "p_bin": 0.7711240066530219,
+        "correction_applied": true
+      },
+      "model_context": {
+        "feature_mode": "transfer",
+        "correction_applied": true
+      },
+      "actual_results": {
+        "Size": 12.607,
+        "CV": 0.163,
+        "Squareness": 0.884,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "completed_timestamp": "2026-06-30T16:02:41.245735",
+      "errors": {
+        "size_error": -0.9522002002325252,
+        "size_z_score": -0.33567634526049916,
+        "size_within_1sigma": true,
+        "size_within_2sigma": true,
+        "cv_error": -0.13614347513496902,
+        "cv_z_score": -0.8130823483867852,
+        "cv_within_1sigma": true,
+        "cv_within_2sigma": true,
+        "squareness_error": -0.015121054092798292,
+        "squareness_z_score": -0.21713648192236168,
+        "squareness_within_1sigma": true,
+        "squareness_within_2sigma": true
+      },
+      "skip_reason": null,
+      "skipped_timestamp": null
+    }
+  ]
+}

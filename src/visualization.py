@@ -1,8 +1,6 @@
 """Plotting helpers for the Cu3MS4 BO workflow.
 
-Every ``plot_*`` function in here is read-only with respect to the optimizer
-(it inspects state but never mutates it), so editing a plot cannot break the
-optimization logic.
+These functions inspect optimizer state and do not change it.
 """
 
 import numpy as np
@@ -10,13 +8,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
 from matplotlib.patches import Patch, Rectangle
-from matplotlib.colors import Normalize, to_rgba
-from typing import Tuple, Optional
+from matplotlib.legend_handler import HandlerTuple
+from matplotlib.colors import LinearSegmentedColormap, Normalize, to_rgba
+from matplotlib.transforms import blended_transform_factory
+from typing import Tuple, Optional, List, Dict
 from pathlib import Path
 
 from sklearn.metrics import r2_score, mean_absolute_error
 
 from config import COLORS, RAW_BOUNDS, RAW_FACTORS, SYNTHESIS_FEATURES
+from chemical_constants import (
+    DESCRIPTOR_SKILL_GAIN,
+    LOPO_SYNTHESIS, LOPO_SYNTHESIS_LT,
+    LOPO_ONEHOT, LOPO_ONEHOT_LT,
+    LOPO_HSAB, LOPO_HSAB_LT,
+)
 
 
 _ANN_BOX = dict(boxstyle='round,pad=0.4', facecolor='white',
@@ -25,15 +31,16 @@ _LEGEND_FONT_SIZE = 12
 _STATS_FONT_SIZE = 9
 
 
-def _style_ax(ax, title='', xlabel='', ylabel=''):
+def _style_ax(ax, title='', xlabel='', ylabel='', *,
+              title_fontsize=15, label_fontsize=13, tick_fontsize=12):
     """Apply consistent presentation styling to an axes object."""
     if title:
-        ax.set_title(title, fontsize=15, fontweight='bold', pad=10)
+        ax.set_title(title, fontsize=title_fontsize, fontweight='bold', pad=10)
     if xlabel:
-        ax.set_xlabel(xlabel, fontsize=13, labelpad=6)
+        ax.set_xlabel(xlabel, fontsize=label_fontsize, labelpad=6)
     if ylabel:
-        ax.set_ylabel(ylabel, fontsize=13, labelpad=6)
-    ax.tick_params(axis='both', labelsize=12)
+        ax.set_ylabel(ylabel, fontsize=label_fontsize, labelpad=6)
+    ax.tick_params(axis='both', labelsize=tick_fontsize)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_color('#AAAAAA')
@@ -93,8 +100,7 @@ def _bin_marker_legend_handles():
     ]
 
 
-# RECOMMENDATION HISTORY
-# ------------------------------------------------------------------------------
+# Recommendation history
 
 def plot_recommendation_history(optimizer, figsize: Tuple[int, int] = (14, 6)):
     """Plot recommendation timeline and size-error distribution."""
@@ -147,8 +153,7 @@ def plot_recommendation_history(optimizer, figsize: Tuple[int, int] = (14, 6)):
     return fig
 
 
-# PARITY PLOTS
-# ------------------------------------------------------------------------------
+# Parity plots
 
 def plot_parity(optimizer, figsize: Tuple[int, int] = (12, 4)):
     """Predicted vs actual values for completed recommendations."""
@@ -199,8 +204,7 @@ def plot_parity(optimizer, figsize: Tuple[int, int] = (12, 4)):
     return fig
 
 
-# CALIBRATION ANALYSIS
-# ------------------------------------------------------------------------------
+# Calibration analysis
 
 def plot_calibration(optimizer, figsize: Tuple[int, int] = (10, 4)):
     """Z-score distribution and confidence-interval coverage."""
@@ -259,8 +263,7 @@ def plot_calibration(optimizer, figsize: Tuple[int, int] = (10, 4)):
     return fig
 
 
-# ERROR LEARNING PROGRESS
-# ------------------------------------------------------------------------------
+# Error learning progress
 
 def plot_error_learning_progress(optimizer, figsize: Tuple[int, int] = (13, 4)):
     """Cumulative MAE over completed recommendations for each property."""
@@ -318,8 +321,7 @@ def plot_error_learning_progress(optimizer, figsize: Tuple[int, int] = (13, 4)):
     return fig
 
 
-# ERROR CORRECTION IMPACT
-# ------------------------------------------------------------------------------
+# Error correction impact
 
 def plot_error_correction_impact(optimizer, figsize: Tuple[int, int] = (14, 4.5)):
     """Compare stored prediction snapshots (at recommendation time) against actuals.
@@ -438,8 +440,7 @@ def plot_error_correction_impact(optimizer, figsize: Tuple[int, int] = (14, 4.5)
     return fig
 
 
-# ERROR LEARNER CORRECTION ARROWS
-# ------------------------------------------------------------------------------
+# Error learner correction arrows
 
 def plot_bias_correction_arrows(optimizer, figsize: Tuple[int, int] = (14, 4.5)):
     """Show how the ErrorLearner shifts predictions toward actual values.
@@ -512,8 +513,7 @@ def plot_bias_correction_arrows(optimizer, figsize: Tuple[int, int] = (14, 4.5))
         base_preds = np.array(base_preds)
         corr_preds = np.array(corr_preds)
 
-        # Use only actuals + base_preds (same formula as plot_error_correction_impact)
-        # so both figures have identical axis limits for overlay animation
+        # Same axis limits as plot_error_correction_impact (actuals + base_preds).
         all_vals = np.concatenate([actuals, base_preds])
         margin = 0.08 * (all_vals.max() - all_vals.min())
         lims = [all_vals.min() - margin, all_vals.max() + margin]
@@ -565,8 +565,7 @@ def plot_bias_correction_arrows(optimizer, figsize: Tuple[int, int] = (14, 4.5))
     return fig
 
 
-# BIAS CORRECTION — SHARED DATA EXTRACTION
-# ------------------------------------------------------------------------------
+# Bias correction — shared data extraction
 
 def _extract_bias_data(optimizer, loo_cv: bool = False):
     """Gather actuals, base predictions, and corrected predictions per property.
@@ -694,8 +693,7 @@ def _loo_cv_bias(X_scaled, base_preds, errors):
     return loo_corr
 
 
-# BIAS CORRECTION — SUMMARY BAR CHART
-# ------------------------------------------------------------------------------
+# Bias correction — summary bar chart
 
 def plot_bias_correction_summary(optimizer, figsize: Tuple[int, int] = (11, 4.5),
                                   loo_cv: bool = False):
@@ -775,8 +773,7 @@ def plot_bias_correction_summary(optimizer, figsize: Tuple[int, int] = (11, 4.5)
     return fig
 
 
-# BIAS CORRECTION — BEFORE / AFTER SCATTER GRID
-# ------------------------------------------------------------------------------
+# Bias correction — before / after scatter grid
 
 def plot_bias_correction_grid(optimizer, figsize: Tuple[int, int] = (14, 8),
                                loo_cv: bool = False):
@@ -852,8 +849,7 @@ def plot_bias_correction_grid(optimizer, figsize: Tuple[int, int] = (14, 8),
     return fig
 
 
-# TARGET ACHIEVEMENT TRACKING
-# ------------------------------------------------------------------------------
+# Target achievement tracking
 
 def plot_target_achievement(optimizer, figsize: Tuple[int, int] = (13, 5)):
     """Track how well recommendations achieve target sizes over time."""
@@ -922,8 +918,7 @@ def plot_target_achievement(optimizer, figsize: Tuple[int, int] = (13, 5)):
     return fig
 
 
-# FEATURE IMPORTANCE
-# ------------------------------------------------------------------------------
+# Feature importance
 
 def plot_feature_importance(optimizer, figsize: Tuple[int, int] = (14, 5)):
     """Visualize feature importance from GP sensitivity analysis.
@@ -995,8 +990,666 @@ def plot_feature_importance(optimizer, figsize: Tuple[int, int] = (14, 5)):
     return fig
 
 
-# CLASSIFIER CALIBRATION RELIABILITY DIAGRAMS
-# ------------------------------------------------------------------------------
+def plot_acquisition_feature_importance(
+    optimizer,
+    squareness_bin: str = 'highly_cubic',
+    figsize: Tuple[int, int] = (14, 5),
+):
+    """Feature importance for the three BO acquisition components (Size / Feasibility / Bin).
+
+    Uses the same gradient-sensitivity method as :func:`plot_feature_importance`, but
+    evaluates the models that actually enter ``acquisition()`` rather than the
+    diagnostic CV and Squareness regressors.
+    """
+    if optimizer.base_optimizer is None:
+        print("Base optimizer not initialized.")
+        return None
+    base = optimizer.base_optimizer
+    try:
+        importance_df = base.get_acquisition_feature_importance(
+            squareness_bin=squareness_bin,
+        )
+    except (AttributeError, ValueError) as exc:
+        print(f"Could not compute acquisition feature importance: {exc}")
+        return None
+    if importance_df.empty:
+        print("No acquisition feature importance data available.")
+        return None
+
+    bin_titles = {
+        'highly_cubic': 'Highly cubic',
+        'poorly_cubic': 'Poorly cubic',
+        'multipod': 'Multipod',
+    }
+    prop_colors = {
+        'Size': ('#B87A8E', '#6E2E44'),
+        'Feasibility': ('#B87A8E', '#6E2E44'),
+        'Bin': ('#B87A8E', '#6E2E44'),
+    }
+    panel_titles = {
+        'Size': 'Size',
+        'Feasibility': 'Feasibility',
+        'Bin': f"Bin ({bin_titles.get(squareness_bin, squareness_bin)})",
+    }
+
+    fig, axes = plt.subplots(1, 3, figsize=figsize)
+    fig.patch.set_facecolor('white')
+
+    for ax, prop in zip(axes, ['Size', 'Feasibility', 'Bin']):
+        color_light, color_dark = prop_colors[prop]
+        prop_data = importance_df[importance_df['Model'] == prop].copy()
+
+        _style_ax(ax, title=panel_titles[prop],
+                  xlabel='Importance share',
+                  title_fontsize=17, label_fontsize=14, tick_fontsize=13)
+        ax.spines['left'].set_visible(False)
+        ax.set_axisbelow(True)
+        ax.grid(axis='x', color='#EEEEEE', linewidth=0.8)
+        ax.grid(axis='y', visible=False)
+
+        if prop_data.empty:
+            ax.text(0.5, 0.5, f'No data for {prop}',
+                    ha='center', va='center', transform=ax.transAxes, fontsize=11)
+            continue
+
+        prop_data = prop_data.sort_values('Importance', ascending=True)
+        feat_labels = [_FEATURE_LABELS.get(f, f) for f in prop_data['Feature']]
+        y_pos = np.arange(len(prop_data))
+
+        bar_colors = [color_light] * (len(prop_data) - 1) + [color_dark]
+        bars = ax.barh(y_pos, prop_data['Importance'],
+                       color=bar_colors, alpha=0.90, edgecolor='white',
+                       linewidth=0.6, height=0.65)
+
+        bars[-1].set_edgecolor('#333333')
+        bars[-1].set_linewidth(1.2)
+
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(feat_labels, fontsize=12)
+        ax.invert_yaxis()
+        ax.set_xlim(0, prop_data['Importance'].max() * 1.25)
+
+        for i, (_, row) in enumerate(prop_data.iterrows()):
+            ax.text(row['Importance'] + prop_data['Importance'].max() * 0.02,
+                    i, f"{row['Importance']:.0%}",
+                    va='center', fontsize=12,
+                    fontweight='bold' if i == len(prop_data) - 1 else 'normal')
+
+    _suptitle(fig, 'Acquisition Feature Importance  (GP Gradient Sensitivity)')
+    fig.tight_layout(pad=1.5)
+    return fig
+
+
+# Precursor transfer evidence
+
+def _match_precursor_pairs(
+    df: pd.DataFrame,
+    source_precursor: str = 'CuI',
+    target_precursor: str = 'CuBr',
+    match_cols: Optional[List[str]] = None,
+    round_decimals: int = 2,
+    precursor_col: str = 'Cu_precursor',
+) -> pd.DataFrame:
+    """Match experiments across precursors on identical synthesis conditions.
+
+    ``precursor_col`` selects the transfer axis: ``'Cu_precursor'`` for
+    Cu-precursor campaigns (CuI/CuBr/CuCl) or ``'Metal_precursor'`` for
+    metal-precursor campaigns (VO(acac)2 / TaCl5).
+    """
+    if match_cols is None:
+        match_cols = list(RAW_FACTORS)
+
+    if precursor_col not in df.columns:
+        return pd.DataFrame()
+
+    src = df[df[precursor_col] == source_precursor].copy()
+    tgt = df[df[precursor_col] == target_precursor].copy()
+    if src.empty or tgt.empty:
+        return pd.DataFrame()
+
+    def _key(frame: pd.DataFrame) -> pd.Series:
+        return frame[match_cols].round(round_decimals).astype(str).agg('|'.join, axis=1)
+
+    src['_key'] = _key(src)
+    tgt['_key'] = _key(tgt)
+
+    rows = []
+    for key, srow in src.groupby('_key'):
+        tmatch = tgt[tgt['_key'] == key]
+        if tmatch.empty:
+            continue
+        srow = srow.iloc[0]
+        trow = tmatch.iloc[0]
+        rows.append({
+            'match_key': key,
+            'source_run_id': srow.get('Run_ID', np.nan),
+            'target_run_id': trow.get('Run_ID', np.nan),
+            'Temp': srow['Temp'],
+            'Time': srow['Time'],
+            f'{source_precursor}_Size': srow.get('Size', np.nan),
+            f'{target_precursor}_Size': trow.get('Size', np.nan),
+            f'{source_precursor}_PhasePure': srow.get('PhasePure', np.nan),
+            f'{target_precursor}_PhasePure': trow.get('PhasePure', np.nan),
+            f'{source_precursor}_Squareness': srow.get('Squareness', np.nan),
+            f'{target_precursor}_Squareness': trow.get('Squareness', np.nan),
+        })
+
+    pairs = pd.DataFrame(rows)
+    if not pairs.empty:
+        pairs = pairs.sort_values(['Temp', 'Time'], na_position='last')
+    return pairs.reset_index(drop=True)
+
+
+def _match_precursor_groups(
+    df: pd.DataFrame,
+    precursors: List[str],
+    match_cols: Optional[List[str]] = None,
+    round_decimals: int = 2,
+    precursor_col: str = 'Cu_precursor',
+) -> pd.DataFrame:
+    """Match experiments across multiple precursors on identical conditions.
+
+    ``precursor_col`` selects the transfer axis (``'Cu_precursor'`` or
+    ``'Metal_precursor'``). Returns one row per unique condition that has data
+    for >= 2 precursors, with columns ``{Precursor}_{Property}`` for each.
+    """
+    if match_cols is None:
+        match_cols = list(RAW_FACTORS)
+    if precursor_col not in df.columns:
+        return pd.DataFrame()
+
+    subsets = {}
+    for prec in precursors:
+        sub = df[df[precursor_col] == prec].copy()
+        if sub.empty:
+            continue
+        sub['_key'] = (
+            sub[match_cols].round(round_decimals).astype(str).agg('|'.join, axis=1)
+        )
+        subsets[prec] = sub
+
+    if len(subsets) < 2:
+        return pd.DataFrame()
+
+    all_keys: set = set()
+    for sub in subsets.values():
+        all_keys.update(sub['_key'].unique())
+
+    rows = []
+    for key in sorted(all_keys):
+        hit_precs = [p for p in precursors if p in subsets and (subsets[p]['_key'] == key).any()]
+        if len(hit_precs) < 2:
+            continue
+        ref = subsets[hit_precs[0]][subsets[hit_precs[0]]['_key'] == key].iloc[0]
+        row: dict = {
+            'match_key': key,
+            'Temp': ref['Temp'],
+            'Time': ref['Time'],
+            'n_precursors': len(hit_precs),
+        }
+        for prec in precursors:
+            if prec in subsets and (subsets[prec]['_key'] == key).any():
+                r = subsets[prec][subsets[prec]['_key'] == key].iloc[0]
+                row[f'{prec}_Size'] = r.get('Size', np.nan)
+                row[f'{prec}_PhasePure'] = r.get('PhasePure', np.nan)
+                row[f'{prec}_Squareness'] = r.get('Squareness', np.nan)
+            else:
+                row[f'{prec}_Size'] = np.nan
+                row[f'{prec}_PhasePure'] = np.nan
+                row[f'{prec}_Squareness'] = np.nan
+        rows.append(row)
+
+    groups = pd.DataFrame(rows)
+    if not groups.empty:
+        groups = groups.sort_values(['Temp', 'Time'], na_position='last')
+    return groups.reset_index(drop=True)
+
+
+def plot_precursor_paired_comparison(
+    optimizer,
+    comparison_df: Optional[pd.DataFrame] = None,
+    skill_df: Optional[pd.DataFrame] = None,
+    source_precursor: str = 'CuI',
+    target_precursor: str = 'CuBr',
+    precursors: Optional[List[str]] = None,
+    precursor_col: str = 'Cu_precursor',
+    color_overrides: Optional[Dict[str, str]] = None,
+    figsize: Tuple[int, int] = (15, 11),
+):
+    """Three-panel figure demonstrating precursor transfer learning.
+
+    Parameters
+    ----------
+    precursor_col : str
+        Transfer axis: ``'Cu_precursor'`` (CuI/CuBr/CuCl campaigns) or
+        ``'Metal_precursor'`` (VO(acac)2/TaCl5 campaigns).
+    precursors : list of str, optional
+        When supplied, Panel A shows grouped bars for all listed precursors at
+        every synthesis condition matched by >= 2 of them.  Overrides the
+        legacy *source_precursor* / *target_precursor* pair.
+
+    Panels
+    ------
+    1. **Paired outcomes** — Size and phase purity at matched synthesis conditions.
+    2. **Skill dumbbell** — synthesis-only vs. +descriptor predictive skill on a
+       shared "skill vs. no-information baseline" axis (Size R², plus Brier skill
+       scores for the PhasePure / IsCubic classifiers). Pass a ``skill_df`` from
+       :func:`compute_transfer_skill_table`; without it the panel falls back to
+       Size-only using ``comparison_df``.
+    3. **Size LOO parity** — cubic training points coloured by precursor, showing
+       the model captures precursor-specific offsets.
+    """
+    import matplotlib.gridspec as gridspec
+
+    if optimizer.base_optimizer is None:
+        print("Base optimizer not initialized.")
+        return None
+
+    base = optimizer.base_optimizer
+    df_all = base.df_all
+    axis_label = 'metal' if precursor_col == 'Metal_precursor' else 'Cu'
+    if precursor_col not in df_all.columns:
+        print(f"No {precursor_col} column — not a transfer-learning campaign.")
+        return None
+    if df_all[precursor_col].nunique() < 2:
+        print(f"Need data from at least two {axis_label} precursors.")
+        return None
+
+    multi_mode = precursors is not None and len(precursors) >= 2
+    if multi_mode:
+        groups = _match_precursor_groups(
+            df_all, precursors=precursors, precursor_col=precursor_col,
+        )
+        if groups.empty:
+            print("No matched synthesis conditions found across precursors.")
+            return None
+    else:
+        precursors = [source_precursor, target_precursor]
+        pairs = _match_precursor_pairs(
+            df_all, source_precursor=source_precursor,
+            target_precursor=target_precursor,
+            precursor_col=precursor_col,
+        )
+        if pairs.empty:
+            print("No matched synthesis pairs found between precursors.")
+            return None
+        groups = pairs
+
+    # Panel B prefers skill_df; only fall back to computing comparison_df (for
+    # the Size-only fallback) when neither was supplied.
+    if comparison_df is None and (skill_df is None or skill_df.empty):
+        print("Computing synthesis vs transfer LOO-CV (may take ~1–2 min)…")
+        comparison_df = optimizer.compare_feature_modes(
+            modes=['synthesis', 'transfer'], verbose=False,
+        )
+
+    if not base.metrics or 'y_pred' not in base.metrics.get('Size', {}):
+        print("Running LOO-CV validation…")
+        optimizer.validate_models()
+
+    prec_palette = [
+        COLORS['primary'],    # blue
+        COLORS['tertiary'],   # orange
+        COLORS['neutral'],    # gray
+        COLORS['secondary'],  # purple
+        COLORS['success'],    # green
+    ]
+    # Explicit per-precursor colours (fall back to the palette for others).
+    prec_color_overrides = {
+        # Cu-precursor axis
+        'CuI':  '#7FD4D0',
+        'CuBr': '#3A9899',
+        'CuCl': '#0B5D5E',
+        # Metal-precursor axis (V light / Ta dark periwinkle)
+        'VO(acac)2': '#9493e8',
+        'TaCl5':     '#35347e',
+    }
+    if color_overrides:
+        prec_color_overrides = {**prec_color_overrides, **color_overrides}
+    prec_colors = {
+        p: prec_color_overrides.get(p, prec_palette[i % len(prec_palette)])
+        for i, p in enumerate(precursors)
+    }
+    n_prec = len(precursors)
+
+    fig = plt.figure(figsize=figsize)
+    fig.patch.set_facecolor('white')
+    gs = gridspec.GridSpec(2, 2, height_ratios=[1.0, 1.0], hspace=0.32, wspace=0.22)
+    # Top row spans the full width; skill-gain dumbbell sits next to Size LOO.
+    gs_pairs = gs[0, :].subgridspec(2, 1, height_ratios=[3, 1], hspace=0.06)
+
+    ax_size = fig.add_subplot(gs_pairs[0])
+    ax_pp = fig.add_subplot(gs_pairs[1], sharex=ax_size)
+    ax_r2 = fig.add_subplot(gs[1, 0])
+    ax_parity = fig.add_subplot(gs[1, 1])
+
+    # Keep background grid lines behind the bars / points, not on top of them.
+    for _ax in (ax_size, ax_pp, ax_r2, ax_parity):
+        _ax.set_axisbelow(True)
+
+    # --- Panel A — Matched synthesis pairs (grouped bars) ---
+    n_cond = len(groups)
+    x = np.arange(n_cond)
+    total_group_width = 0.78
+    width = total_group_width / n_prec
+
+    labels = []
+    for _, row in groups.iterrows():
+        labels.append(f"{int(row['Temp'])} °C\n{int(row['Time'])} min")
+
+    for j, prec in enumerate(precursors):
+        col = f'{prec}_Size'
+        if col not in groups.columns:
+            continue
+        sizes = groups[col].astype(float).values
+        offset = (j - (n_prec - 1) / 2) * width
+        ax_size.bar(x + offset, sizes, width, label=prec,
+                    color=prec_colors[prec], alpha=0.88,
+                    edgecolor='white', linewidth=0.6)
+
+    _style_ax(ax_size, title='Matched synthesis conditions',
+              ylabel='Size (nm)',
+              title_fontsize=19, label_fontsize=17, tick_fontsize=16)
+    ax_size.set_xticks(x)
+    ax_size.set_xticklabels(labels, fontsize=13)
+    ax_size.legend(loc='upper right', fontsize=14, frameon=True, framealpha=0.95,
+                   edgecolor='#CCCCCC')
+
+    if not multi_mode:
+        src_sizes = groups[f'{precursors[0]}_Size'].astype(float).values
+        tgt_sizes = groups[f'{precursors[1]}_Size'].astype(float).values
+        for xi, (s, t) in enumerate(zip(src_sizes, tgt_sizes)):
+            if np.isfinite(s) and np.isfinite(t):
+                off_s = (0 - (n_prec - 1) / 2) * width
+                off_t = (1 - (n_prec - 1) / 2) * width
+                ax_size.annotate(
+                    '', xy=(xi + off_t, t), xytext=(xi + off_s, s),
+                    arrowprops=dict(arrowstyle='->', color='#666666', lw=1.0),
+                )
+
+    n_matched = int(groups['n_precursors'].sum()) if 'n_precursors' in groups.columns else n_cond
+
+    for j, prec in enumerate(precursors):
+        col = f'{prec}_PhasePure'
+        if col not in groups.columns:
+            continue
+        pp = groups[col].fillna(0).astype(float).values
+        offset = (j - (n_prec - 1) / 2) * width
+        ax_pp.bar(x + offset, pp, width, color=prec_colors[prec],
+                  alpha=0.75, edgecolor='white')
+    _style_ax(ax_pp, ylabel='Phase pure',
+              label_fontsize=17, tick_fontsize=16)
+    ax_pp.set_ylim(-0.05, 1.15)
+    ax_pp.set_yticks([0, 1])
+    plt.setp(ax_size.get_xticklabels(), visible=False)
+
+    # --- Panel B — synthesis→descriptor skill dumbbell ---
+    from matplotlib.lines import Line2D
+
+    _style_ax(ax_r2, title='Skill gain from precursor descriptor',
+              ylabel='LOO predictive skill\n(R² / Brier skill score)',
+              title_fontsize=17, label_fontsize=15, tick_fontsize=14)
+
+    highlight = DESCRIPTOR_SKILL_GAIN   # transfer / descriptor highlight
+    gray = COLORS['neutral']
+
+    # Preferred source: a precomputed skill table (Size R² + classifier Brier
+    # skill scores). Falls back to Size-only from comparison_df if unavailable.
+    display_names = {'Size': 'Size', 'PhasePure': 'Phase\npurity',
+                     'IsCubic': 'Squareness\nbinning'}
+    task_order = ['Size', 'PhasePure', 'IsCubic']
+    tasks = []  # (label, synthesis_skill, descriptor_skill)
+
+    if skill_df is not None and not skill_df.empty:
+        present = [t for t in task_order if t in skill_df['Task'].values]
+        for t in present:
+            sub = skill_df[skill_df['Task'] == t].set_index('Mode')['Skill']
+            tasks.append((display_names.get(t, t),
+                          float(sub.get('synthesis', np.nan)),
+                          float(sub.get('transfer', np.nan))))
+    elif comparison_df is not None and not comparison_df.empty:
+        cd = comparison_df[comparison_df['Property'] == 'Size'].set_index('Mode')
+        if 'R2' in cd.columns:
+            tasks.append(('Size',
+                          float(cd['R2'].get('synthesis', np.nan)),
+                          float(cd['R2'].get('transfer', np.nan))))
+
+    all_vals = [v for _, s, d in tasks for v in (s, d) if np.isfinite(v)]
+    if tasks and all_vals:
+        x_t = np.arange(len(tasks))
+        for xi, (lab, syn, desc) in enumerate(tasks):
+            if np.isfinite(syn) and np.isfinite(desc):
+                ax_r2.annotate(
+                    '', xy=(xi, desc), xytext=(xi, syn),
+                    arrowprops=dict(arrowstyle='-|>', color=highlight, lw=2.2,
+                                    shrinkA=4, shrinkB=4), zorder=2)
+            if np.isfinite(syn):
+                ax_r2.scatter(xi, syn, s=70, color=gray, zorder=3,
+                              edgecolor='white', linewidth=0.8)
+            if np.isfinite(desc):
+                ax_r2.scatter(xi, desc, s=95, color=highlight, zorder=4,
+                              edgecolor='white', linewidth=0.8)
+                ax_r2.text(xi, desc + 0.025, f'{desc:.2f}', ha='center',
+                           va='bottom', fontsize=12, fontweight='bold',
+                           color=highlight)
+            if np.isfinite(syn):
+                ax_r2.text(xi, syn - 0.025, f'{syn:.2f}', ha='center', va='top',
+                           fontsize=12, color=gray)
+
+        # Zero line = no-information baseline; sub-zero dots read as "worse".
+        ax_r2.axhline(0, color='#444444', linewidth=1.0, zorder=1)
+        ax_r2.set_xticks(x_t)
+        ax_r2.set_xticklabels([t[0] for t in tasks], fontsize=14)
+        ax_r2.set_xlim(-0.6, len(tasks) - 0.4)
+
+        lo = min(0.0, min(all_vals)) - 0.16
+        hi = max(0.0, max(all_vals)) + 0.14
+        ax_r2.set_ylim(lo, hi)
+
+        # Call out the first task whose baseline sits below zero.
+        below = [(xi, s) for xi, (_, s, _) in enumerate(tasks)
+                 if np.isfinite(s) and s < 0]
+        if below:
+            xi0, s0 = below[0]
+            ax_r2.annotate('worse than\nbaseline', xy=(xi0, s0 - 0.03),
+                           xytext=(xi0, lo + 0.015), ha='center', va='bottom',
+                           fontsize=12, color=gray, style='italic')
+
+        handles = [
+            Line2D([0], [0], marker='o', linestyle='none', markerfacecolor=gray,
+                   markeredgecolor='white', markersize=8, label='Synthesis only'),
+            Line2D([0], [0], marker='o', linestyle='none', markerfacecolor=highlight,
+                   markeredgecolor='white', markersize=9, label='+ descriptor'),
+        ]
+        ax_r2.legend(handles=handles, loc='upper right', fontsize=12,
+                     frameon=True, framealpha=0.95, edgecolor='#CCCCCC')
+    else:
+        ax_r2.text(0.5, 0.5, 'Run compute_transfer_skill_table()\nfirst',
+                   ha='center', va='center', transform=ax_r2.transAxes)
+
+    # --- Panel C — Size LOO parity coloured by precursor ---
+    if 'Size' not in base.metrics or 'y_pred' not in base.metrics['Size']:
+        _style_ax(ax_parity, title='Size LOO parity',
+                  xlabel='Actual size (nm)', ylabel='LOO predicted size (nm)',
+                  title_fontsize=17, label_fontsize=15, tick_fontsize=14)
+        ax_parity.text(0.5, 0.5, 'No LOO data available',
+                       ha='center', va='center', transform=ax_parity.transAxes)
+    else:
+        y_actual = base.df_cubic['Size'].values
+        y_loo = base.metrics['Size']['y_pred']
+        prec_labels = base.df_cubic[precursor_col].values
+        r2_all = float(base.metrics['Size']['r2'])
+
+        _style_ax(ax_parity, title='Size LOO parity (cubic training data)',
+                  xlabel='Actual size (nm)', ylabel='LOO predicted size (nm)',
+                  title_fontsize=17, label_fontsize=15, tick_fontsize=14)
+
+        default_color = COLORS['completed']
+        # Order the legend like Panel A (the `precursors` list: CuI, CuBr, CuCl),
+        # not alphabetically, so both legends read in the same order.
+        present = set(np.unique(prec_labels))
+        ordered_precs = [p for p in precursors if p in present]
+        ordered_precs += [p for p in sorted(present) if p not in ordered_precs]
+        for prec in ordered_precs:
+            mask = prec_labels == prec
+            color = prec_colors.get(prec, default_color)
+            ax_parity.scatter(
+                y_actual[mask], y_loo[mask], s=55, color=color, alpha=0.82,
+                edgecolor='white', linewidth=0.6, label=f'{prec} (n={mask.sum()})', zorder=4,
+            )
+        all_vals = np.concatenate([y_actual, y_loo])
+        margin = 0.08 * (all_vals.max() - all_vals.min())
+        lims = [all_vals.min() - margin, all_vals.max() + margin]
+        ax_parity.plot(lims, lims, color='#444444', lw=1.5, linestyle='--', zorder=2)
+        ax_parity.set_xlim(lims)
+        ax_parity.set_ylim(lims)
+        ax_parity.set_aspect('equal')
+        ax_parity.text(
+            0.03, 0.97, f'Pooled LOO R² = {r2_all:.2f}',
+            transform=ax_parity.transAxes, va='top', fontsize=12,
+            fontweight='bold', bbox=_ANN_BOX,
+        )
+        ax_parity.legend(loc='lower right', fontsize=12, frameon=True,
+                         framealpha=0.95, edgecolor='#CCCCCC')
+
+    fig.subplots_adjust(left=0.06, right=0.98, top=0.96, bottom=0.07, hspace=0.42, wspace=0.20)
+    return fig
+
+
+def plot_lopo_bars(
+    lopo_df: pd.DataFrame,
+    held_out: str = 'CuCl',
+    figsize: Tuple[int, int] = (11.2, 4.6),
+):
+    """Two-panel leave-one-precursor-out bars for one held-out halide.
+
+    Panel (a) is absolute Size R² against the held-out mean — still negative
+    when a systematic offset remains. Panel (b) is the landscape test:
+    mean-centered R² and Pearson *r*. Dummy halide labels cannot name an
+    unseen precursor; hardness descriptors can.
+
+    ``lopo_df`` is the table from :func:`diagnostics.leave_one_precursor_out`
+    (or ``outputs_CuCl/lopo_size.csv``).
+    """
+    if lopo_df is None or lopo_df.empty:
+        print("No LOPO results to plot.")
+        return None
+
+    sub = lopo_df[lopo_df['held_out'].astype(str) == str(held_out)].copy()
+    if sub.empty:
+        available = sorted(lopo_df['held_out'].astype(str).unique())
+        print(f"No LOPO rows for held_out={held_out!r}. Have: {available}")
+        return None
+
+    method_order = ['synthesis', 'onehot', 'descriptors']
+    method_labels = {
+        'synthesis': 'Synthesis\nonly',
+        'onehot': 'One-hot\nlabels',
+        'descriptors': 'HSAB\nhardness',
+    }
+    method_colors = {
+        'synthesis': LOPO_SYNTHESIS,
+        'onehot': LOPO_ONEHOT,
+        'descriptors': LOPO_HSAB,
+    }
+    method_colors_light = {
+        'synthesis': LOPO_SYNTHESIS_LT,
+        'onehot': LOPO_ONEHOT_LT,
+        'descriptors': LOPO_HSAB_LT,
+    }
+    sub = sub.set_index('method')
+    missing = [m for m in method_order if m not in sub.index]
+    if missing:
+        print(f"LOPO table missing methods {missing} for {held_out}.")
+        return None
+
+    n_train = int(sub.loc['descriptors', 'n_train'])
+    n_test = int(sub.loc['descriptors', 'n_test'])
+
+    fig, (ax_r2, ax_land) = plt.subplots(1, 2, figsize=figsize)
+    fig.patch.set_facecolor('white')
+    for ax in (ax_r2, ax_land):
+        ax.set_axisbelow(True)
+
+    x = np.arange(len(method_order))
+    r2 = np.array([float(sub.loc[m, 'r2']) for m in method_order])
+    r2c = np.array([float(sub.loc[m, 'r2_centered']) for m in method_order])
+    rho = np.array([float(sub.loc[m, 'pearson_r']) for m in method_order])
+    colors = [method_colors[m] for m in method_order]
+    colors_light = [method_colors_light[m] for m in method_order]
+    tick_labels = [method_labels[m] for m in method_order]
+
+    # --- (a) Absolute R² ---
+    bars_a = ax_r2.bar(x, r2, width=0.62, color=colors, edgecolor='none',
+                       zorder=3)
+    ax_r2.axhline(0, color='#444444', linewidth=1.0, zorder=2)
+    _style_ax(ax_r2,
+              title='Absolute Size R²',
+              ylabel='Held-out R²',
+              title_fontsize=15, label_fontsize=13, tick_fontsize=12)
+    ax_r2.set_xticks(x)
+    ax_r2.set_xticklabels(tick_labels, fontsize=12)
+    ax_r2.set_xlim(-0.6, len(method_order) - 0.4)
+    y_lo = min(-0.4, float(np.nanmin(r2)) * 1.12)
+    y_hi = max(0.35, float(np.nanmax(r2)) + 0.35)
+    ax_r2.set_ylim(y_lo, y_hi)
+    for bar, val in zip(bars_a, r2):
+        va = 'top' if val < 0 else 'bottom'
+        offset = -0.12 if val < 0 else 0.08
+        ax_r2.text(bar.get_x() + bar.get_width() / 2, val + offset,
+                   f'{val:.2f}', ha='center', va=va, fontsize=11,
+                   fontweight='bold', color='#333333', zorder=4)
+
+    # --- (b) Landscape: centered R² + Pearson r ---
+    width = 0.36
+    bars_c = ax_land.bar(x - width / 2, r2c, width, color=colors,
+                         edgecolor='none', zorder=3)
+    bars_r = ax_land.bar(x + width / 2, rho, width, color=colors_light,
+                         edgecolor='none', zorder=3)
+    ax_land.axhline(0, color='#444444', linewidth=1.0, zorder=2)
+    _style_ax(ax_land,
+              title='Landscape transfer',
+              ylabel='Centered R²  /  Pearson r',
+              title_fontsize=15, label_fontsize=13, tick_fontsize=12)
+    ax_land.set_xticks(x)
+    ax_land.set_xticklabels(tick_labels, fontsize=12)
+    ax_land.set_xlim(-0.6, len(method_order) - 0.4)
+    land_vals = np.concatenate([r2c, rho])
+    land_lo = min(-1.05, float(np.nanmin(land_vals)) - 0.18)
+    land_hi = max(0.95, float(np.nanmax(land_vals)) + 0.18)
+    ax_land.set_ylim(land_lo, land_hi)
+    for bar, val in zip(list(bars_c) + list(bars_r), list(r2c) + list(rho)):
+        va = 'top' if val < 0 else 'bottom'
+        offset = -0.04 if val < 0 else 0.03
+        ax_land.text(bar.get_x() + bar.get_width() / 2, val + offset,
+                     f'{val:.2f}', ha='center', va=va, fontsize=10,
+                     color='#333333', zorder=4)
+    ax_land.legend(
+        handles=[
+            tuple(Patch(facecolor=c, edgecolor='none') for c in colors),
+            tuple(Patch(facecolor=c, edgecolor='none') for c in colors_light),
+        ],
+        labels=['Centered R²', 'Pearson r'],
+        handler_map={tuple: HandlerTuple(ndivide=None, pad=0.15)},
+        loc='upper left', fontsize=11, frameon=True,
+        framealpha=0.95, edgecolor='#CCCCCC',
+        handlelength=3.6, handleheight=0.85,
+    )
+
+    for ax, letter in ((ax_r2, 'a'), (ax_land, 'b')):
+        ax.text(-0.14, 1.10, f'({letter})', transform=ax.transAxes,
+                fontsize=15, fontweight='bold', va='bottom', ha='left')
+
+    fig.suptitle(
+        f'Leave-one-precursor-out  ·  hold out {held_out}'
+        f'  (train n={n_train}, test n={n_test})',
+        fontsize=14, fontweight='bold', y=1.06,
+    )
+    fig.tight_layout()
+    return fig
+
+
+# Classifier calibration reliability diagrams
 
 def plot_classifier_calibration(optimizer, figsize: Tuple[int, int] = (12, 4)):
     """Plot reliability diagrams for classifier calibration."""
@@ -1040,8 +1693,7 @@ def plot_classifier_calibration(optimizer, figsize: Tuple[int, int] = (12, 4)):
     return fig
 
 
-# COLLINEARITY HEATMAP
-# ------------------------------------------------------------------------------
+# Collinearity heatmap
 
 def plot_collinearity_heatmap(optimizer, figsize: Tuple[int, int] = (8, 6)):
     """Plot correlation heatmap for collinearity visualization."""
@@ -1065,15 +1717,14 @@ def plot_collinearity_heatmap(optimizer, figsize: Tuple[int, int] = (8, 6)):
             ax.text(j, i, f'{val:.2f}', ha='center', va='center', color=color, fontsize=8)
     ax.set_title(f'Feature Correlation Matrix ({optimizer.base_optimizer.feature_mode} mode)')
     if diag['problematic_pairs']:
-        print("\n⚠️ Highly correlated pairs (|r| > 0.8):")
+        print("\nHighly correlated pairs (|r| > 0.8):")
         for f1, f2, r in diag['problematic_pairs']:
             print(f"   {f1} ↔ {f2}: r = {r:.3f}")
     plt.tight_layout()
     return fig
 
 
-# DATASET QUALITY DASHBOARD
-# ------------------------------------------------------------------------------
+# Dataset quality dashboard
 
 def plot_dataset_quality_dashboard(optimizer, figsize: Tuple[int, int] = (14, 10), save_path: Path = None):
     """Comprehensive 4-panel dataset quality dashboard for presentations."""
@@ -1187,12 +1838,11 @@ def plot_dataset_quality_dashboard(optimizer, figsize: Tuple[int, int] = (14, 10
     plt.tight_layout(rect=[0, 0, 1, 0.96], pad=1.5)
     if save_path:
         fig.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
-        print(f"✓ Dashboard saved to {save_path}")
+        print(f"Dashboard saved to {save_path}")
     return fig
 
 
-# LOO-CV RESIDUALS
-# ------------------------------------------------------------------------------
+# LOO-CV residuals
 
 def plot_loo_residuals(optimizer, figsize: Tuple[int, int] = (12, 10)) -> Optional[plt.Figure]:
     """LOO-CV parity and residuals: assess model fit and homoscedasticity."""
@@ -1227,8 +1877,7 @@ def plot_loo_residuals(optimizer, figsize: Tuple[int, int] = (12, 10)) -> Option
     return fig
 
 
-# PROPERTY CORRELATIONS
-# ------------------------------------------------------------------------------
+# Property correlations
 
 def plot_property_correlations(optimizer, figsize: Tuple[int, int] = (13, 4.5)) -> Optional[plt.Figure]:
     """Pairwise correlations of outcome properties (Size, CV, Squareness)."""
@@ -1274,8 +1923,7 @@ def plot_property_correlations(optimizer, figsize: Tuple[int, int] = (13, 4.5)) 
     return fig
 
 
-# ACQUISITION SLICE
-# ------------------------------------------------------------------------------
+# Acquisition slice
 
 def plot_acquisition_slice(
     optimizer,
@@ -1319,8 +1967,7 @@ def plot_acquisition_slice(
     return fig
 
 
-# 3D RESPONSE & CLASSIFICATION SURFACES
-# ------------------------------------------------------------------------------
+# 3d response & classification surfaces
 
 _FEATURE_LABELS = {
     'Temp': 'Temperature (°C)',
@@ -2007,8 +2654,7 @@ def plot_bin_probability_facets(
     return fig
 
 
-# BIN PROBABILITY FACETS — ALL REMAINING FEATURES AS COLUMN FACETS
-# ------------------------------------------------------------------------------
+# Bin probability facets — all remaining features as column facets
 
 def plot_bin_probability_facets_all(
     optimizer,
@@ -2019,8 +2665,7 @@ def plot_bin_probability_facets_all(
 
     The x and y axes are always the two most important Squareness features.
     Each figure uses a different remaining feature (ranked 3rd, 4th, 5th …)
-    as the column-slice variable, so you can see how the landscape shifts as
-    each secondary variable is varied.
+    as the column-slice variable.
 
     Returns a list of figures (one per binning variable).
     """
@@ -2045,8 +2690,7 @@ def plot_bin_probability_facets_all(
     return figs
 
 
-# BIN PROBABILITY FACETS — Cu/V RATIO FIXED AS COLUMN FACET
-# ------------------------------------------------------------------------------
+# Bin probability facets — Cu/V ratio fixed as column facet
 
 def plot_bin_probability_facets_cuv(
     optimizer,
@@ -2202,8 +2846,148 @@ def plot_bin_probability_facets_cuv(
     return fig
 
 
-# BO TRAJECTORY
-# ------------------------------------------------------------------------------
+def plot_bin_probability_row(
+    optimizer,
+    f_x: str = 'S_Metal_ratio',
+    f_y: str = 'Cu_V_ratio',
+    n_grid: int = 80,
+    figsize: Tuple[float, float] = (13.2, 4.15),
+) -> Optional[plt.Figure]:
+    """1×3 map of P(bin) on a single design-space slice.
+
+    One panel per morphology (multipod / highly cubic / poorly cubic) on the
+    same ``f_x`` × ``f_y`` plane. Remaining synthesis features are held at the
+    cubic-training median. Colour limits are shared (0–1); the dashed contour
+    is P = 0.5. All successful experiments are overlaid, coloured by observed
+    bin.
+
+    This is the compact main-text companion to ``plot_bin_probability_facets``.
+    """
+    from optimizer import compute_bin_probability
+    from matplotlib.lines import Line2D
+
+    if optimizer.base_optimizer is None:
+        print("Base optimizer not initialized.")
+        return None
+    base = optimizer.base_optimizer
+
+    for name, feat in (('f_x', f_x), ('f_y', f_y)):
+        if feat not in base.features:
+            print(f"{name}='{feat}' is not in the feature set: {base.features}")
+            return None
+    if f_x == f_y:
+        print("f_x and f_y must be different features.")
+        return None
+
+    features = base.features
+    bounds = base.bounds
+    medians = base.df_cubic[features].median()
+    idx = {f: features.index(f) for f in features}
+    threshold = base.sq_threshold
+
+    x_range = np.linspace(bounds[f_x][0], bounds[f_x][1], n_grid)
+    y_range = np.linspace(bounds[f_y][0], bounds[f_y][1], n_grid)
+    X_grid, Y_grid = np.meshgrid(x_range, y_range)
+
+    X_feat = np.tile(medians.values, (X_grid.size, 1))
+    X_feat[:, idx[f_x]] = X_grid.ravel()
+    X_feat[:, idx[f_y]] = Y_grid.ravel()
+
+    preds = base.predict(X_feat)
+    probs = {
+        key: compute_bin_probability(
+            preds['sq_mu'], preds['sq_std'], preds['p_cubic'],
+            threshold, key,
+        ).reshape(n_grid, n_grid)
+        for key in _BIN_KEYS
+    }
+
+    df_s = base.df_success
+    is_cubic = _get_is_cubic(df_s)
+    bin_masks = _get_bin_masks(df_s, is_cubic, threshold)
+    colors = _bin_colors()
+    cmaps = [
+        LinearSegmentedColormap.from_list(f'bin_{key}', ['#FFFFFF', color])
+        for key, color in zip(_BIN_KEYS, colors)
+    ]
+
+    fig, axes = plt.subplots(1, 3, figsize=figsize, sharex=True, sharey=True)
+    fig.patch.set_facecolor('white')
+    letters = 'abc'
+    xl = _FEATURE_LABELS.get(f_x, f_x)
+    yl = _FEATURE_LABELS.get(f_y, f_y)
+
+    for ax, letter, bin_name, bin_key, cmap in zip(
+        axes, letters, _BIN_NAMES, _BIN_KEYS, cmaps
+    ):
+        ax.set_facecolor('#f7f7f7')
+        im = ax.imshow(
+            probs[bin_key], origin='lower', aspect='auto',
+            extent=[bounds[f_x][0], bounds[f_x][1],
+                    bounds[f_y][0], bounds[f_y][1]],
+            cmap=cmap, vmin=0, vmax=1, interpolation='bilinear',
+        )
+        try:
+            ax.contour(
+                X_grid, Y_grid, probs[bin_key], levels=[0.5],
+                colors=['#222222'], linewidths=1.6, linestyles='--', zorder=3,
+            )
+        except Exception:
+            pass
+
+        for mask, marker, color in zip(bin_masks, _BIN_MARKERS, colors):
+            sub = df_s[mask]
+            if sub.empty:
+                continue
+            ax.scatter(
+                sub[f_x], sub[f_y], c=color, s=48, marker=marker,
+                alpha=0.92, edgecolor='black', linewidth=0.65, zorder=5,
+            )
+
+        ax.set_title(bin_name, fontsize=13, fontweight='bold', pad=8)
+        ax.set_xlabel(xl, fontsize=12)
+        ax.text(
+            0.04, 0.96, f'({letter})', transform=ax.transAxes,
+            va='top', ha='left', fontsize=12, fontweight='bold',
+            color='#1a1a1a',
+            bbox=dict(boxstyle='round,pad=0.15', facecolor='white',
+                      edgecolor='none', alpha=0.85),
+        )
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_edgecolor('#888888')
+        ax.tick_params(axis='both', labelsize=11)
+
+        cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+        cb.set_ticks([0.0, 0.5, 1.0])
+        cb.ax.tick_params(labelsize=10)
+        if letter == 'c':
+            cb.set_label(r'$P(\mathrm{bin})$', fontsize=12)
+
+    axes[0].set_ylabel(yl, fontsize=12)
+
+    held = [f for f in features if f not in (f_x, f_y)]
+    held_txt = ';  '.join(
+        f'{_FEATURE_LABELS.get(f, f)} = {medians[f]:.3g}' for f in held
+    )
+    marker_handles = _bin_marker_legend_handles() + [
+        Line2D([0], [0], linestyle='--', color='#222222',
+               linewidth=1.6, label=r'$P = 0.50$'),
+    ]
+    fig.legend(
+        handles=marker_handles, loc='lower center', ncol=4, fontsize=11,
+        frameon=True, framealpha=0.95, edgecolor='#CCCCCC',
+        bbox_to_anchor=(0.48, -0.08),
+    )
+    fig.text(
+        0.48, -0.17,
+        f'Other features held at cubic-training median:  {held_txt}',
+        ha='center', va='top', fontsize=13, color='#333333',
+    )
+    return fig
+
+
+# BO trajectory
 
 def plot_bo_trajectory(
     optimizer,
@@ -2336,8 +3120,14 @@ def plot_bo_trajectory(
     return fig
 
 
-# BO TRAJECTORY BY TARGET SIZE
-# ------------------------------------------------------------------------------
+# BO trajectory by target size
+
+def _global_rec_number(rec_id: str) -> str:
+    """Strip the REC_ prefix, leaving e.g. '007' for caption cross-reference."""
+    if not rec_id:
+        return ''
+    return rec_id.removeprefix('REC_')
+
 
 def plot_bo_trajectory_by_size(
     optimizer,
@@ -2415,11 +3205,32 @@ def plot_bo_trajectory_by_size(
 
     fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize, squeeze=False)
     fig.patch.set_facecolor('white')
-    fig.suptitle('Bayesian Optimization Trajectory by Target Size',
-                 fontsize=15, fontweight='bold', y=0.98)
 
     for ax in axes.flat:
         ax.set_visible(False)
+
+    _target_palette = {
+        10: '#4EBEB2',
+        15: '#2FA093',
+        20: '#1E8376',
+        25: '#17665B',
+        30: '#114A40',
+    }
+    target_colors = {
+        ts: _target_palette.get(ts, '#1E8376')
+        for ts in target_sizes
+    }
+
+    errors_by_target: dict = {ts: [] for ts in target_sizes}
+    for rec in completed_sorted:
+        act = rec.get('actual_results') or {}
+        tgt = rec.get('target') or {}
+        actual = act.get('Size', np.nan)
+        target = tgt.get('size')
+        if target is not None and not np.isnan(actual):
+            key = int(target)
+            if key in errors_by_target:
+                errors_by_target[key].append(abs(actual - target))
 
     for panel_idx, target_size in enumerate(target_sizes):
         row, col = divmod(panel_idx, n_cols)
@@ -2431,10 +3242,10 @@ def plot_bo_trajectory_by_size(
         iterations = np.arange(1, n + 1)
         tol = recs[0]['tolerance']
 
-        ax.axhline(target_size, color=COLORS['primary'], linestyle='--',
-                   linewidth=2.0, alpha=0.8, zorder=1)
         ax.axhspan(target_size - tol, target_size + tol,
-                   alpha=0.12, color=COLORS['primary'], zorder=0)
+                   alpha=0.35, color='#B4B2A9', zorder=0)
+        ax.axhline(target_size, color='#555555', linestyle='-',
+                   linewidth=1.0, alpha=0.9, zorder=2)
 
         pred_mus = np.array([r['pred_mu'] for r in recs])
         pred_stds = np.array([r['pred_std'] for r in recs])
@@ -2451,46 +3262,70 @@ def plot_bo_trajectory_by_size(
                         capsize=4, capthick=1.3, elinewidth=1.3,
                         zorder=4)
 
-        for i, r in enumerate(recs):
-            color = bin_color_map[r['bin']]
-            ax.scatter(iterations[i], r['actual'], s=120, color=color,
-                       edgecolor='black', linewidth=1.0, zorder=5)
-            ax.annotate(r['rec_id'], (iterations[i], r['actual']),
-                        textcoords='offset points', xytext=(0, 10),
-                        fontsize=7, ha='center', color='#555555')
-
         _style_ax(ax, title=f'Target: {target_size} nm',
-                  xlabel='Iteration', ylabel='Particle Size (nm)')
+                  xlabel='Recommendation #', ylabel='Particle Size (nm)',
+                  label_fontsize=15, tick_fontsize=14, title_fontsize=17)
         ax.set_xticks(iterations.astype(int))
+        ax.set_xticklabels([str(int(i)) for i in iterations])
 
-        y_pad = max(max(pred_stds[valid_pred]) * 2 if valid_pred.any() else 3, 3)
-        all_vals = np.concatenate([pred_mus[valid_pred], actuals_arr,
-                                   [target_size - tol, target_size + tol]])
-        ax.set_ylim(np.nanmin(all_vals) - y_pad, np.nanmax(all_vals) + y_pad)
+        ax.set_ylim(2, 42)
+
+        for i, r in enumerate(recs):
+            ax.scatter(iterations[i], r['actual'], s=120, color=DESCRIPTOR_SKILL_GAIN,
+                       edgecolor='black', linewidth=1.0, zorder=5)
+
+    all_size_errors = [e for errs in errors_by_target.values() for e in errs]
+    if n_panels == 5 and n_rows == 2 and n_cols == 3 and all_size_errors:
+        ax_hist = axes[1, 2]
+        ax_hist.set_visible(True)
+        errors = np.array(all_size_errors)
+        bin_width = max(1.0, np.ptp(errors) / 6)
+        bins = np.arange(0, errors.max() + bin_width, bin_width)
+        bin_centers = (bins[:-1] + bins[1:]) / 2
+        bottom = np.zeros(len(bins) - 1)
+        for ts in target_sizes:
+            ts_errors = errors_by_target[ts]
+            if not ts_errors:
+                continue
+            counts, _ = np.histogram(ts_errors, bins=bins)
+            ax_hist.bar(
+                bin_centers, counts, width=bin_width * 0.92, bottom=bottom,
+                color=target_colors[ts], alpha=0.85, edgecolor='white',
+                linewidth=0.8, label=f'{ts} nm', zorder=2,
+            )
+            bottom += counts
+        ax_hist.axvline(np.median(errors), color='#333333',
+                        linestyle='--', linewidth=1.8,
+                        label=f'Median = {np.median(errors):.1f} nm', zorder=3)
+        _style_ax(ax_hist, title='Size Error Across All Recommendations',
+                  xlabel='|Observed − Target| (nm)', ylabel='Count',
+                  label_fontsize=15, tick_fontsize=14, title_fontsize=17)
+        ax_hist.legend(fontsize=_LEGEND_FONT_SIZE, frameon=True,
+                       framealpha=0.95, edgecolor='#CCCCCC', loc='upper right')
 
     legend_elements = [
-        plt.Line2D([0], [0], color=COLORS['primary'], linestyle='--',
-                   linewidth=2, label='Target ± tolerance'),
+        Patch(facecolor='#B4B2A9', alpha=0.35,
+              edgecolor='#B4B2A9', linewidth=0.8,
+              label='Target ± tolerance'),
+        plt.Line2D([0], [0], color='#555555', linestyle='-',
+                   linewidth=1.0, label='Target'),
         plt.Line2D([0], [0], marker='D', color='#555555', markerfacecolor='white',
                    markeredgewidth=1.8, markersize=8, linestyle='None',
                    label='GP predicted ± 2σ'),
-        plt.scatter([], [], s=120, color=COLORS['success'],
-                    edgecolor='black', linewidth=1.0, label='Highly cubic'),
-        plt.scatter([], [], s=120, color=COLORS['tertiary'],
-                    edgecolor='black', linewidth=1.0, label='Poorly cubic'),
+        plt.scatter([], [], s=120, color=DESCRIPTOR_SKILL_GAIN,
+                    edgecolor='black', linewidth=1.0, label='Observed size'),
     ]
 
     fig.legend(handles=legend_elements, loc='lower center',
-               ncol=4, fontsize=_LEGEND_FONT_SIZE, frameon=True,
+               ncol=4, fontsize=_LEGEND_FONT_SIZE + 2, frameon=True,
                framealpha=0.95, edgecolor='#CCCCCC',
-               bbox_to_anchor=(0.5, -0.02))
+               bbox_to_anchor=(0.5, -0.01))
 
-    fig.tight_layout(pad=2.0, rect=[0, 0.05, 1, 0.95])
+    fig.tight_layout(pad=1.2, h_pad=3.0, rect=[0, 0.08, 1, 1.0])
     return fig
 
 
-# RECOMMENDATION REGRET
-# ------------------------------------------------------------------------------
+# Recommendation regret
 
 def plot_recommendation_regret(optimizer, figsize: Tuple[int, int] = (13, 4.5)) -> Optional[plt.Figure]:
     """Simple regret over completed recommendations: |actual - target| per property."""
@@ -2548,8 +3383,7 @@ def plot_recommendation_regret(optimizer, figsize: Tuple[int, int] = (13, 4.5)) 
     return fig
 
 
-# LOO-CV PARITY
-# ------------------------------------------------------------------------------
+# LOO-CV parity
 
 def plot_loo_parity(
     optimizer,
@@ -2635,8 +3469,160 @@ def plot_loo_parity(
     return fig
 
 
-# FEASIBILITY LANDSCAPE (2-D)
-# ------------------------------------------------------------------------------
+def _plot_loo_reliability_panel(
+    ax,
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    color: str,
+    title: str,
+) -> None:
+    """Reliability diagram for LOO predicted probabilities vs binary outcomes."""
+    from diagnostics import _build_classifier_calibration_metrics
+
+    metrics = _build_classifier_calibration_metrics(y_true, y_prob, n_bins=8)
+    bins = metrics['calibration_bins']
+    obs = np.array(bins['observed_frequency'])
+    pred = np.array(bins['predicted_frequency'])
+    counts = np.array(bins['bin_counts'])
+    mask = counts > 0
+
+    _style_ax(ax, title=title,
+              xlabel='Mean LOO predicted probability',
+              ylabel='Observed positive rate')
+    ax.plot([0, 1], [0, 1], color='#444444', lw=1.5, linestyle='--',
+            label='Perfect calibration', zorder=2)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_aspect('equal')
+
+    if mask.sum() > 0:
+        sizes = 45 + 180 * (counts[mask] / counts[mask].max())
+        ax.scatter(pred[mask], obs[mask], s=sizes, color=color, alpha=0.8,
+                   edgecolor='black', linewidth=0.5, label='LOO bins', zorder=4)
+
+    ax.text(
+        0.04, 0.96,
+        f"Brier = {metrics['brier_score']:.3f}\n"
+        f"ECE = {metrics['ece']:.3f}\n"
+        f"MAE = {mean_absolute_error(y_true, y_prob):.3f}",
+        transform=ax.transAxes, va='top', fontsize=10,
+        fontweight='bold', bbox=_ANN_BOX,
+    )
+    _styled_legend(ax, loc='lower right')
+
+
+def plot_acquisition_loo_parity(
+    optimizer,
+    squareness_bin: str = 'highly_cubic',
+    figsize: Tuple[int, int] = (13, 4.5),
+) -> Optional[plt.Figure]:
+    """Three-panel LOO-CV quality figure for the BO acquisition components.
+
+    Panels correspond to the models in ``acquisition()``:
+
+    - **Size** — regression parity (actual vs LOO predicted size)
+    - **Feasibility** — reliability diagram for LOO ``P(HasProduct)×P(PhasePure)``
+    - **Bin** — reliability diagram for LOO ``P(squareness bin)``
+    """
+    if optimizer.base_optimizer is None:
+        print("Base optimizer not initialized.")
+        return None
+    base = optimizer.base_optimizer
+
+    if not base.metrics or 'y_pred' not in base.metrics.get('Size', {}):
+        print("Running LOO-CV validation for Size GP…")
+        optimizer.validate_models()
+    if not base.metrics or 'y_pred' not in base.metrics.get('Size', {}):
+        print("No Size LOO-CV metrics available after validation.")
+        return None
+
+    from diagnostics import get_acquisition_loo_parity
+
+    try:
+        parity = get_acquisition_loo_parity(base, squareness_bin=squareness_bin)
+    except ValueError as exc:
+        print(f"Could not compute acquisition LOO parity: {exc}")
+        return None
+
+    bin_titles = {
+        'highly_cubic': 'Highly cubic',
+        'poorly_cubic': 'Poorly cubic',
+        'multipod': 'Multipod',
+    }
+    bin_label = f"Bin ({bin_titles.get(squareness_bin, squareness_bin)})"
+    specs = [
+        ('Size', 'Size (nm)', COLORS['primary'], 'regression'),
+        ('Feasibility', 'Feasibility', COLORS['secondary'], 'calibration'),
+        ('Bin', bin_label, COLORS['tertiary'], 'calibration'),
+    ]
+
+    fig, axes = plt.subplots(1, 3, figsize=figsize)
+    fig.patch.set_facecolor('white')
+
+    for ax, (key, label, color, kind) in zip(axes, specs):
+        data = parity.get(key)
+        if not data:
+            _style_ax(ax, title=label)
+            ax.text(0.5, 0.5, 'No LOO data available',
+                    ha='center', va='center', transform=ax.transAxes, fontsize=11)
+            continue
+
+        if kind == 'calibration':
+            _plot_loo_reliability_panel(
+                ax, data['y_actual'], data['y_pred'], color, label,
+            )
+            continue
+
+        y_actual = data['y_actual']
+        y_loo = data['y_pred']
+        y_std = data.get('y_std')
+
+        _style_ax(ax, title=label,
+                  xlabel=f'Actual {label}',
+                  ylabel=f'LOO Predicted {label}')
+
+        all_vals = np.concatenate([y_actual, y_loo])
+        margin = 0.08 * (all_vals.max() - all_vals.min())
+        lims = [all_vals.min() - margin, all_vals.max() + margin]
+
+        ax.plot(lims, lims, color='#444444', lw=1.5, linestyle='--',
+                label='Perfect prediction', zorder=2)
+        ax.set_xlim(lims)
+        ax.set_ylim(lims)
+        ax.set_aspect('equal')
+
+        if y_std is not None:
+            ax.errorbar(y_actual, 
+                        y_loo, yerr=y_std,
+                        fmt='o', 
+                        color=color, 
+                        markersize=7, 
+                        alpha=0.75,
+                        capsize=3, 
+                        capthick=1.2, 
+                        elinewidth=1.0,
+                        markeredgecolor='white', 
+                        markeredgewidth=0.8,
+                        label='LOO prediction ± GP σ', zorder=4
+                        )
+
+        ax.text(0.04, 
+                0.96,
+                f"LOO R² = {data['r2']:.2f}\nMAE = {data['mae']:.3f}",
+                transform=ax.transAxes, 
+                va='top', 
+                fontsize=10,
+                fontweight='bold', 
+                bbox=_ANN_BOX
+                )
+        _styled_legend(ax, loc='lower right')
+
+    _suptitle(fig, 'LOO-CV Model Quality  ·  Size, Feasibility, and Bin Acquisition Surrogates')
+    fig.tight_layout(pad=1.5)
+    return fig
+
+
+# Feasibility landscape (2-D)
 
 def plot_feasibility_landscape(
     optimizer,
@@ -2749,8 +3735,7 @@ def plot_feasibility_landscape(
     return fig
 
 
-# SQUARENESS BINNING
-# ------------------------------------------------------------------------------
+# Squareness binning
 
 def plot_squareness_binning(
     optimizer,
@@ -2833,8 +3818,7 @@ def plot_squareness_binning(
     return fig
 
 
-# ACQUISITION DECOMPOSITION
-# ------------------------------------------------------------------------------
+# Acquisition decomposition
 
 def plot_acquisition_decomposition(
     optimizer,
@@ -2936,8 +3920,7 @@ def plot_acquisition_decomposition(
     return fig
 
 
-# OPTIMIZATION PROGRESS (CONVERGENCE EVIDENCE)
-# ------------------------------------------------------------------------------
+# Optimization progress (convergence evidence)
 
 def plot_optimization_progress(
     optimizer,
@@ -3141,8 +4124,7 @@ def plot_optimization_progress(
     return fig
 
 
-# GP HYPERPARAMETER TRACKING & LENGTHSCALE EVOLUTION
-# ------------------------------------------------------------------------------
+# GP hyperparameter tracking & lengthscale evolution
 
 def log_gp_hyperparameters(optimizer, iteration: int, log_path: Path) -> dict:
     """Record fitted GP kernel hyperparameters at the current BO iteration.

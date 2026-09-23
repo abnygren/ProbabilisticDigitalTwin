@@ -1,11 +1,7 @@
-"""Self-validating Bayesian optimization for Cu3MS4 nanoparticle synthesis.
+"""Self-validating wrapper around Cu3VS4Optimizer.
 
-Extends the base ``Cu3VS4Optimizer`` with:
-
-    - experiment tracking with source attribution,
-    - frozen per-recommendation prediction snapshots,
-    - residual-GP bias correction and per-property uncertainty calibration,
-    - transfer learning across Cu and Group-5 metal precursors.
+Adds experiment/recommendation tracking, residual-GP bias correction,
+uncertainty calibration, and optional transfer learning across precursors.
 """
 
 import numpy as np
@@ -35,44 +31,26 @@ from optimizer import (
     latin_hypercube_sample,
     _select_diverse_candidates,
 )
-from diagnostics import detect_extrapolation, compare_feature_modes
+from diagnostics import (
+    detect_extrapolation, compare_feature_modes, compute_transfer_skill_table,
+    leave_one_precursor_out, few_shot_transfer_curve,
+)
 
 
 class ErrorLearner:
-    """Post-hoc error / calibration learner for the base GP regressors.
+    """Bias correction and uncertainty calibration for the base GP regressors.
 
-    Fit on the *completed recommendations only* -- the points where the
-    optimizer made a prediction (frozen snapshot in ``recommendations.json``)
-    and we later observed the actual outcome. For each property in
-    ``{Size, CV, Squareness}`` it learns two things:
+    Fit only on completed recommendations (frozen prediction vs measured
+    outcome). For Size, CV, and Squareness it learns:
 
-    1. A **residual GP** mapping ``X_scaled -> (actual - predicted)`` using
-       the base optimizer's feature scaler. At prediction time its mean is
-       *added* to the base GP mean, which captures any spatially varying
-       systematic bias the base model couldn't absorb (e.g. a direction in
-       feature space where the model consistently under- or over-predicts).
+    - A residual GP on (actual - predicted) in scaled feature space. At
+      prediction time its mean is added to the base GP mean.
+    - A scalar calibration factor so RMS z-scores of completed recs are ~1.
+      Applied as a multiplier on the base GP sigma, floored at 0.5.
 
-       Because it is itself a GP fit on residuals it is not an oracle: when
-       extrapolating away from completed recommendations its bias estimate
-       falls back to the prior (~ ``mean_bias`` for the property), which is
-       the correct conservative behaviour. The residual GP's own posterior
-       variance is intentionally not folded into the predictive sigma -- the
-       calibration factor below does that.
-
-    2. A scalar **uncertainty calibration factor** per property, fit so that
-       the empirical RMS z-score of completed recommendations is ~1. At
-       prediction time the base GP sigma is multiplied by this factor.
-       ``factor == 1``  base GP is already well calibrated.
-       ``factor > 1``   base GP was overconfident.
-       ``factor < 1``   base GP was underconfident.
-       The factor is floored at 0.5 so one fluky run cannot collapse the
-       intervals to near zero.
-
-    Both corrections only switch on after ``MIN_COMPLETED_FOR_ERROR_MODEL``
-    (default 10) recommendations have been completed. Until then,
-    ``SelfValidatingOptimizer._warm_start_calibration_from_loo`` can still
-    seed the calibration factor from LOO-CV coverage of the base training
-    set.
+    Corrections turn on after MIN_COMPLETED_FOR_ERROR_MODEL (default 10)
+    completed recommendations. Until then, LOO-CV coverage can warm-start
+    the calibration factor.
     """
 
     def __init__(self, min_samples: int = MIN_COMPLETED_FOR_ERROR_MODEL):
@@ -305,15 +283,14 @@ class SelfValidatingOptimizer:
 
         self.base_optimizer = base_optimizer
         self._feature_mode_cache = None
+        self._transfer_skill_cache = None
         self._loo_calibration_done = False
 
         if len(self.exp_store) > 0:
             self._build_models()
             self._update_error_learner()
 
-        print(f"\n{'='*60}")
-        print("SELF-VALIDATING OPTIMIZER INITIALIZED")
-        print(f"{'='*60}")
+        print("\nSelf-validating optimizer initialized")
         print(f"Experiments: {self.exp_store}")
         print(f"Recommendations: {self.rec_store}")
         print(f"Otsu threshold (frozen): {self._frozen_otsu_threshold:.3f}")
@@ -361,7 +338,7 @@ class SelfValidatingOptimizer:
             val = otsu_threshold(cubic_sq)
             print(f"[Otsu] Computed threshold from {len(cubic_sq)} cubic samples: {val:.3f}")
 
-        # Persist so we never recompute against future data.
+        # Persist so later experiments do not change the threshold.
         from experiment_store import _atomic_json_save
         _atomic_json_save(threshold_path, {'otsu_threshold': round(val, 4)})
         print(f"[Otsu] Saved to {threshold_path}")
@@ -369,6 +346,7 @@ class SelfValidatingOptimizer:
 
     def _build_models(self):
         self._feature_mode_cache = None
+        self._transfer_skill_cache = None
         df_all = self.exp_store.get_all()
         df_success = self.exp_store.get_training_data()
 
@@ -391,7 +369,7 @@ class SelfValidatingOptimizer:
                 df=df_all, feature_mode=self.feature_mode, validate=False,
                 frozen_otsu_threshold=self._frozen_otsu_threshold,
             )
-            print(f"  ✓ Base optimizer created ({self.feature_mode} mode)")
+            print(f"  Base optimizer created ({self.feature_mode} mode)")
             print(f"  Features: {self.base_optimizer.features}")
             if self.feature_mode == 'transfer':
                 print(f"  Transfer mode: vary_cu={TRANSFER_MODE.get('vary_cu_precursor', False)}, "
@@ -399,13 +377,13 @@ class SelfValidatingOptimizer:
                 print(f"  Target precursors: Cu={TRANSFER_MODE.get('target_cu_precursor', '—')}, "
                       f"Metal={TRANSFER_MODE.get('target_metal_precursor', '—')}")
                 if TRANSFER_MODE.get('vary_cu_precursor') and df_all['Cu_precursor'].nunique() <= 1:
-                    print("  ⚠ vary_cu_precursor is True but all experiments use the same Cu precursor. "
+                    print("  Warning: vary_cu_precursor is True but all experiments use the same Cu precursor. "
                           "Precursor features will have zero variance until mixed-precursor data is added.")
                 if TRANSFER_MODE.get('vary_metal_precursor') and df_all['Metal_precursor'].nunique() <= 1:
-                    print("  ⚠ vary_metal_precursor is True but all experiments use the same Metal precursor. "
+                    print("  Warning: vary_metal_precursor is True but all experiments use the same Metal precursor. "
                           "Precursor features will have zero variance until mixed-precursor data is added.")
         except Exception as e:
-            print(f"  ✗ Failed to create base optimizer: {e}")
+            print(f"  Failed to create base optimizer: {e}")
             self.base_optimizer = None
             raise
 
@@ -451,8 +429,8 @@ class SelfValidatingOptimizer:
 
         Uses ``cal_68`` (fraction of LOO predictions within 1 sigma): if the
         model captures only 53% instead of the expected 68%, the intervals are
-        too tight by a factor of ``0.68 / 0.53 ~ 1.28`` and we inflate sigma
-        accordingly.
+        too tight by a factor of ``0.68 / 0.53 ~ 1.28``, and sigma is scaled
+        by that factor.
         """
         if self.base_optimizer is None:
             return
@@ -620,9 +598,7 @@ class SelfValidatingOptimizer:
 
         active_precursors = self._get_active_precursors()
 
-        print(f"\n{'='*60}")
-        print(f"GENERATING RECOMMENDATIONS")
-        print(f"{'='*60}")
+        print("\nGenerating recommendations")
         print(f"Target: {target_size} ± {size_tol} nm")
         print(f"Squareness bin: {squareness_bin}")
         print(f"Precursors: Cu={active_precursors['Cu_precursor']}, "
@@ -636,21 +612,46 @@ class SelfValidatingOptimizer:
         preds = self.predict(X, apply_correction=True)
         acq = base.acquisition(X, target_size, size_tol, preds=preds, squareness_bin=squareness_bin)
 
-        # Exclusion set so we never re-recommend a previously suggested point.
+        # Previously recommended points are excluded.
         X_history_scaled = self._build_history_exclusion_set()
 
+        # Request extra candidates: feature-space diversity doesn't guarantee
+        # uniqueness in raw space after back-transformation + rounding.
+        n_request = max(n_return * 3, n_return + 6)
         X_feas, acq_feas, selected, mask = _select_diverse_candidates(
             X, acq['total'], acq['p_size'], acq['p_feasible'],
-            base.scaler, p_size_min, p_feas_min, n_return, min_distance,
+            base.scaler, p_size_min, p_feas_min, n_request, min_distance,
             X_history_scaled=X_history_scaled,
         )
 
+        # Build set of historical raw conditions for raw-space deduplication.
+        # Includes all past recommendations AND all training experiments.
+        history_raw_set = set()
+        all_recs = self.rec_store.get_all()
+        for rec in all_recs:
+            if rec['status'] in ('completed', 'pending'):
+                cond = rec['conditions']
+                key = tuple(cond.get(k) for k in RAW_FACTORS)
+                history_raw_set.add(key)
+        exp_df = self.exp_store.get_all()
+        if not exp_df.empty:
+            for _, row in exp_df.iterrows():
+                key = tuple(row.get(k) for k in RAW_FACTORS)
+                history_raw_set.add(key)
+
         rows, rec_ids, X_selected_list = [], [], []
-        for rank, sel_idx in enumerate(selected, 1):
+        for sel_idx in selected:
             feat_dict = {feat: X_feas[sel_idx, i] for i, feat in enumerate(base.features)}
             raw_params = base._feature_dict_to_raw(feat_dict)
             raw_params = round_to_practical(raw_params)
 
+            # Skip if rounded raw conditions duplicate a past or current-batch rec.
+            raw_key = tuple(raw_params.get(k) for k in RAW_FACTORS)
+            if raw_key in history_raw_set:
+                continue
+            history_raw_set.add(raw_key)
+
+            rank = len(rows) + 1
             predictions = {
                 'size_mu': float(acq['size_mu'][mask][sel_idx]),
                 'size_std': float(acq['size_std'][mask][sel_idx]),
@@ -688,6 +689,9 @@ class SelfValidatingOptimizer:
                 'P_Bin': round(predictions['p_bin'], 3),
             })
 
+            if len(rows) >= n_return:
+                break
+
         result_df = pd.DataFrame(rows)
         if warn_extrapolation and X_selected_list:
             X_sel = np.array(X_selected_list)
@@ -697,8 +701,8 @@ class SelfValidatingOptimizer:
             for warning in extrap_check['warnings']:
                 print(warning)
 
-        print(f"\n✓ Generated {len(result_df)} recommendations (IDs: {rec_ids})")
-        print(f"  These are now PENDING in the recommendation store.")
+        print(f"\nGenerated {len(result_df)} recommendations (IDs: {rec_ids})")
+        print(f"  These are now pending in the recommendation store.")
         print(f"  After running experiments, use complete_recommendation() to log results.")
         return result_df
 
@@ -716,9 +720,7 @@ class SelfValidatingOptimizer:
         if Squareness is None:
             raise ValueError("Must provide Squareness value")
 
-        print(f"\n{'='*60}")
-        print(f"COMPLETING RECOMMENDATION: {rec_id}")
-        print(f"{'='*60}")
+        print(f"\nCompleting recommendation: {rec_id}")
 
         rec = self.rec_store.get_by_id(rec_id)
         if rec is None:
@@ -882,9 +884,7 @@ class SelfValidatingOptimizer:
         }
 
         if verbose:
-            print(f"\n{'='*60}")
-            print("PREDICTION RESULTS")
-            print(f"{'='*60}")
+            print("\nPrediction results")
             print(f"\nConditions:")
             print(f"  Temp: {Temp}°C, Time: {Time} min, VOacac: {VOacac} mmol")
             print(f"  DDT: {DDT} mL, OAm: {OAm} mL")
@@ -925,6 +925,88 @@ class SelfValidatingOptimizer:
         self._feature_mode_cache = (cache_key, result_df)
         return result_df
 
+    def compute_transfer_skill_table(self, modes=('synthesis', 'transfer'),
+                                     classifier_targets=None, verbose=True,
+                                     force_recompute=False):
+        """Synthesis-vs-descriptor predictive-skill table (see diagnostics).
+
+        Cached like :meth:`compare_feature_modes` because it refits GP models
+        for every mode (~5-6 min for the classifier cross-validation).
+        """
+        cache_key = (tuple(modes),
+                     tuple(classifier_targets) if classifier_targets else None)
+        if (not force_recompute and self._transfer_skill_cache is not None
+                and self._transfer_skill_cache[0] == cache_key):
+            if verbose:
+                print("[INFO] Returning cached transfer-skill table "
+                      "(use force_recompute=True to retrain)")
+            return self._transfer_skill_cache[1]
+
+        df_all = self.exp_store.get_all()
+        if 'IsCubic' not in df_all.columns:
+            df_all['IsCubic'] = (
+                df_all.get('Polymorph', pd.Series()).fillna('').astype(str).str.lower().str.strip() == 'cubic'
+            ).astype(int)
+        if 'Cu_V_ratio' not in df_all.columns:
+            df_all = add_chemical_features(df_all)
+
+        result_df = compute_transfer_skill_table(
+            df_all, modes=modes, classifier_targets=classifier_targets,
+            verbose=verbose,
+        )
+        self._transfer_skill_cache = (cache_key, result_df)
+        return result_df
+
+    def leave_one_precursor_out(self, precursor_col=None, prop='Size',
+                                verbose=True):
+        """Hold out each precursor group and predict it from the others.
+
+        See :func:`diagnostics.leave_one_precursor_out`. Infers the transfer
+        axis from ``TRANSFER_MODE`` when ``precursor_col`` is omitted.
+        """
+        if precursor_col is None:
+            if TRANSFER_MODE.get('vary_metal_precursor'):
+                precursor_col = 'Metal_precursor'
+            else:
+                precursor_col = 'Cu_precursor'
+        df_all = self.exp_store.get_all()
+        if 'IsCubic' not in df_all.columns:
+            df_all['IsCubic'] = (
+                df_all.get('Polymorph', pd.Series()).fillna('').astype(str)
+                .str.lower().str.strip() == 'cubic'
+            ).astype(int)
+        if 'Cu_V_ratio' not in df_all.columns:
+            df_all = add_chemical_features(df_all)
+        return leave_one_precursor_out(
+            df_all, precursor_col=precursor_col, prop=prop, verbose=verbose,
+        )
+
+    def few_shot_transfer_curve(self, source, target, precursor_col=None,
+                                prop='Size', n_target_grid=(0, 2, 4, 8),
+                                n_repeats=5, seed=0, verbose=True):
+        """Source + k target points vs k target points only.
+
+        See :func:`diagnostics.few_shot_transfer_curve`.
+        """
+        if precursor_col is None:
+            if TRANSFER_MODE.get('vary_metal_precursor'):
+                precursor_col = 'Metal_precursor'
+            else:
+                precursor_col = 'Cu_precursor'
+        df_all = self.exp_store.get_all()
+        if 'IsCubic' not in df_all.columns:
+            df_all['IsCubic'] = (
+                df_all.get('Polymorph', pd.Series()).fillna('').astype(str)
+                .str.lower().str.strip() == 'cubic'
+            ).astype(int)
+        if 'Cu_V_ratio' not in df_all.columns:
+            df_all = add_chemical_features(df_all)
+        return few_shot_transfer_curve(
+            df_all, precursor_col=precursor_col, source=source, target=target,
+            prop=prop, n_target_grid=n_target_grid, n_repeats=n_repeats,
+            seed=seed, verbose=verbose,
+        )
+
     def get_collinearity_diagnostics(self, verbose=True):
         if self.base_optimizer is None:
             raise RuntimeError("Base optimizer not initialized")
@@ -942,20 +1024,18 @@ class SelfValidatingOptimizer:
         diagnostics['error_learner'] = self.error_learner.get_diagnostics()
         diagnostics['experiment_counts'] = self.exp_store.count()
         diagnostics['recommendation_counts'] = self.rec_store.count()
-        print(f"\n--- Self-Validation Status ---")
+        print(f"\nSelf-validation status")
         el = diagnostics['error_learner']
         if el['is_fitted']:
-            print(f"✓ Error learner ACTIVE (trained on {el['n_training_samples']} samples)")
+            print(f"Error learner active (trained on {el['n_training_samples']} samples)")
             print(f"  Mean bias corrections: {el['mean_bias']}")
             print(f"  Calibration factors: {el['calibration_factors']}")
         else:
-            print(f"⏳ Error learner inactive (need {el['min_samples_required']} completed recommendations)")
+            print(f"Error learner inactive (need {el['min_samples_required']} completed recommendations)")
         return diagnostics
 
     def print_status(self):
-        print(f"\n{'='*60}")
-        print("SYSTEM STATUS")
-        print(f"{'='*60}")
+        print("\nSystem status")
         exp_counts = self.exp_store.count()
         rec_counts = self.rec_store.count()
         print(f"\nExperiments:")

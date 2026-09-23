@@ -1,8 +1,4 @@
-"""Base Cu3VS4 Bayesian optimizer.
-
-Contains the ``Cu3VS4Optimizer`` class together with the GP factories and the
-acquisition / sampling / candidate-selection helpers that it uses.
-"""
+"""Base Cu3VS4 Bayesian optimizer: GPs, acquisition, and candidate selection."""
 
 import numpy as np
 import pandas as pd
@@ -21,6 +17,7 @@ from config import (
     SQUARENESS_BINS, DEFAULT_SQUARENESS_BIN, OTSU_N_THRESHOLDS,
     SYNTHESIS_FEATURES, TRANSFER_MODE, TRANSFER_FEATURES,
     PRECURSOR_DESCRIPTOR_FEATURES,
+    TRANSFER_DESCRIPTOR_AXES, MIN_PRECURSORS_FOR_INDEPENDENT_DESCRIPTORS,
 )
 from features import (
     add_chemical_features,
@@ -256,10 +253,6 @@ class Cu3VS4Optimizer:
         frozen_otsu_threshold: Optional[float] = None,
     ):
         self.feature_mode = feature_mode
-        self.use_ard = (
-            feature_mode == 'transfer'
-            and TRANSFER_MODE.get('use_ard_kernel', True)
-        )
 
         self.df_all = df.copy()
         # Backwards compatibility: allow callers that still pass a 'GSD' column
@@ -269,6 +262,23 @@ class Cu3VS4Optimizer:
         if feature_mode in ['chemical', 'hybrid', 'synthesis', 'transfer']:
             if 'Cu_V_ratio' not in self.df_all.columns:
                 self.df_all = add_chemical_features(self.df_all)
+
+        # ARD (per-feature lengthscales) only pays off in transfer mode when the
+        # pooled data spans enough distinct precursors to resolve the extra
+        # descriptor dimensions. With <=2 precursor groups the precursor
+        # descriptors collapse to a single collinear binary contrast, so ARD
+        # just adds ill-identified lengthscales and destabilises the fit (it
+        # can drop the pooled Size R² from ~0.37 to ~0.01). Fall back to a
+        # single shared lengthscale until >=3 precursor groups are pooled.
+        use_ard_cfg = (
+            feature_mode == 'transfer'
+            and TRANSFER_MODE.get('use_ard_kernel', True)
+        )
+        n_groups = self._count_transfer_groups(self.df_all)
+        self.use_ard = use_ard_cfg and n_groups >= 3
+        if use_ard_cfg and not self.use_ard:
+            print(f"  [ARD] Disabled: only {n_groups} distinct precursor group(s) "
+                  f"pooled (need >=3). Using a shared lengthscale for stability.")
 
         self.df_success = self.df_all[self.df_all["HasProduct"] == 1].copy()
 
@@ -281,7 +291,9 @@ class Cu3VS4Optimizer:
         elif feature_mode == 'synthesis':
             self.features = list(SYNTHESIS_FEATURES)
         elif feature_mode == 'transfer':
-            self.features = list(TRANSFER_FEATURES)
+            self.features = self._collapse_transfer_descriptors(
+                list(TRANSFER_FEATURES), self.df_all
+            )
         else:
             raise ValueError(
                 f"Unknown feature_mode: {feature_mode}. "
@@ -308,6 +320,50 @@ class Cu3VS4Optimizer:
         if validate:
             self._validate()
 
+    @staticmethod
+    def _collapse_transfer_descriptors(features: List[str], df: pd.DataFrame) -> List[str]:
+        """Drop collinear precursor descriptors that the pooled data can't identify.
+
+        For each transfer axis carrying two descriptors, keep both only if
+        >= ``MIN_PRECURSORS_FOR_INDEPENDENT_DESCRIPTORS`` distinct precursors are
+        pooled along that axis; otherwise the pair is collinear (a single binary
+        contrast) so only the axis' ``primary`` descriptor is retained.
+        """
+        features = list(features)
+        for axis, spec in TRANSFER_DESCRIPTOR_AXES.items():
+            present = [d for d in spec['descriptors'] if d in features]
+            if len(present) < 2:
+                continue
+            col = spec['precursor_col']
+            n = int(df[col].nunique()) if col in df.columns else 0
+            if n >= MIN_PRECURSORS_FOR_INDEPENDENT_DESCRIPTORS:
+                continue
+            keep = spec['primary'] if spec['primary'] in present else present[0]
+            dropped = [d for d in present if d != keep]
+            for d in dropped:
+                features.remove(d)
+            print(f"  [descriptors] Collapsed {axis} axis to '{keep}': only {n} "
+                  f"distinct {col}(s) pooled (need >="
+                  f"{MIN_PRECURSORS_FOR_INDEPENDENT_DESCRIPTORS}); "
+                  f"{dropped} collinear and dropped.")
+        return features
+
+    @staticmethod
+    def _count_transfer_groups(df: pd.DataFrame) -> int:
+        """Number of distinct precursor groups along the active transfer axes.
+
+        Counts unique combinations of the precursor columns that ``TRANSFER_MODE``
+        is varying (Cu and/or metal). Used to decide whether ARD is justified.
+        """
+        cols = []
+        if TRANSFER_MODE.get('vary_cu_precursor') and 'Cu_precursor' in df.columns:
+            cols.append('Cu_precursor')
+        if TRANSFER_MODE.get('vary_metal_precursor') and 'Metal_precursor' in df.columns:
+            cols.append('Metal_precursor')
+        if not cols:
+            return 0
+        return int(df[cols].drop_duplicates().shape[0])
+
     def _gp_factory(self):
         return make_gp_regressor(len(self.features), use_ard=self.use_ard)
 
@@ -328,7 +384,7 @@ class Cu3VS4Optimizer:
                 print(f"  Cubic-only regression data: n={len(self.df_cubic)} "
                       f"(of {len(self.df_success)} successful)")
             else:
-                print(f"  ⚠ Only {len(df_cubic)} cubic samples; "
+                print(f"  Warning: only {len(df_cubic)} cubic samples; "
                       f"falling back to all successful (n={len(self.df_success)})")
                 self.df_cubic = self.df_success
                 self.X_cubic = self.X_success
@@ -381,24 +437,33 @@ class Cu3VS4Optimizer:
             self.metrics[name] = cv
             print(f"  {name}: R²={cv['r2']:.3f}, RMSE={cv['rmse']:.3f}")
 
-        if (self.feature_mode == 'transfer'
-                and 'Cu_precursor' in self.df_cubic.columns
-                and self.df_cubic['Cu_precursor'].nunique() > 1):
-            self._validate_per_precursor()
+        if self.feature_mode == 'transfer':
+            for group_col in ('Cu_precursor', 'Metal_precursor'):
+                if (group_col in self.df_cubic.columns
+                        and self.df_cubic[group_col].nunique() > 1):
+                    self._validate_per_precursor(group_col)
 
-    def _validate_per_precursor(self):
-        """Print LOO-CV R² broken out by Cu precursor."""
+    def _validate_per_precursor(self, group_col: str = 'Cu_precursor'):
+        """Print LOO-CV R² broken out by precursor along one transfer axis.
+
+        ``group_col`` is either ``'Cu_precursor'`` or ``'Metal_precursor'``.
+        A per-group R² can be negative (worse than predicting that group's
+        mean) even when the pooled R² is positive; this is exactly what
+        surfaces when a small target set (e.g. TaCl5) is carried by a much
+        larger source set (e.g. VO(acac)2).
+        """
         from sklearn.metrics import r2_score, mean_squared_error
-        print("\n  Per-precursor LOO breakdown:")
-        cu_labels = self.df_cubic['Cu_precursor'].values
+        axis = 'Cu' if group_col == 'Cu_precursor' else 'metal'
+        print(f"\n  Per-precursor LOO breakdown ({axis}):")
+        group_labels = self.df_cubic[group_col].values
         for name in ["Size", "CV", "Squareness"]:
             cv = self.metrics.get(name)
             if cv is None or 'y_pred' not in cv:
                 continue
             y_true = self.df_cubic[name].values
             y_pred = cv['y_pred']
-            for prec in sorted(self.df_cubic['Cu_precursor'].unique()):
-                mask = cu_labels == prec
+            for prec in sorted(self.df_cubic[group_col].dropna().unique()):
+                mask = group_labels == prec
                 n_prec = mask.sum()
                 if n_prec < 3:
                     print(f"    {name}/{prec}: n={n_prec} (too few for R²)")
@@ -628,36 +693,104 @@ class Cu3VS4Optimizer:
                 pass
         return pd.DataFrame(results)
 
-    def get_feature_importance(self) -> pd.DataFrame:
-        """Gradient-based feature importance.
+    def _gradient_sensitivity(
+        self,
+        X_scaled: np.ndarray,
+        predict_fn,
+        eps: float = 0.05,
+    ) -> List[float]:
+        """Mean |∂f/∂x_j| via central differences in scaled feature space."""
+        raw_sens = []
+        for j in range(len(self.features)):
+            X_plus = X_scaled.copy()
+            X_minus = X_scaled.copy()
+            X_plus[:, j] += eps
+            X_minus[:, j] -= eps
+            grad = np.abs(predict_fn(X_plus) - predict_fn(X_minus)) / (2 * eps)
+            raw_sens.append(float(np.mean(grad)))
+        return raw_sens
 
-        For every feature and training point we estimate ``|df/dx_j|`` with
-        central finite differences in the scaled space; the mean absolute
-        gradient is a data-distribution-aware importance that works for both
-        isotropic and ARD kernels.
+    @staticmethod
+    def _importance_rows(model_name: str, features: List[str], raw_sens: List[float]) -> List[Dict[str, Any]]:
+        total = sum(raw_sens)
+        n = len(features)
+        return [
+            {
+                'Model': model_name,
+                'Feature': feat,
+                'Sensitivity': s,
+                'Importance': s / total if total > 0 else 1.0 / n,
+            }
+            for feat, s in zip(features, raw_sens)
+        ]
+
+    def get_feature_importance(self) -> pd.DataFrame:
+        """Gradient-based feature importance for the diagnostic regression GPs.
+
+        Mean ``|df/dx_j|`` from central finite differences in scaled space.
+        Works for both isotropic and ARD kernels.
         """
-        eps = 0.05
         results = []
         gp_models = [("Size", self.gp_size), ("CV", self.gp_cv),
                      ("Squareness", self.gp_sq)]
 
         for name, gp in gp_models:
-            raw_sens = []
-            for j in range(len(self.features)):
-                X_plus = self.X_cubic_scaled.copy()
-                X_minus = self.X_cubic_scaled.copy()
-                X_plus[:, j] += eps
-                X_minus[:, j] -= eps
-                grad = np.abs(gp.predict(X_plus) - gp.predict(X_minus)) / (2 * eps)
-                raw_sens.append(float(np.mean(grad)))
+            raw_sens = self._gradient_sensitivity(
+                self.X_cubic_scaled, lambda X, _gp=gp: _gp.predict(X)
+            )
+            results.extend(self._importance_rows(name, self.features, raw_sens))
 
-            total = sum(raw_sens)
-            for feat, s in zip(self.features, raw_sens):
-                results.append({
-                    'Model': name, 'Feature': feat,
-                    'Sensitivity': s,
-                    'Importance': s / total if total > 0 else 1.0 / len(self.features),
-                })
+        return pd.DataFrame(results)
+
+    def get_acquisition_feature_importance(
+        self,
+        squareness_bin: str = DEFAULT_SQUARENESS_BIN,
+        X_scaled: Optional[np.ndarray] = None,
+    ) -> pd.DataFrame:
+        """Gradient-based feature importance for the BO acquisition components.
+
+        Panels correspond to the three factors multiplied in ``acquisition()``:
+
+        - **Size** — size GP posterior mean (``gp_size``)
+        - **Feasibility** — ``P(HasProduct) * P(PhasePure)``
+        - **Bin** — ``P(squareness bin)`` from the squareness GP + IsCubic classifier
+
+        Sensitivities are evaluated over all experiments (``X_all_scaled``) by
+        default so classifier-trained components see their natural support.
+        """
+        if squareness_bin not in SQUARENESS_BINS:
+            raise ValueError(
+                f"Unknown squareness_bin '{squareness_bin}'. "
+                f"Choose from {SQUARENESS_BINS}"
+            )
+        if X_scaled is None:
+            X_scaled = self.X_all_scaled
+
+        def _size_mu(X):
+            return self.gp_size.predict(X)
+
+        def _feasibility(X):
+            n = len(X)
+            p_product = (np.ones(n) if self.clf_product is None
+                         else self.clf_product.predict_proba(X)[:, 1])
+            p_pure = (np.ones(n) if self.clf_pure is None
+                      else self.clf_pure.predict_proba(X)[:, 1])
+            return p_product * p_pure
+
+        def _bin_prob(X):
+            sq_mu, sq_std = self.gp_sq.predict(X, return_std=True)
+            n = len(X)
+            p_cubic = (np.ones(n) if self.clf_cubic is None
+                       else self.clf_cubic.predict_proba(X)[:, 1])
+            return compute_bin_probability(
+                sq_mu, sq_std, p_cubic, self.sq_threshold, squareness_bin,
+            )
+
+        results = []
+        for name, fn in [("Size", _size_mu), ("Feasibility", _feasibility),
+                         ("Bin", _bin_prob)]:
+            raw_sens = self._gradient_sensitivity(X_scaled, fn)
+            results.extend(self._importance_rows(name, self.features, raw_sens))
 
         return pd.DataFrame(results)
 
@@ -669,9 +802,7 @@ class Cu3VS4Optimizer:
 
     def full_diagnostics(self) -> Dict[str, Any]:
         """Run all diagnostic checks and return a single report dict."""
-        print(f"\n{'='*70}")
-        print("MODEL DIAGNOSTICS")
-        print(f"{'='*70}")
+        print("\nModel diagnostics")
         print(f"\nFeature mode: {self.feature_mode}")
         print(f"Features ({len(self.features)}): {self.features}")
         print(f"Training samples: {len(self.df_all)} total, "
@@ -693,7 +824,7 @@ class Cu3VS4Optimizer:
             'samples_per_feature': ratio,
         }
 
-        print(f"\n--- LOO-CV Regression Metrics ---")
+        print(f"\nLOO-CV regression metrics")
         if self.metrics:
             diagnostics['loo_cv'] = self.metrics
             for prop, m in self.metrics.items():
@@ -703,7 +834,7 @@ class Cu3VS4Optimizer:
         else:
             print("No LOO-CV metrics available. Run with validate=True.")
 
-        print(f"\n--- Collinearity Diagnostics ---")
+        print(f"\nCollinearity diagnostics")
         diagnostics['collinearity'] = self.get_collinearity_diagnostics(verbose=False)
         vif_df = diagnostics['collinearity']['vif']
         high_vif = vif_df[vif_df['VIF'] >= 10]
@@ -713,11 +844,10 @@ class Cu3VS4Optimizer:
             print("No severe collinearity detected")
         print(vif_df.to_string(index=False))
 
-        print(f"\n--- Classifier Calibration ---")
+        print(f"\nClassifier calibration")
         diagnostics['classifier_calibration'] = self.get_classifier_calibration(verbose=False)
         for name, cal in diagnostics['classifier_calibration'].items():
             print(f"{name}: Brier={cal['brier_score']:.4f}, ECE={cal['ece']:.4f}")
             print(f"  {cal['interpretation']}")
 
-        print(f"\n{'='*70}")
         return diagnostics

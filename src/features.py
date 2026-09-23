@@ -1,14 +1,9 @@
 """Feature engineering for the Cu3MS4 BO workflow.
 
-Transforms raw synthesis parameters (Temp, Time, VOacac, DDT, OAm) into the
-chemically meaningful descriptors used by the GP models (ratios, concentrations,
-log-time, optional precursor descriptors).
-
-The legacy column name ``VOacac`` refers to the Group-5 metal precursor mmol
-regardless of which metal is actually used (V, Nb, Ta), kept for backward
-compatibility with the original Cu3VS4 CSV exports.
-
-Also provides the VIF calculation used by the collinearity diagnostics.
+Converts raw lab parameters (Temp, Time, VOacac, DDT, OAm) into chemical
+features (ratios, concentration, log-time, optional precursor descriptors).
+The column name VOacac is the Group-5 metal precursor mmol, kept for
+compatibility with the original Cu3VS4 CSVs.
 """
 
 import numpy as np
@@ -73,7 +68,7 @@ def raw_to_chemical_features(
     ----------
     VOacac : array-like
         Group-5 metal precursor amount in mmol (legacy column name; applies to
-        VO(acac)2, NbCl5, and TaCl5 alike).
+        VO(acac)2 and TaCl5 alike).
     cu_precursor : str, optional
         Cu precursor name for per-sample descriptor lookup.
     metal_precursor : str, optional
@@ -124,9 +119,9 @@ def raw_to_chemical_features(
             ip = chem_const.get_metal_ionic_potential(metal_prec)
             result['Metal_ionic_potential'] = np.full(n_samples, ip)
 
-        if ENHANCED_FEATURE_CONFIG.get('Metal_hsab_mismatch', False):
-            mm = chem_const.get_metal_hsab_mismatch(metal_prec)
-            result['Metal_hsab_mismatch'] = np.full(n_samples, mm)
+        if ENHANCED_FEATURE_CONFIG.get('Metal_oxophilicity', False):
+            ox = chem_const.get_metal_oxophilicity(metal_prec)
+            result['Metal_oxophilicity'] = np.full(n_samples, ox)
 
         if ENHANCED_FEATURE_CONFIG.get('S_BDE', False):
             bde = chem_const.get_sulfur_bde(s_prec)
@@ -216,15 +211,15 @@ def add_chemical_features(df: pd.DataFrame) -> pd.DataFrame:
             if ENHANCED_FEATURE_CONFIG.get('Metal_ionic_potential', False):
                 df['Metal_ionic_potential'] = df['Metal_precursor'].apply(
                     chem_const.get_metal_ionic_potential)
-            if ENHANCED_FEATURE_CONFIG.get('Metal_hsab_mismatch', False):
-                df['Metal_hsab_mismatch'] = df['Metal_precursor'].apply(
-                    chem_const.get_metal_hsab_mismatch)
+            if ENHANCED_FEATURE_CONFIG.get('Metal_oxophilicity', False):
+                df['Metal_oxophilicity'] = df['Metal_precursor'].apply(
+                    chem_const.get_metal_oxophilicity)
         else:
             metal_prec = CURRENT_PRECURSORS.get('Metal_Precursor', 'VO(acac)2')
             if ENHANCED_FEATURE_CONFIG.get('Metal_ionic_potential', False):
                 df['Metal_ionic_potential'] = chem_const.get_metal_ionic_potential(metal_prec)
-            if ENHANCED_FEATURE_CONFIG.get('Metal_hsab_mismatch', False):
-                df['Metal_hsab_mismatch'] = chem_const.get_metal_hsab_mismatch(metal_prec)
+            if ENHANCED_FEATURE_CONFIG.get('Metal_oxophilicity', False):
+                df['Metal_oxophilicity'] = chem_const.get_metal_oxophilicity(metal_prec)
 
     return df
 
@@ -300,7 +295,7 @@ def _resolve_precursor_feature_value(feat: str) -> float:
         'Cu_precursor_hardness': lambda: chem_const.get_precursor_hardness(cu_prec),
         'Cu_hsab_mismatch':      lambda: chem_const.get_hsab_mismatch(cu_prec),
         'Metal_ionic_potential':  lambda: chem_const.get_metal_ionic_potential(metal_prec),
-        'Metal_hsab_mismatch':   lambda: chem_const.get_metal_hsab_mismatch(metal_prec),
+        'Metal_oxophilicity':     lambda: chem_const.get_metal_oxophilicity(metal_prec),
     }
     if feat not in lookup:
         raise ValueError(f"Unknown precursor descriptor feature: {feat}")
@@ -427,13 +422,10 @@ def validate_bounds_roundtrip(
     -----
     The optimizer clips back-transformed raw conditions to ``RAW_BOUNDS`` via
     ``np.clip`` before reporting recommendations, so a non-empty result does
-    NOT mean unsafe recommendations are issued -- it only means the
-    chemical-feature box is slightly larger than the strict pre-image of the
-    raw box (because the ``S_Metal_ratio`` / ``Ligand_Metal_ratio`` bounds use
-    worst-case extremes of VOacac). Tighten ``CHEMICAL_BOUNDS`` in
-    ``config.py`` if you want a fully tight chemical box.
-
-    Not run at import time -- call it explicitly when auditing the bounds.
+    not mean unsafe recommendations are issued. The chemical-feature box is
+    slightly larger than the strict pre-image of the raw box because the
+    ``S_Metal_ratio`` / ``Ligand_Metal_ratio`` bounds use worst-case VOacac
+    extremes. Not run at import time.
     """
     rng = np.random.RandomState(seed)
     all_bounds = {**RAW_BOUNDS, **CHEMICAL_BOUNDS}

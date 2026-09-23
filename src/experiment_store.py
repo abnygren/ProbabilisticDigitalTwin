@@ -1,12 +1,7 @@
 """Experiment and recommendation persistence.
 
-This module owns the on-disk state for the BO workflow:
-
-    ExperimentStore       all experiments, with source tracking and JSON I/O
-    RecommendationStore   recommendation lifecycle + frozen prediction snapshots
-
-Each experiment optionally stores ``Cu_precursor`` / ``Metal_precursor``
-metadata so that transfer-learning campaigns can pool data across precursors.
+ExperimentStore holds all experiments with source tracking.
+RecommendationStore holds recommendation lifecycle and frozen prediction snapshots.
 """
 
 import numpy as np
@@ -80,9 +75,7 @@ class ExperimentStore:
         """
         df = pd.read_csv(csv_path)
 
-        # Accept either the newer 'CV' column or the legacy 'GSD' column for
-        # the polydispersity metric (older CSVs may still label it 'GSD').
-        # Internally we store this under 'CV'.
+        # Accept 'CV' or the older 'GSD' column; stored as 'CV'.
         has_cv_col = 'CV' in df.columns
         has_gsd_col = 'GSD' in df.columns
         if not has_cv_col and not has_gsd_col:
@@ -95,11 +88,13 @@ class ExperimentStore:
             if rid is not None:
                 existing_run_ids.add(rid)
             c = exp['conditions']
-            cu_prec = exp.get('precursors', {}).get('Cu_precursor', 'CuI')
+            prec = exp.get('precursors', {})
+            cu_prec = prec.get('Cu_precursor', 'CuI')
+            metal_prec = prec.get('Metal_precursor', 'VO(acac)2')
             existing_conditions.add((
                 round(c['Temp'], 4), round(c['Time'], 4),
                 round(c['VOacac'], 6), round(c['DDT'], 4),
-                round(c['OAm'], 4), cu_prec,
+                round(c['OAm'], 4), cu_prec, metal_prec,
             ))
 
         has_run_id_col = 'Run_ID' in df.columns
@@ -115,6 +110,10 @@ class ExperimentStore:
                       and pd.notna(row.get('Cu_precursor')))
             row_cu_prec = str(row['Cu_precursor']) if has_cu else default_cu_precursor
 
+            has_metal = ('Metal_precursor' in df.columns
+                         and pd.notna(row.get('Metal_precursor')))
+            row_metal_prec = str(row['Metal_precursor']) if has_metal else default_metal_precursor
+
             if run_id is not None and run_id in existing_run_ids:
                 skipped += 1
                 continue
@@ -122,7 +121,7 @@ class ExperimentStore:
                 cond_key = (
                     round(float(row['Temp']), 4), round(float(row['Time']), 4),
                     round(float(row['VOacac']), 6), round(float(row['DDT']), 4),
-                    round(float(row['OAm']), 4), row_cu_prec,
+                    round(float(row['OAm']), 4), row_cu_prec, row_metal_prec,
                 )
                 if cond_key in existing_conditions:
                     skipped += 1
@@ -135,10 +134,6 @@ class ExperimentStore:
                 polydispersity_value = float(row['CV'])
             elif has_gsd_col and pd.notna(row.get('GSD')):
                 polydispersity_value = float(row['GSD'])
-
-            has_metal = ('Metal_precursor' in df.columns
-                         and pd.notna(row.get('Metal_precursor')))
-            metal_prec = str(row['Metal_precursor']) if has_metal else default_metal_precursor
 
             exp = {
                 'exp_id': self._generate_id(),
@@ -154,7 +149,7 @@ class ExperimentStore:
                 },
                 'precursors': {
                     'Cu_precursor': row_cu_prec,
-                    'Metal_precursor': metal_prec,
+                    'Metal_precursor': row_metal_prec,
                 },
                 'results': {
                     'Size': float(row['Size']) if pd.notna(row.get('Size')) else None,
@@ -192,7 +187,7 @@ class ExperimentStore:
         cu_precursor : str, optional
             Cu precursor used (``'CuI'``, ``'CuCl'`` ...). Stored for transfer learning.
         metal_precursor : str, optional
-            Group-5 metal precursor used (``'VO(acac)2'``, ``'NbCl5'`` ...).
+            Group-5 metal precursor used (``'VO(acac)2'``, ``'TaCl5'`` ...).
         """
         exp_id = self._generate_id()
 

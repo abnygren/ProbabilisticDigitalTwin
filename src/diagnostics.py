@@ -1,12 +1,7 @@
-"""Diagnostics and model-quality assessment.
+"""Diagnostics and model-quality checks.
 
-Provides:
-    - leave-one-out cross-validation with per-fold refit and rescaling,
-    - feature-mode comparison,
-    - extrapolation detection,
-    - VIF-based collinearity diagnostics,
-    - Brier / ECE classifier calibration,
-    - optimization-convergence summary and reporting helpers.
+LOO-CV, feature-mode comparison, collinearity, classifier calibration,
+and optimization-progress summaries.
 """
 
 import numpy as np
@@ -17,12 +12,12 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.gaussian_process import GaussianProcessRegressor, GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import Matern, ConstantKernel as C
 from sklearn.model_selection import LeaveOneOut, StratifiedKFold
-from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, brier_score_loss
 
-from scipy.stats import norm
+from scipy.stats import norm, pearsonr
 from scipy.spatial.distance import cdist
 
-from config import RAW_FACTORS
+from config import RAW_FACTORS, SYNTHESIS_FEATURES, PRECURSOR_DESCRIPTOR_FEATURES
 from features import add_chemical_features, calculate_vif, CHEM_FEATURES, HYBRID_FEATURES
 
 
@@ -71,6 +66,140 @@ def loo_cv(
     return result
 
 
+def actual_bin_membership(
+    df: pd.DataFrame,
+    threshold: float,
+    squareness_bin: str,
+) -> np.ndarray:
+    """Binary label for whether each row falls in the requested squareness bin."""
+    is_cubic = df['IsCubic'].values.astype(int)
+    sq = df['Squareness'].values
+    if squareness_bin == 'highly_cubic':
+        return ((is_cubic == 1) & (sq >= threshold)).astype(float)
+    if squareness_bin == 'poorly_cubic':
+        return ((is_cubic == 1) & (sq < threshold)).astype(float)
+    if squareness_bin == 'multipod':
+        return (is_cubic == 0).astype(float)
+    raise ValueError(f"Unknown squareness_bin '{squareness_bin}'")
+
+
+def loo_feasibility_parity(base) -> Dict[str, Any]:
+    """LOO predicted P(HasProduct)×P(PhasePure) vs actual joint feasibility."""
+    from optimizer import make_gp_classifier
+
+    X = base.X_all
+    df = base.df_all
+    y_actual = (df['HasProduct'].values * df['PhasePure'].values).astype(float)
+    y_pred = np.zeros(len(y_actual))
+    n_feat = len(base.features)
+    clf_factory = lambda: make_gp_classifier(n_feat)
+
+    for train_idx, test_idx in LeaveOneOut().split(X):
+        scaler = StandardScaler()
+        X_tr = scaler.fit_transform(X[train_idx])
+        X_te = scaler.transform(X[test_idx])
+
+        def _fold_prob(col: str) -> float:
+            y_tr = df[col].values[train_idx].astype(int)
+            if len(np.unique(y_tr)) < 2:
+                return float(np.mean(y_tr))
+            clf = clf_factory()
+            clf.fit(X_tr, y_tr)
+            return float(clf.predict_proba(X_te)[:, 1][0])
+
+        y_pred[test_idx[0]] = _fold_prob('HasProduct') * _fold_prob('PhasePure')
+
+    return {
+        'y_actual': y_actual,
+        'y_pred': y_pred,
+        'r2': float(r2_score(y_actual, y_pred)),
+        'mae': float(mean_absolute_error(y_actual, y_pred)),
+        'brier': float(brier_score_loss(y_actual, y_pred)),
+    }
+
+
+def loo_bin_parity(base, squareness_bin: str) -> Dict[str, Any]:
+    """LOO predicted P(bin) vs actual bin membership on successful experiments."""
+    from optimizer import make_gp_classifier, make_gp_regressor, compute_bin_probability
+
+    df = base.df_success
+    X = base.X_success
+    threshold = base.sq_threshold
+    y_actual = actual_bin_membership(df, threshold, squareness_bin)
+    y_pred = np.zeros(len(y_actual))
+    n_feat = len(base.features)
+
+    for train_idx, test_idx in LeaveOneOut().split(X):
+        scaler = StandardScaler()
+        X_tr = scaler.fit_transform(X[train_idx])
+        X_te = scaler.transform(X[test_idx])
+        df_tr = df.iloc[train_idx]
+
+        cubic_mask = df_tr['IsCubic'].values == 1
+        if cubic_mask.sum() >= 3:
+            gp = make_gp_regressor(n_feat, use_ard=base.use_ard)
+            gp.fit(X_tr[cubic_mask], df_tr['Squareness'].values[cubic_mask])
+            sq_mu, sq_std = gp.predict(X_te, return_std=True)
+        else:
+            sq_mu = np.full(len(test_idx), df_tr['Squareness'].mean())
+            sq_std = np.full(len(test_idx), 0.1)
+
+        y_cubic_tr = df_tr['IsCubic'].values.astype(int)
+        if len(np.unique(y_cubic_tr)) < 2:
+            p_cubic = np.full(len(test_idx), float(np.mean(y_cubic_tr)))
+        else:
+            clf = make_gp_classifier(n_feat)
+            clf.fit(X_tr, y_cubic_tr)
+            p_cubic = clf.predict_proba(X_te)[:, 1]
+
+        y_pred[test_idx] = compute_bin_probability(
+            sq_mu, sq_std, p_cubic, threshold, squareness_bin,
+        )
+
+    return {
+        'y_actual': y_actual,
+        'y_pred': y_pred,
+        'r2': float(r2_score(y_actual, y_pred)),
+        'mae': float(mean_absolute_error(y_actual, y_pred)),
+        'brier': float(brier_score_loss(y_actual, y_pred)),
+    }
+
+
+def get_acquisition_loo_parity(
+    base,
+    squareness_bin: str = 'highly_cubic',
+) -> Dict[str, Dict[str, Any]]:
+    """Bundle LOO parity data for the three acquisition components."""
+    if not base.metrics or 'y_pred' not in base.metrics.get('Size', {}):
+        raise ValueError("Size LOO metrics missing; run validate_models() first.")
+
+    y_actual_size = base.df_cubic['Size'].values
+    y_loo_size = base.metrics['Size']['y_pred']
+    try:
+        _, gp_std = base.gp_size.predict(base.X_cubic_scaled, return_std=True)
+    except Exception:
+        gp_std = np.zeros(len(y_actual_size))
+
+    size = {
+        'y_actual': y_actual_size,
+        'y_pred': y_loo_size,
+        'y_std': gp_std,
+        'r2': float(base.metrics['Size']['r2']),
+        'mae': float(mean_absolute_error(y_actual_size, y_loo_size)),
+        'kind': 'regression',
+    }
+
+    print("Running LOO-CV for feasibility acquisition component…")
+    feasibility = loo_feasibility_parity(base)
+    feasibility['kind'] = 'probability'
+
+    print(f"Running LOO-CV for bin acquisition component ({squareness_bin})…")
+    bin_data = loo_bin_parity(base, squareness_bin)
+    bin_data['kind'] = 'probability'
+
+    return {'Size': size, 'Feasibility': feasibility, 'Bin': bin_data}
+
+
 def compare_feature_modes(
     df: pd.DataFrame,
     modes: List[str] = None,
@@ -90,9 +219,7 @@ def compare_feature_modes(
 
     for mode in modes:
         if verbose:
-            print(f"\n{'='*50}")
-            print(f"Evaluating {mode.upper()} feature mode...")
-            print(f"{'='*50}")
+            print(f"\nEvaluating {mode} feature mode...")
 
         try:
             opt = Cu3VS4Optimizer(df, feature_mode=mode, validate=True)
@@ -117,9 +244,7 @@ def compare_feature_modes(
     results_df = pd.DataFrame(results)
 
     if verbose and not results_df.empty:
-        print(f"\n{'='*60}")
-        print("FEATURE MODE COMPARISON SUMMARY")
-        print(f"{'='*60}")
+        print("\nFeature mode comparison")
 
         for metric in ['R2', 'RMSE']:
             print(f"\n{metric} by Mode and Property:")
@@ -135,6 +260,371 @@ def compare_feature_modes(
         print(cal_summary.round(3).to_string())
 
     return results_df
+
+
+def compute_transfer_skill_table(
+    df: pd.DataFrame,
+    modes: Tuple[str, str] = ('synthesis', 'transfer'),
+    classifier_targets: List[str] = None,
+    verbose: bool = True,
+) -> pd.DataFrame:
+    """Predictive-skill comparison for the precursor-transfer figure.
+
+    For each feature *mode* this computes a set of leave-one-out / cross-validated
+    skill scores on a common "skill vs. no-information baseline" axis:
+
+    * **Size** — LOO regression R^2 (skill relative to predicting the training
+      mean).
+    * **Classifier targets** (default ``PhasePure`` and ``IsCubic``) — the Brier
+      Skill Score ``BSS = 1 - Brier_model / Brier_baserate`` from stratified CV,
+      i.e. skill relative to always predicting the class base rate.
+
+    Both R^2 and BSS equal 0 for a no-information model and go negative when the
+    model is *worse* than that baseline, so the two metrics share a single axis
+    in the figure.
+
+    Returns a tidy DataFrame with columns ``['Task', 'Metric', 'Mode', 'Skill']``.
+    """
+    # Local import avoids a circular import with optimizer.
+    from optimizer import Cu3VS4Optimizer, make_gp_classifier
+
+    if classifier_targets is None:
+        classifier_targets = ['PhasePure', 'IsCubic']
+
+    rows = []
+    for mode in modes:
+        if verbose:
+            print(f"[skill] Evaluating '{mode}' mode (this refits GPs, ~2-3 min)…")
+        try:
+            opt = Cu3VS4Optimizer(df, feature_mode=mode, validate=True)
+        except Exception as exc:
+            if verbose:
+                print(f"  [skill] '{mode}' mode failed: {exc}")
+            continue
+
+        # Size regression skill (LOO R^2).
+        if 'Size' in opt.metrics:
+            rows.append({'Task': 'Size', 'Metric': 'R2', 'Mode': mode,
+                         'Skill': float(opt.metrics['Size']['r2'])})
+
+        # Classifier skill (Brier skill score, out-of-sample stratified CV).
+        n_feat = len(opt.features)
+        X_all = opt.X_all
+        for target in classifier_targets:
+            if target not in opt.df_all.columns:
+                continue
+            y = np.asarray(opt.df_all[target].values)
+            finite = y[~pd.isna(y)]
+            if len(np.unique(finite)) < 2:
+                continue
+            y = y.astype(int)
+            try:
+                m = cross_validated_classifier_calibration(
+                    X_all, y,
+                    clf_factory=lambda nf=n_feat: make_gp_classifier(nf),
+                    max_splits=5,
+                )
+                p = float(np.mean(y))
+                brier_base = p * (1.0 - p)
+                bss = (1.0 - m['brier_score'] / brier_base
+                       if brier_base > 0 else np.nan)
+                rows.append({'Task': target, 'Metric': 'BSS', 'Mode': mode,
+                             'Skill': float(bss)})
+                if verbose:
+                    print(f"  [skill] {target}: BSS={bss:.3f} "
+                          f"(Brier={m['brier_score']:.3f}, base={brier_base:.3f})")
+            except Exception as exc:
+                if verbose:
+                    print(f"  [skill] {target}/{mode} failed: {exc}")
+                continue
+
+    result_df = pd.DataFrame(rows)
+
+    if verbose and not result_df.empty:
+        print("\nTransfer skill summary (vs no-information baseline)")
+        pivot = result_df.pivot(index='Task', columns='Mode', values='Skill')
+        print(pivot.round(3).to_string())
+
+    return result_df
+
+
+def _lopo_fit_predict(X_train, y_train, X_test, use_ard: bool):
+    """Fit one size GP on a training split and predict a held-out split."""
+    from optimizer import make_gp_regressor
+
+    scaler = StandardScaler()
+    X_tr = scaler.fit_transform(np.asarray(X_train, dtype=float))
+    X_te = scaler.transform(np.asarray(X_test, dtype=float))
+    gp = make_gp_regressor(X_tr.shape[1], use_ard=use_ard)
+    gp.fit(X_tr, np.asarray(y_train, dtype=float))
+    mu, std = gp.predict(X_te, return_std=True)
+    return np.asarray(mu), np.asarray(std)
+
+
+def _lopo_metrics(y_true, y_pred) -> Dict[str, float]:
+    y_true = np.asarray(y_true, dtype=float)
+    y_pred = np.asarray(y_pred, dtype=float)
+    r2 = float(r2_score(y_true, y_pred)) if len(y_true) >= 2 else np.nan
+    rmse = float(np.sqrt(mean_squared_error(y_true, y_pred)))
+    mae = float(mean_absolute_error(y_true, y_pred))
+    bias = float(np.mean(y_pred) - np.mean(y_true))
+    if len(y_true) >= 3 and np.std(y_true) > 1e-12 and np.std(y_pred) > 1e-12:
+        rho, _ = pearsonr(y_true, y_pred)
+    else:
+        rho = np.nan
+    # Trend skill after removing each vector's mean (landscape transfer).
+    if len(y_true) >= 3:
+        r2_centered = float(r2_score(y_true - y_true.mean(),
+                                     y_pred - y_pred.mean()))
+    else:
+        r2_centered = np.nan
+    return {
+        'r2': r2, 'rmse': rmse, 'mae': mae, 'bias': bias,
+        'pearson_r': float(rho) if rho == rho else np.nan,
+        'r2_centered': r2_centered,
+    }
+
+
+def leave_one_precursor_out(
+    df: pd.DataFrame,
+    precursor_col: str,
+    prop: str = 'Size',
+    verbose: bool = True,
+) -> pd.DataFrame:
+    """Leave-one-precursor-out test of whether descriptors transfer.
+
+    For each held-out precursor group, train a size GP on the other groups
+    and predict the held-out cubes. Three representations are compared:
+
+    * **synthesis** — the five synthesis features only.
+    * **descriptors** — synthesis features plus whatever precursor
+      descriptors are already on ``df`` (HSAB / oxophilicity). Held-out
+      rows keep their own descriptor values, so this is the chemical
+      extrapolation test.
+    * **onehot** — synthesis features plus dummy indicators for the
+      *training* groups. The held-out group is the zero vector, so this
+      baseline can learn a per-seen-precursor intercept but cannot name
+      a new precursor.
+
+    Pooled LOO-CV cannot separate those last two: every left-out point
+    still has other points of the same precursor in the training fold.
+    This test can.
+
+    With only two precursor groups, holding one out leaves a single
+    training group, so descriptors are constant on the train set and
+    ``descriptors`` collapses toward ``synthesis``. That is reported
+    rather than hidden; use :func:`few_shot_transfer_curve` for the
+    two-group (Ta/Nb) case.
+    """
+    from optimizer import Cu3VS4Optimizer
+
+    if precursor_col not in df.columns:
+        raise ValueError(f"No '{precursor_col}' column on the frame.")
+
+    work = df.copy()
+    if 'IsCubic' not in work.columns:
+        work['IsCubic'] = (
+            work.get('Polymorph', pd.Series(dtype=str))
+            .fillna('').astype(str).str.lower().str.strip() == 'cubic'
+        ).astype(int)
+    if 'Cu_V_ratio' not in work.columns:
+        work = add_chemical_features(work)
+
+    cubic = work[(work['HasProduct'] == 1) & (work['IsCubic'] == 1)].copy()
+    cubic = cubic.dropna(subset=[prop, precursor_col])
+    synth_feats = [f for f in SYNTHESIS_FEATURES if f in cubic.columns]
+    desc_feats = [f for f in PRECURSOR_DESCRIPTOR_FEATURES if f in cubic.columns]
+    groups = [g for g in cubic[precursor_col].dropna().unique()
+              if (cubic[precursor_col] == g).sum() >= 3]
+    if len(groups) < 2:
+        raise ValueError(
+            f"Need >=2 {precursor_col} groups with >=3 cubic points; "
+            f"found {groups}."
+        )
+
+    if verbose:
+        counts = {g: int((cubic[precursor_col] == g).sum()) for g in groups}
+        print(f"\nLeave-one-precursor-out on {prop} ({precursor_col})")
+        print(f"  Groups: {counts}")
+        print(f"  Synthesis features: {synth_feats}")
+        print(f"  Descriptors on frame: {desc_feats or '(none)'}")
+        if len(groups) == 2:
+            print("  [note] Only 2 groups: holding one out leaves constant")
+            print("         descriptors on the train set, so 'descriptors'")
+            print("         cannot learn a chemical map. Prefer few-shot")
+            print("         transfer for this campaign.")
+
+    rows = []
+    for held in sorted(groups, key=str):
+        train = cubic[cubic[precursor_col] != held]
+        test = cubic[cubic[precursor_col] == held]
+        y_tr = train[prop].values
+        y_te = test[prop].values
+        n_train_groups = int(train[precursor_col].nunique())
+        use_ard = n_train_groups >= 3
+
+        collapsed = list(desc_feats)
+        if collapsed:
+            collapsed = Cu3VS4Optimizer._collapse_transfer_descriptors(
+                synth_feats + collapsed, train
+            )
+            collapsed = [f for f in collapsed if f not in synth_feats]
+
+        # One-hot of training groups; held-out rows are the zero vector.
+        train_levels = sorted(train[precursor_col].astype(str).unique())
+        dummy_names = [f'_oh_{lvl}' for lvl in train_levels]
+        train_oh = train[synth_feats].copy()
+        test_oh = test[synth_feats].copy()
+        for lvl, col in zip(train_levels, dummy_names):
+            train_oh[col] = (train[precursor_col].astype(str) == lvl).astype(float)
+            test_oh[col] = 0.0
+
+        method_X = {
+            'synthesis': (train[synth_feats].values, test[synth_feats].values, False),
+            'descriptors': (
+                train[synth_feats + collapsed].values if collapsed
+                else train[synth_feats].values,
+                test[synth_feats + collapsed].values if collapsed
+                else test[synth_feats].values,
+                use_ard and len(collapsed) > 0,
+            ),
+            'onehot': (train_oh.values, test_oh.values, False),
+        }
+
+        if verbose:
+            print(f"\n  Hold out {held}  (train n={len(train)}, "
+                  f"test n={len(test)}, train groups={n_train_groups})")
+
+        for method, (X_tr, X_te, ard) in method_X.items():
+            if X_tr.shape[1] == 0:
+                continue
+            mu, _ = _lopo_fit_predict(X_tr, y_tr, X_te, use_ard=ard)
+            m = _lopo_metrics(y_te, mu)
+            row = {
+                'held_out': held, 'method': method,
+                'n_train': len(train), 'n_test': len(test),
+                'n_train_groups': n_train_groups, 'n_features': X_tr.shape[1],
+                'use_ard': ard, **m,
+            }
+            rows.append(row)
+            if verbose:
+                rho = m['pearson_r']
+                rho_s = f"{rho:.3f}" if rho == rho else "n/a"
+                print(f"    {method:<12} R²={m['r2']:+.3f}  "
+                      f"centered R²={m['r2_centered']:+.3f}  "
+                      f"RMSE={m['rmse']:.2f}  bias={m['bias']:+.2f}  "
+                      f"r={rho_s}")
+
+    result = pd.DataFrame(rows)
+    if verbose and not result.empty:
+        print("\nLeave-one-precursor-out summary")
+        pivot = result.pivot(index='held_out', columns='method', values='r2')
+        print("R² (vs held-out mean):")
+        print(pivot.round(3).to_string())
+        pivot_c = result.pivot(index='held_out', columns='method', values='r2_centered')
+        print("\nCentered R² (within-group landscape):")
+        print(pivot_c.round(3).to_string())
+    return result
+
+
+def few_shot_transfer_curve(
+    df: pd.DataFrame,
+    precursor_col: str,
+    source: str,
+    target: str,
+    prop: str = 'Size',
+    n_target_grid: Tuple[int, ...] = (0, 2, 4, 8),
+    n_repeats: int = 5,
+    seed: int = 0,
+    verbose: bool = True,
+) -> pd.DataFrame:
+    """Learning curve: source data + k target points vs k target points only.
+
+    For two-group campaigns (Ta, Nb) this is the test pooled LOO cannot
+    run: does adding source-precursor data reduce the target data needed
+    to predict held-out target sizes?
+
+    ``k = 0`` is source-only prediction of the full target set (same as
+    one LOPO fold). Target-only is skipped at k < 3 (R² undefined).
+    """
+    work = df.copy()
+    if 'IsCubic' not in work.columns:
+        work['IsCubic'] = (
+            work.get('Polymorph', pd.Series(dtype=str))
+            .fillna('').astype(str).str.lower().str.strip() == 'cubic'
+        ).astype(int)
+    if 'Cu_V_ratio' not in work.columns:
+        work = add_chemical_features(work)
+
+    cubic = work[(work['HasProduct'] == 1) & (work['IsCubic'] == 1)].copy()
+    cubic = cubic.dropna(subset=[prop, precursor_col])
+    synth_feats = [f for f in SYNTHESIS_FEATURES if f in cubic.columns]
+    src = cubic[cubic[precursor_col] == source]
+    tgt = cubic[cubic[precursor_col] == target].reset_index(drop=True)
+    if len(src) < 5:
+        raise ValueError(f"Source {source} has only {len(src)} cubic points.")
+    if len(tgt) < 6:
+        raise ValueError(f"Target {target} has only {len(tgt)} cubic points.")
+
+    rng = np.random.RandomState(seed)
+    n_tgt = len(tgt)
+    grid = [k for k in n_target_grid if 0 <= k < n_tgt]
+    if verbose:
+        print(f"\nFew-shot transfer curve on {prop}")
+        print(f"  Source {source}: n={len(src)}  Target {target}: n={n_tgt}")
+        print(f"  Features: {synth_feats}")
+        print(f"  k in {grid}, repeats={n_repeats}")
+
+    rows = []
+    X_src = src[synth_feats].values
+    y_src = src[prop].values
+    X_tgt = tgt[synth_feats].values
+    y_tgt = tgt[prop].values
+
+    for k in grid:
+        for rep in range(n_repeats):
+            if k == 0:
+                take = np.array([], dtype=int)
+            else:
+                take = rng.choice(n_tgt, size=k, replace=False)
+            hold = np.setdiff1d(np.arange(n_tgt), take)
+            if len(hold) < 3:
+                continue
+
+            X_hold, y_hold = X_tgt[hold], y_tgt[hold]
+
+            # Source (+ optional target shots).
+            if k == 0:
+                X_tr = X_src
+                y_tr = y_src
+            else:
+                X_tr = np.vstack([X_src, X_tgt[take]])
+                y_tr = np.concatenate([y_src, y_tgt[take]])
+            mu, _ = _lopo_fit_predict(X_tr, y_tr, X_hold, use_ard=False)
+            m = _lopo_metrics(y_hold, mu)
+            rows.append({
+                'k_target': k, 'repeat': rep, 'method': 'source+target',
+                'n_hold': len(hold), **m,
+            })
+
+            # Target-only baseline.
+            if k >= 3:
+                mu_t, _ = _lopo_fit_predict(
+                    X_tgt[take], y_tgt[take], X_hold, use_ard=False,
+                )
+                mt = _lopo_metrics(y_hold, mu_t)
+                rows.append({
+                    'k_target': k, 'repeat': rep, 'method': 'target_only',
+                    'n_hold': len(hold), **mt,
+                })
+
+    result = pd.DataFrame(rows)
+    if verbose and not result.empty:
+        print("\nFew-shot transfer curve (mean R2 over repeats)")
+        summary = (result.groupby(['k_target', 'method'])['r2']
+                   .agg(['mean', 'std', 'count']))
+        print(summary.round(3).to_string())
+    return result
 
 
 def detect_extrapolation(
@@ -274,9 +764,7 @@ def diagnose_collinearity(
     }
 
     if verbose:
-        print(f"\n{'='*60}")
-        print(f"COLLINEARITY DIAGNOSTICS: {feature_mode.upper()} MODE")
-        print(f"{'='*60}")
+        print(f"\nCollinearity diagnostics ({feature_mode} mode)")
         print(f"\nFeatures ({len(available)}): {available}")
         print(f"\nVariance Inflation Factors:")
         print(vif_df.to_string(index=False))
@@ -286,12 +774,11 @@ def diagnose_collinearity(
                 print(f"  {f1} ↔ {f2}: r = {r:.3f}")
         print(f"\nRecommendations:")
         for rec in recommendations:
-            print(f"  • {rec}")
+            print(f"  - {rec}")
 
     return results
 
-# CLASSIFIER CALIBRATION
-# ------------------------------------------------------------------------------
+# Classifier calibration
 
 def _build_classifier_calibration_metrics(
     y_true: np.ndarray,
@@ -472,9 +959,7 @@ def evaluate_all_classifiers(optimizer, verbose: bool = True) -> Dict[str, Dict[
                 print(f"  Fallback reason: {metrics['fallback_reason']}")
 
     if verbose and results:
-        print(f"\n{'='*50}")
-        print("CALIBRATION SUMMARY")
-        print(f"{'='*50}")
+        print("\nCalibration summary")
         print("Well-calibrated: Brier < 0.2, ECE < 0.1")
         print("Primary method: out-of-sample stratified CV.")
         print("Fallback: in-sample metrics only when class counts are too small for CV.")
@@ -678,7 +1163,7 @@ def get_optimization_convergence_summary(
         else:
             out['interpretation'].append(
                 f"Target achievement: {t['success_rate']:.0f}% within tolerance — the target size may be "
-                f"near a physical limit of this synthesis. The model can still guide you to the closest achievable size."
+                f"near a physical limit of this synthesis. The model can still guide toward the closest achievable size."
             )
 
     # Backward compat: keep 'overall' key pointing to target metrics
@@ -693,17 +1178,15 @@ def print_optimization_convergence_summary(optimizer, last_n: Optional[int] = 10
     p = s['prediction_quality']
     t = s['target_achievement']
 
-    print("\n" + "MODEL PERFORMANCE & OPTIMIZATION SUMMARY")
-    print("-" * 60)
+    print("\nModel performance and optimization summary")
 
     print(f"\n  Completed recommendations: {p['n']}")
     if p['n'] < 2:
-        print("  → Need at least 2 completed recs to assess performance.")
-        print("=" * 60)
+        print("  Need at least 2 completed recs to assess performance.")
         return
 
     # Primary: Prediction quality
-    print(f"\n  ── PREDICTION ACCURACY (predicted vs actual) ──")
+    print(f"\n  Prediction accuracy (predicted vs actual)")
     print(f"  Size MAE:       {p['mae_nm']:.2f} nm")
     print(f"  Size RMSE:      {p['rmse_nm']:.2f} nm")
     print(f"  Mean bias:      {p['mean_error_nm']:+.2f} nm")
@@ -713,7 +1196,7 @@ def print_optimization_convergence_summary(optimizer, last_n: Optional[int] = 10
     # Per-recommendation detail
     details = s.get('rec_details', [])
     if details:
-        print(f"\n  ── PREDICTION LOG ──")
+        print(f"\n  Prediction log")
         print(f"  {'Rec':<10} {'Predicted':>10} {'Actual':>8} {'Error':>8} {'Target':>8}")
         print(f"  {'-'*46}")
         for d in details:
@@ -728,7 +1211,7 @@ def print_optimization_convergence_summary(optimizer, last_n: Optional[int] = 10
             )
 
     # Secondary: Target achievement
-    print(f"\n  ── TARGET ACHIEVEMENT (actual vs user target) ──")
+    print(f"\n  Target achievement (actual vs user target)")
     ci_lo, ci_hi = t['success_rate_ci95']
     print(
         f"  Within tolerance: {t['success_rate']:.0f}% "
@@ -737,7 +1220,7 @@ def print_optimization_convergence_summary(optimizer, last_n: Optional[int] = 10
     print(f"  Mean |error| from target: {t['mean_abs_error_nm']:.2f} nm")
 
     if s.get('by_target_band'):
-        print(f"\n  ── BY TARGET SIZE BAND ──")
+        print(f"\n  By target size band")
         for band, bm in sorted(s['by_target_band'].items(), key=lambda x: float(x[0].split('-')[0])):
             bp = bm['prediction']
             bt = bm['target']
@@ -750,7 +1233,7 @@ def print_optimization_convergence_summary(optimizer, last_n: Optional[int] = 10
     if s.get('recent'):
         rp = s['recent']['prediction']
         rt = s['recent']['target']
-        print(f"\n  ── LAST {last_n} RECOMMENDATIONS ──")
+        print(f"\n  Last {last_n} recommendations")
         print(
             f"    Pred MAE={rp['mae_nm']:.2f} nm, "
             f"within 1σ={rp['within_1sigma']:.0%}, "
@@ -758,37 +1241,35 @@ def print_optimization_convergence_summary(optimizer, last_n: Optional[int] = 10
         )
 
     if s.get('interpretation'):
-        print(f"\n  ── ASSESSMENT ──")
+        print(f"\n  Assessment")
         for line in s['interpretation']:
-            print(f"    • {line}")
+            print(f"    - {line}")
 
 
-# MODEL ASSESSMENT REPORT
-# ------------------------------------------------------------------------------
+# Model assessment report
 
 def print_model_assessment(optimizer):
     """Print detailed model self-assessment report."""
     stats = optimizer.get_model_assessment()
 
-    print("\n" + "MODEL SELF-ASSESSMENT REPORT")
-    print("-" * 70)
+    print("\nModel self-assessment")
 
     exp = stats.get('experiment_counts', {})
-    print(f"\n📊 EXPERIMENT DATABASE")
-    print(f"   Total experiments:        {exp.get('total', 0)}")
-    print(f"   ├─ Imported (initial):    {exp.get('imported', 0)}")
-    print(f"   ├─ From recommendations:  {exp.get('recommendation', 0)}")
-    print(f"   └─ Manual additions:      {exp.get('manual', 0)}")
+    print(f"\nExperiments")
+    print(f"   Total:                    {exp.get('total', 0)}")
+    print(f"   Imported (initial):       {exp.get('imported', 0)}")
+    print(f"   From recommendations:     {exp.get('recommendation', 0)}")
+    print(f"   Manual additions:         {exp.get('manual', 0)}")
 
     rec = stats.get('recommendation_counts', {})
-    print(f"\n📋 RECOMMENDATION HISTORY")
-    print(f"   Total recommendations:    {rec.get('total', 0)}")
-    print(f"   ├─ Pending:               {rec.get('pending', 0)}")
-    print(f"   ├─ Completed:             {rec.get('completed', 0)}")
-    print(f"   └─ Skipped:               {rec.get('skipped', 0)}")
+    print(f"\nRecommendations")
+    print(f"   Total:                    {rec.get('total', 0)}")
+    print(f"   Pending:                  {rec.get('pending', 0)}")
+    print(f"   Completed:                {rec.get('completed', 0)}")
+    print(f"   Skipped:                  {rec.get('skipped', 0)}")
 
     if stats.get('sufficient_data', False):
-        print(f"\n📈 PREDICTION ACCURACY (from {stats.get('n_completed', 0)} completed recommendations)")
+        print(f"\nPrediction accuracy (from {stats.get('n_completed', 0)} completed recommendations)")
         print(f"   {'Property':<12} {'MAE':>8} {'Mean Err':>10} {'Within 1σ':>10} {'Within 2σ':>10}")
         print(f"   {'-'*52}")
         for prop in ['size', 'cv', 'squareness']:
@@ -803,28 +1284,27 @@ def print_model_assessment(optimizer):
         print(f"   If coverage < target → model is overconfident")
         print(f"   If coverage > target → model is underconfident")
     else:
-        print(f"\n📈 PREDICTION ACCURACY")
+        print(f"\nPrediction accuracy")
         print(f"   Insufficient data ({stats.get('n_completed', 0)} completed, need ≥2)")
 
     el = stats.get('error_learner', {})
-    print(f"\n🔧 ERROR CORRECTION STATUS")
+    print(f"\nError correction")
     if el.get('is_fitted', False):
-        print(f"   Status: ✅ ACTIVE (trained on {el.get('n_training_samples', 0)} samples)")
+        print(f"   Status: active (trained on {el.get('n_training_samples', 0)} samples)")
         print(f"\n   Bias Corrections (added to predictions):")
         for prop, bias in el.get('mean_bias', {}).items():
             print(f"      {prop}: {bias:+.3f}")
         print(f"\n   Calibration Factors (multiply uncertainty by):")
         for prop, cal in el.get('calibration_factors', {}).items():
-            status = "⚠️ overconfident" if cal > 1.2 else "✅ well-calibrated"
+            status = "overconfident" if cal > 1.2 else "well-calibrated"
             print(f"      {prop}: {cal:.2f}x {status}")
     else:
         needed = el.get('min_samples_required', 5)
         have = el.get('n_training_samples', 0)
-        print(f"   Status: ⏳ INACTIVE (need {needed} completed recommendations, have {have})")
+        print(f"   Status: inactive (need {needed} completed recommendations, have {have})")
 
 
-# STATISTICAL EVIDENCE FOR SIZE OPTIMIZATION
-# ------------------------------------------------------------------------------
+# Statistical evidence for size optimization
 
 def compute_optimization_statistics(optimizer) -> Dict[str, Any]:
     """Compute statistical evidence that BO optimized nanocrystal size.
@@ -903,8 +1383,7 @@ def compute_optimization_statistics(optimizer) -> Dict[str, Any]:
         within_tol = group['within_tolerance'].sum()
         tol = group['tolerance'].iloc[0]
 
-        # Baseline: distance from ALL initial experiments to this target
-        # (represents unguided exploration — what you'd get without BO)
+        # Baseline: distance of all initial experiments from this target.
         if len(initial_sizes) > 0:
             baseline_errors = np.abs(initial_sizes - target_size)
         else:
@@ -990,8 +1469,7 @@ def compute_optimization_statistics(optimizer) -> Dict[str, Any]:
 
     # Overall baseline comparison: BO target errors vs what unguided experiments achieve
     if len(initial_sizes) > 0:
-        # For each target attempted, compute distance of ALL initial experiments to that target
-        # This represents what you'd expect from unguided sampling
+        # Distance of all initial experiments from each attempted target.
         unique_targets = df['target'].unique()
         baseline_all = np.concatenate([
             np.abs(initial_sizes - t) for t in unique_targets
@@ -1056,7 +1534,7 @@ def compute_optimization_statistics(optimizer) -> Dict[str, Any]:
 
 
 def print_optimization_statistics(optimizer):
-    """Print a publication-ready statistical summary of the optimization."""
+    """Print a statistical summary of the optimization."""
     results = compute_optimization_statistics(optimizer)
     if not results:
         return
@@ -1064,9 +1542,7 @@ def print_optimization_statistics(optimizer):
     overall = results['overall']
     tests = results['tests']
 
-    print("\n" + "=" * 70)
-    print("  STATISTICAL EVIDENCE FOR SIZE OPTIMIZATION")
-    print("=" * 70)
+    print("\nStatistical evidence for size optimization")
 
     print(f"\n  Total BO-guided experiments: {overall['n_total']}")
     print(f"  Mean prediction error |pred − actual|: {overall['mean_pred_error']:.2f} nm")
@@ -1074,14 +1550,14 @@ def print_optimization_statistics(optimizer):
     print(f"  Hit rate (within tolerance): {overall['hit_rate']:.0%}")
 
     # --- GP Calibration ---
-    print("\n  ─── GP Model Calibration ───")
+    print("\n  GP model calibration")
     print(f"  Z-score mean: {overall['z_score_mean']:.3f} (ideal: 0)")
     print(f"  Z-score std:  {overall['z_score_std']:.3f} (ideal: 1)")
     print(f"  Within ±1σ:   {overall['frac_within_1sigma']:.0%} (ideal: 68%)")
     print(f"  Within ±2σ:   {overall['frac_within_2sigma']:.0%} (ideal: 95%)")
 
     # --- Statistical Tests ---
-    print("\n  ─── Statistical Tests ───")
+    print("\n  Statistical tests")
 
     for test_name, test_data in tests.items():
         p = test_data['p']
@@ -1089,36 +1565,18 @@ def print_optimization_statistics(optimizer):
         label = test_name.replace('_', ' ').title()
         print(f"\n  {label}:")
         print(f"    p = {p:.4f} {sig}")
-        print(f"    → {test_data['interpretation']}")
+        print(f"    {test_data['interpretation']}")
 
     # --- Per-Target Table ---
-    print("\n  ─── Per-Target Summary ───")
+    print("\n  Per-target summary")
     table = results['summary_table']
     print(table.to_string(index=False))
-
-    # --- Suggested paper text ---
-    print("\n  ─── Suggested Paper Language ───")
-    print(f"  \"Bayesian optimization achieved target sizes with a mean absolute")
-    print(f"   error of {overall['mean_target_error']:.2f} nm across {overall['n_total']} experiments")
-    print(f"   spanning 10–30 nm targets. The within-tolerance hit rate")
-    print(f"   ({overall['hit_rate']:.0%}) was significantly higher than random")
-    print(f"   sampling (p = {tests['binomial_hit_rate']['p']:.2e}, binomial test).")
-    if tests['mann_whitney_vs_baseline']['p'] < 0.05:
-        print(f"   BO-guided experiments achieved target sizes significantly")
-        print(f"   better than unguided exploration (p = {tests['mann_whitney_vs_baseline']['p']:.2e},")
-        print(f"   Mann–Whitney U test).")
-    print(f"   The GP surrogate model was well-calibrated, with")
-    print(f"   {overall['frac_within_1sigma']:.0%} of outcomes within ±1σ of predictions")
-    print(f"   (expected: 68%) and z-scores consistent with zero mean")
-    print(f"   (p = {tests['ttest_zero_mean']['p']:.3f}, one-sample t-test).\"")
-
-    print("\n" + "=" * 70)
 
     return results
 
 
 def get_gp_hyperparameter_table(optimizer) -> pd.DataFrame:
-    """Extract a publication-ready table of fitted GP kernel hyperparameters.
+    """Fitted GP kernel hyperparameters as a table.
 
     Returns a DataFrame with columns: Model, Signal_Variance, Lengthscale(s),
     Noise_Level, Log_Marginal_Likelihood.  For ARD kernels, lengthscales are
@@ -1162,13 +1620,12 @@ def get_gp_hyperparameter_table(optimizer) -> pd.DataFrame:
 
 
 def display_recommendations_table(recommendations_df: pd.DataFrame):
-    """Display recommendations in a nicely formatted way."""
+    """Print a recommendation table."""
     if recommendations_df.empty:
         print("No recommendations to display.")
         return
 
-    print("\n" + "SYNTHESIS RECOMMENDATIONS")
-    print("-" * 80)
+    print("\nSynthesis recommendations")
 
     # Recommendation tables use 'Pred_CV' for the polydispersity prediction;
     # fall back to the legacy 'Pred_GSD' column for older saved data.
@@ -1194,6 +1651,5 @@ def display_recommendations_table(recommendations_df: pd.DataFrame):
         if p_feas is not None:
             print(f"   Feasibility: {p_feas * 100:.0f}%")
 
-    print("\n" + "To complete a recommendation after running the experiment:")
+    print("\nTo complete a recommendation after running the experiment:")
     print("  optimizer.complete_recommendation('REC_XXX', Size=..., CV=..., Squareness=...)")
-    print("-" * 80)

@@ -675,7 +675,7 @@
         "Size": 26.124,
         "Squareness": 0.906,
         "HasProduct": 1,
-        "PhasePure": 0,
+        "PhasePure": 1,
         "Polymorph": "cubic",
         "CV": 0.299
       },
@@ -849,7 +849,7 @@
         "Size": 20.267,
         "Squareness": 0.954,
         "HasProduct": 1,
-        "PhasePure": 0,
+        "PhasePure": 1,
         "Polymorph": "cubic",
         "CV": 0.157
       },
@@ -1139,7 +1139,7 @@
         "Size": 27.713,
         "Squareness": 0.93,
         "HasProduct": 1,
-        "PhasePure": 0,
+        "PhasePure": 1,
         "Polymorph": "cubic",
         "CV": 0.261
       },
@@ -1255,7 +1255,7 @@
         "Size": 13.196,
         "Squareness": 0.814,
         "HasProduct": 1,
-        "PhasePure": 0,
+        "PhasePure": 1,
         "Polymorph": "cubic",
         "CV": 0.309
       },
@@ -1371,7 +1371,7 @@
         "Size": 15.758,
         "Squareness": 0.823,
         "HasProduct": 1,
-        "PhasePure": 0,
+        "PhasePure": 1,
         "Polymorph": "cubic",
         "CV": 0.189
       },

@@ -1,17 +1,6 @@
-"""Configuration for the Cu3MS4 Bayesian optimization workflow.
+"""Default configuration for the Cu3MS4 Bayesian optimization workflow.
 
-Edit this file to change experimental parameters, feature settings,
-optimization behavior, or plot styling.
-
-Supports three material systems via ``CURRENT_PRECURSORS`` / ``TRANSFER_MODE``:
-    Cu3VS4    (default)
-    Cu3NbS4   (set ``Metal_Precursor`` to 'NbCl5')
-    Cu3TaS4   (set ``Metal_Precursor`` to 'TaCl5')
-
-Multiple Cu precursors are supported for transfer learning:
-    CuI, CuBr, CuCl, Cu(OAc), Cu(OAc)2, CuCl2
-Set ``Cu_precursor`` in ``CURRENT_PRECURSORS`` and configure
-``TRANSFER_MODE`` to enable precursor-varying descriptors.
+Campaign notebooks override CURRENT_PRECURSORS and TRANSFER_MODE in-cell.
 """
 
 import math
@@ -24,13 +13,12 @@ DDT_MMOL_PER_ML = 4.17       # DDT conversion (MW=202.4, density=0.845)
 OAM_MMOL_PER_ML = 3.04       # OAm conversion (MW=267.5, density=0.813)
 
 
-# Precursor choices used by chemical feature calculation.
-# The raw column "VOacac" is kept for backward compatibility with old CSV data:
-# it refers to the Group-5 metal precursor mmol regardless of which metal is used.
+# Defaults used when adding chemical features. Notebooks override these.
+# The column "VOacac" is Group-5 metal precursor mmol for all campaigns.
 CURRENT_PRECURSORS = {
-    'Cu_precursor': 'CuBr',
+    'Cu_precursor': 'CuCl',
     'S_precursor': 'DDT',
-    'Metal_Precursor': 'VO(acac)2',  # 'NbCl5' or 'TaCl5' for other campaigns
+    'Metal_Precursor': 'VO(acac)2',
 }
 
 
@@ -97,25 +85,13 @@ ENHANCED_FEATURE_CONFIG = {
     'effective_dielectric': False,
     'Cu_precursor_hardness': False,   # Cu precursor Pearson hardness
     'Cu_hsab_mismatch': False,        # Cu precursor |eta_cation - eta_anion|
-    'Metal_ionic_potential': False,   # Group-5 metal Z/r (Shannon)
-    'Metal_hsab_mismatch': False,     # Group-5 metal |Z/r - eta_anion|
+    'Metal_ionic_potential': False,   # Group-5 metal Z/r (Shannon, precursor basis)
+    'Metal_oxophilicity': False,      # Group-5 metal oxophilicity (MO2 vs MS2)
     'S_BDE': False,
 }
 
-# Synthesis-driven feature set: 5 mechanistically orthogonal features.
-#
-# DDT and Metal_Conc are excluded to avoid severe collinearity:
-#   DDT vs S_Metal_ratio   — r > 0.95 (CuI is fixed so S_Metal_ratio is
-#                            essentially DDT * const).
-#   Cu_V_ratio vs Metal_Conc — r ~ -0.99 (both depend only on VOacac).
-# Keeping collinear pairs destabilises GP lengthscales; the chemical ratios
-# already carry the relevant physical information.
-#
-#   Temp               — Arrhenius nucleation; dominant CV driver
-#   Cu_V_ratio         — Metal stoichiometry; controls phase purity
-#   S_Metal_ratio      — Sulfur excess; controls crystallisation / shape
-#   Ligand_Metal_ratio — OAm passivation density; growth-rate control
-#   log_Time           — Linearised reaction extent; Ostwald ripening
+# Default feature set. DDT and Metal_Conc are left out because they are
+# nearly collinear with S_Metal_ratio and Cu_V_ratio when Cu amount is fixed.
 SYNTHESIS_FEATURES = [
     "Temp",
     "Cu_V_ratio",
@@ -124,22 +100,14 @@ SYNTHESIS_FEATURES = [
     "log_Time",
 ]
 
-# Transfer learning mode.
-#
-# When enabled, precursor-specific descriptors are appended to the feature set
-# and the GP regressors switch to an ARD kernel so synthesis features and
-# precursor descriptors can have separate lengthscales.
-#
-#   vary_cu_precursor     — adds Cu_precursor_hardness, Cu_hsab_mismatch
-#   vary_metal_precursor  — adds Metal_ionic_potential, Metal_hsab_mismatch
-#
-# `target_*_precursor` is what new experiments will use; existing data from
-# other precursors becomes the transfer training signal.
+# Transfer learning. When enabled, precursor descriptors are appended and
+# GPs use an ARD kernel. target_*_precursor is what new experiments use;
+# other precursors in the training set are the transfer source.
 TRANSFER_MODE = {
     'enabled': True,
     'vary_cu_precursor': True,
     'vary_metal_precursor': False,
-    'target_cu_precursor': 'CuBr',
+    'target_cu_precursor': 'CuCl',
     'target_metal_precursor': 'VO(acac)2',
     'use_ard_kernel': True,
 }
@@ -151,18 +119,35 @@ if TRANSFER_MODE.get('vary_cu_precursor'):
     ENHANCED_FEATURE_CONFIG['Cu_hsab_mismatch'] = True
 if TRANSFER_MODE.get('vary_metal_precursor'):
     ENHANCED_FEATURE_CONFIG['Metal_ionic_potential'] = True
-    ENHANCED_FEATURE_CONFIG['Metal_hsab_mismatch'] = True
+    ENHANCED_FEATURE_CONFIG['Metal_oxophilicity'] = True
 
 TRANSFER_FEATURES = list(SYNTHESIS_FEATURES)
 if TRANSFER_MODE.get('vary_cu_precursor'):
     TRANSFER_FEATURES += ['Cu_precursor_hardness', 'Cu_hsab_mismatch']
 if TRANSFER_MODE.get('vary_metal_precursor'):
-    TRANSFER_FEATURES += ['Metal_ionic_potential', 'Metal_hsab_mismatch']
+    TRANSFER_FEATURES += ['Metal_ionic_potential', 'Metal_oxophilicity']
 
 # Constant per precursor — these are not sampled during LHS.
 PRECURSOR_DESCRIPTOR_FEATURES = {
     'Cu_precursor_hardness', 'Cu_hsab_mismatch',
-    'Metal_ionic_potential', 'Metal_hsab_mismatch',
+    'Metal_ionic_potential', 'Metal_oxophilicity',
+}
+
+# With only 2 precursors on an axis, the two descriptors are collinear
+# (one binary contrast). Keep the primary until >= 3 precursors are pooled.
+MIN_PRECURSORS_FOR_INDEPENDENT_DESCRIPTORS = 3
+
+TRANSFER_DESCRIPTOR_AXES = {
+    'cu': {
+        'precursor_col': 'Cu_precursor',
+        'descriptors': ['Cu_precursor_hardness', 'Cu_hsab_mismatch'],
+        'primary': 'Cu_precursor_hardness',
+    },
+    'metal': {
+        'precursor_col': 'Metal_precursor',
+        'descriptors': ['Metal_ionic_potential', 'Metal_oxophilicity'],
+        'primary': 'Metal_oxophilicity',
+    },
 }
 
 

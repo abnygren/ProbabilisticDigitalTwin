@@ -1,11 +1,11 @@
 {
-  "next_id": 93,
+  "next_id": 99,
   "experiments": [
     {
       "exp_id": "EXP_001",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.993324",
+      "timestamp": "2026-06-19T13:51:48.859257",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -13,13 +13,17 @@
         "DDT": 1.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 1
     },
@@ -27,7 +31,7 @@
       "exp_id": "EXP_002",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.993402",
+      "timestamp": "2026-06-19T13:51:48.859383",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -35,13 +39,17 @@
         "DDT": 5.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 2
     },
@@ -49,7 +57,7 @@
       "exp_id": "EXP_003",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.993477",
+      "timestamp": "2026-06-19T13:51:48.859426",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -57,13 +65,17 @@
         "DDT": 1.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 3
     },
@@ -71,7 +83,7 @@
       "exp_id": "EXP_004",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.993632",
+      "timestamp": "2026-06-19T13:51:48.859461",
       "conditions": {
         "Temp": 260.0,
         "Time": 8.0,
@@ -79,13 +91,17 @@
         "DDT": 5.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 4
     },
@@ -93,7 +109,7 @@
       "exp_id": "EXP_005",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.993697",
+      "timestamp": "2026-06-19T13:51:48.859496",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -101,13 +117,17 @@
         "DDT": 1.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 11.2,
+        "CV": 0.579,
         "Squareness": 0.85,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.579
+        "Polymorph": "cubic"
       },
       "run_id_original": 5
     },
@@ -115,7 +135,7 @@
       "exp_id": "EXP_006",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.993977",
+      "timestamp": "2026-06-19T13:51:48.859532",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -123,13 +143,17 @@
         "DDT": 5.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 6
     },
@@ -137,7 +161,7 @@
       "exp_id": "EXP_007",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.994187",
+      "timestamp": "2026-06-19T13:51:48.859562",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -145,13 +169,17 @@
         "DDT": 1.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 7
     },
@@ -159,7 +187,7 @@
       "exp_id": "EXP_008",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.994308",
+      "timestamp": "2026-06-19T13:51:48.859592",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -167,13 +195,17 @@
         "DDT": 5.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 45.0,
+        "CV": 0.302,
         "Squareness": 0.76,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.302
+        "Polymorph": "cubic"
       },
       "run_id_original": 8
     },
@@ -181,7 +213,7 @@
       "exp_id": "EXP_009",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.994587",
+      "timestamp": "2026-06-19T13:51:48.859625",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -189,13 +221,17 @@
         "DDT": 1.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 11.4,
+        "CV": 0.363,
         "Squareness": 0.87,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.363
+        "Polymorph": "cubic"
       },
       "run_id_original": 9
     },
@@ -203,7 +239,7 @@
       "exp_id": "EXP_010",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.994868",
+      "timestamp": "2026-06-19T13:51:48.859658",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -211,13 +247,17 @@
         "DDT": 5.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 17.4,
+        "CV": 0.3,
         "Squareness": 0.86,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.3
+        "Polymorph": "cubic"
       },
       "run_id_original": 10
     },
@@ -225,7 +265,7 @@
       "exp_id": "EXP_011",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.994996",
+      "timestamp": "2026-06-19T13:51:48.859690",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -233,13 +273,17 @@
         "DDT": 1.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 14.9,
+        "CV": 0.123,
         "Squareness": 0.84,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.123
+        "Polymorph": "cubic"
       },
       "run_id_original": 11
     },
@@ -247,7 +291,7 @@
       "exp_id": "EXP_012",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995178",
+      "timestamp": "2026-06-19T13:51:48.859722",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -255,13 +299,17 @@
         "DDT": 5.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 22.1,
+        "CV": 0.147,
         "Squareness": 0.91,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.147
+        "Polymorph": "cubic"
       },
       "run_id_original": 12
     },
@@ -269,7 +317,7 @@
       "exp_id": "EXP_013",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995389",
+      "timestamp": "2026-06-19T13:51:48.859795",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -277,13 +325,17 @@
         "DDT": 1.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 14.5,
+        "CV": 0.224,
         "Squareness": 0.93,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.224
+        "Polymorph": "cubic"
       },
       "run_id_original": 13
     },
@@ -291,7 +343,7 @@
       "exp_id": "EXP_014",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995453",
+      "timestamp": "2026-06-19T13:51:48.859828",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -299,13 +351,17 @@
         "DDT": 5.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 17.5,
+        "CV": 0.205,
         "Squareness": 0.91,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.205
+        "Polymorph": "cubic"
       },
       "run_id_original": 14
     },
@@ -313,7 +369,7 @@
       "exp_id": "EXP_015",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995505",
+      "timestamp": "2026-06-19T13:51:48.860001",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -321,13 +377,17 @@
         "DDT": 1.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 30.9,
+        "CV": 0.453,
         "Squareness": 0.85,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.453
+        "Polymorph": "cubic"
       },
       "run_id_original": 15
     },
@@ -335,7 +395,7 @@
       "exp_id": "EXP_016",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995554",
+      "timestamp": "2026-06-19T13:51:48.860433",
       "conditions": {
         "Temp": 285.0,
         "Time": 49.0,
@@ -343,13 +403,17 @@
         "DDT": 3.0,
         "OAm": 4.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 21.0,
+        "CV": 0.146,
         "Squareness": 0.92,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.146
+        "Polymorph": "cubic"
       },
       "run_id_original": 16
     },
@@ -357,7 +421,7 @@
       "exp_id": "EXP_017",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995602",
+      "timestamp": "2026-06-19T13:51:48.860484",
       "conditions": {
         "Temp": 285.0,
         "Time": 49.0,
@@ -365,13 +429,17 @@
         "DDT": 3.0,
         "OAm": 4.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 21.6,
+        "CV": 0.201,
         "Squareness": 0.91,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.201
+        "Polymorph": "cubic"
       },
       "run_id_original": 17
     },
@@ -379,7 +447,7 @@
       "exp_id": "EXP_018",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995649",
+      "timestamp": "2026-06-19T13:51:48.860547",
       "conditions": {
         "Temp": 285.0,
         "Time": 49.0,
@@ -387,13 +455,17 @@
         "DDT": 3.0,
         "OAm": 4.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 21.5,
+        "CV": 0.155,
         "Squareness": 0.9,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.155
+        "Polymorph": "cubic"
       },
       "run_id_original": 18
     },
@@ -401,7 +473,7 @@
       "exp_id": "EXP_019",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995694",
+      "timestamp": "2026-06-19T13:51:48.860591",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -409,13 +481,17 @@
         "DDT": 5.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 12.0,
+        "CV": 0.42,
         "Squareness": 0.85,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.42
+        "Polymorph": "cubic"
       },
       "run_id_original": 19
     },
@@ -423,7 +499,7 @@
       "exp_id": "EXP_020",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995742",
+      "timestamp": "2026-06-19T13:51:48.860638",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -431,13 +507,17 @@
         "DDT": 1.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 20
     },
@@ -445,7 +525,7 @@
       "exp_id": "EXP_021",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995786",
+      "timestamp": "2026-06-19T13:51:48.860871",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -453,13 +533,17 @@
         "DDT": 1.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 21
     },
@@ -467,7 +551,7 @@
       "exp_id": "EXP_022",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995829",
+      "timestamp": "2026-06-19T13:51:48.861076",
       "conditions": {
         "Temp": 260.0,
         "Time": 90.0,
@@ -475,13 +559,17 @@
         "DDT": 5.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 24.4,
+        "CV": 0.255,
         "Squareness": 0.71,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "multipod",
-        "CV": 0.255
+        "Polymorph": "multipod"
       },
       "run_id_original": 22
     },
@@ -489,7 +577,7 @@
       "exp_id": "EXP_023",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995873",
+      "timestamp": "2026-06-19T13:51:48.861126",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -497,13 +585,17 @@
         "DDT": 1.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 23
     },
@@ -511,7 +603,7 @@
       "exp_id": "EXP_024",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995915",
+      "timestamp": "2026-06-19T13:51:48.861157",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -519,13 +611,17 @@
         "DDT": 5.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 20.6,
+        "CV": 0.262,
         "Squareness": 0.68,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "multipod",
-        "CV": 0.262
+        "Polymorph": "multipod"
       },
       "run_id_original": 24
     },
@@ -533,7 +629,7 @@
       "exp_id": "EXP_025",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.995961",
+      "timestamp": "2026-06-19T13:51:48.861199",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -541,13 +637,17 @@
         "DDT": 5.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 12.5,
+        "CV": 0.256,
         "Squareness": 0.8,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.256
+        "Polymorph": "cubic"
       },
       "run_id_original": 25
     },
@@ -555,7 +655,7 @@
       "exp_id": "EXP_026",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996006",
+      "timestamp": "2026-06-19T13:51:48.861233",
       "conditions": {
         "Temp": 310.0,
         "Time": 8.0,
@@ -563,13 +663,17 @@
         "DDT": 1.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 19.5,
+        "CV": 0.435,
         "Squareness": 0.92,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.435
+        "Polymorph": "cubic"
       },
       "run_id_original": 26
     },
@@ -577,7 +681,7 @@
       "exp_id": "EXP_027",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996050",
+      "timestamp": "2026-06-19T13:51:48.861346",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -585,13 +689,17 @@
         "DDT": 1.0,
         "OAm": 1.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 22.0,
+        "CV": 0.624,
         "Squareness": 0.92,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.624
+        "Polymorph": "cubic"
       },
       "run_id_original": 27
     },
@@ -599,7 +707,7 @@
       "exp_id": "EXP_028",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996093",
+      "timestamp": "2026-06-19T13:51:48.861421",
       "conditions": {
         "Temp": 310.0,
         "Time": 90.0,
@@ -607,13 +715,17 @@
         "DDT": 1.0,
         "OAm": 7.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 16.8,
+        "CV": 0.145,
         "Squareness": 0.96,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.145
+        "Polymorph": "cubic"
       },
       "run_id_original": 28
     },
@@ -621,7 +733,7 @@
       "exp_id": "EXP_029",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996138",
+      "timestamp": "2026-06-19T13:51:48.861455",
       "conditions": {
         "Temp": 265.0,
         "Time": 32.0,
@@ -629,13 +741,17 @@
         "DDT": 3.1,
         "OAm": 6.5
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 29.8,
+        "CV": 0.223,
         "Squareness": 0.76,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "multipod",
-        "CV": 0.223
+        "Polymorph": "multipod"
       },
       "run_id_original": 29
     },
@@ -643,7 +759,7 @@
       "exp_id": "EXP_030",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996182",
+      "timestamp": "2026-06-19T13:51:48.861491",
       "conditions": {
         "Temp": 260.0,
         "Time": 71.0,
@@ -651,13 +767,17 @@
         "DDT": 1.6,
         "OAm": 2.8
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 10.2,
+        "CV": 0.436,
         "Squareness": 0.9,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.436
+        "Polymorph": "cubic"
       },
       "run_id_original": 30
     },
@@ -665,7 +785,7 @@
       "exp_id": "EXP_031",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996225",
+      "timestamp": "2026-06-19T13:51:48.861523",
       "conditions": {
         "Temp": 280.0,
         "Time": 25.0,
@@ -673,13 +793,17 @@
         "DDT": 4.4,
         "OAm": 3.7
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 12.6,
+        "CV": 0.565,
         "Squareness": 0.74,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.565
+        "Polymorph": "cubic"
       },
       "run_id_original": 31
     },
@@ -687,7 +811,7 @@
       "exp_id": "EXP_032",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996291",
+      "timestamp": "2026-06-19T13:51:48.861559",
       "conditions": {
         "Temp": 299.0,
         "Time": 47.0,
@@ -695,13 +819,17 @@
         "DDT": 3.7,
         "OAm": 5.6
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 24.9,
+        "CV": 0.351,
         "Squareness": 0.8,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.351
+        "Polymorph": "cubic"
       },
       "run_id_original": 32
     },
@@ -709,7 +837,7 @@
       "exp_id": "EXP_033",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996382",
+      "timestamp": "2026-06-19T13:51:48.861590",
       "conditions": {
         "Temp": 305.0,
         "Time": 41.0,
@@ -717,13 +845,17 @@
         "DDT": 4.3,
         "OAm": 1.7
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 22.2,
+        "CV": 0.186,
         "Squareness": 0.92,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.186
+        "Polymorph": "cubic"
       },
       "run_id_original": 33
     },
@@ -731,7 +863,7 @@
       "exp_id": "EXP_034",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996442",
+      "timestamp": "2026-06-19T13:51:48.861621",
       "conditions": {
         "Temp": 271.0,
         "Time": 50.0,
@@ -739,13 +871,17 @@
         "DDT": 1.2,
         "OAm": 2.1
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 34
     },
@@ -753,7 +889,7 @@
       "exp_id": "EXP_035",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996489",
+      "timestamp": "2026-06-19T13:51:48.861685",
       "conditions": {
         "Temp": 293.0,
         "Time": 69.0,
@@ -761,13 +897,17 @@
         "DDT": 4.8,
         "OAm": 4.2
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 41.6,
+        "CV": 0.195,
         "Squareness": 0.69,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "multipod",
-        "CV": 0.195
+        "Polymorph": "multipod"
       },
       "run_id_original": 35
     },
@@ -775,7 +915,7 @@
       "exp_id": "EXP_036",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996538",
+      "timestamp": "2026-06-19T13:51:48.861796",
       "conditions": {
         "Temp": 286.0,
         "Time": 60.0,
@@ -783,13 +923,17 @@
         "DDT": 3.6,
         "OAm": 6.9
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 18.2,
+        "CV": 0.384,
         "Squareness": 0.9,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.384
+        "Polymorph": "cubic"
       },
       "run_id_original": 36
     },
@@ -797,7 +941,7 @@
       "exp_id": "EXP_037",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996585",
+      "timestamp": "2026-06-19T13:51:48.861829",
       "conditions": {
         "Temp": 273.0,
         "Time": 87.0,
@@ -805,13 +949,17 @@
         "DDT": 1.8,
         "OAm": 3.4
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 13.1,
+        "CV": 0.258,
         "Squareness": 0.73,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.258
+        "Polymorph": "cubic"
       },
       "run_id_original": 37
     },
@@ -819,7 +967,7 @@
       "exp_id": "EXP_038",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996630",
+      "timestamp": "2026-06-19T13:51:48.861861",
       "conditions": {
         "Temp": 284.0,
         "Time": 80.0,
@@ -827,13 +975,17 @@
         "DDT": 2.6,
         "OAm": 1.2
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 16.9,
+        "CV": 0.321,
         "Squareness": 0.84,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.321
+        "Polymorph": "cubic"
       },
       "run_id_original": 38
     },
@@ -841,7 +993,7 @@
       "exp_id": "EXP_039",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996675",
+      "timestamp": "2026-06-19T13:51:48.861936",
       "conditions": {
         "Temp": 309.0,
         "Time": 9.0,
@@ -849,13 +1001,17 @@
         "DDT": 2.1,
         "OAm": 4.8
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 12.9,
+        "CV": 0.231,
         "Squareness": 0.96,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.231
+        "Polymorph": "cubic"
       },
       "run_id_original": 39
     },
@@ -863,7 +1019,7 @@
       "exp_id": "EXP_040",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996721",
+      "timestamp": "2026-06-19T13:51:48.861971",
       "conditions": {
         "Temp": 294.0,
         "Time": 15.0,
@@ -871,13 +1027,17 @@
         "DDT": 2.9,
         "OAm": 5.3
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 21.2,
+        "CV": 0.429,
         "Squareness": 0.89,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.429
+        "Polymorph": "cubic"
       },
       "run_id_original": 40
     },
@@ -885,7 +1045,7 @@
       "exp_id": "EXP_041",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996798",
+      "timestamp": "2026-06-19T13:51:48.862003",
       "conditions": {
         "Temp": 297.0,
         "Time": 14.0,
@@ -893,13 +1053,17 @@
         "DDT": 2.3,
         "OAm": 6.2
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 18.2,
+        "CV": 0.164,
         "Squareness": 0.95,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.164
+        "Polymorph": "cubic"
       },
       "run_id_original": 41
     },
@@ -907,7 +1071,7 @@
       "exp_id": "EXP_042",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996852",
+      "timestamp": "2026-06-19T13:51:48.862035",
       "conditions": {
         "Temp": 300.0,
         "Time": 14.0,
@@ -915,13 +1079,17 @@
         "DDT": 2.0,
         "OAm": 5.4
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 22.1,
+        "CV": 0.333,
         "Squareness": 0.88,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.333
+        "Polymorph": "cubic"
       },
       "run_id_original": 42
     },
@@ -929,7 +1097,7 @@
       "exp_id": "EXP_043",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996897",
+      "timestamp": "2026-06-19T13:51:48.862066",
       "conditions": {
         "Temp": 289.0,
         "Time": 79.0,
@@ -937,13 +1105,17 @@
         "DDT": 1.2,
         "OAm": 2.7
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 14.4,
+        "CV": 0.298,
         "Squareness": 0.74,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.298
+        "Polymorph": "cubic"
       },
       "run_id_original": 43
     },
@@ -951,7 +1123,7 @@
       "exp_id": "EXP_044",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996943",
+      "timestamp": "2026-06-19T13:51:48.862096",
       "conditions": {
         "Temp": 270.0,
         "Time": 75.0,
@@ -959,13 +1131,17 @@
         "DDT": 3.5,
         "OAm": 5.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 18.4,
+        "CV": 0.268,
         "Squareness": 0.77,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.268
+        "Polymorph": "cubic"
       },
       "run_id_original": 44
     },
@@ -973,7 +1149,7 @@
       "exp_id": "EXP_045",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.996988",
+      "timestamp": "2026-06-19T13:51:48.862126",
       "conditions": {
         "Temp": 280.0,
         "Time": 67.0,
@@ -981,13 +1157,17 @@
         "DDT": 3.9,
         "OAm": 6.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 22.9,
+        "CV": 0.299,
         "Squareness": 0.91,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.299
+        "Polymorph": "cubic"
       },
       "run_id_original": 45
     },
@@ -995,7 +1175,7 @@
       "exp_id": "EXP_046",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997032",
+      "timestamp": "2026-06-19T13:51:48.862157",
       "conditions": {
         "Temp": 285.0,
         "Time": 60.0,
@@ -1003,13 +1183,17 @@
         "DDT": 3.0,
         "OAm": 4.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 11.7,
+        "CV": 0.357,
         "Squareness": 0.77,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.357
+        "Polymorph": "cubic"
       },
       "run_id_original": 46
     },
@@ -1017,7 +1201,7 @@
       "exp_id": "EXP_047",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997076",
+      "timestamp": "2026-06-19T13:51:48.874842",
       "conditions": {
         "Temp": 267.0,
         "Time": 86.0,
@@ -1025,13 +1209,17 @@
         "DDT": 3.7,
         "OAm": 1.3
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 35.7,
+        "CV": 0.322,
         "Squareness": 0.81,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.322
+        "Polymorph": "cubic"
       },
       "run_id_original": 47
     },
@@ -1039,7 +1227,7 @@
       "exp_id": "EXP_048",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997121",
+      "timestamp": "2026-06-19T13:51:48.874891",
       "conditions": {
         "Temp": 284.0,
         "Time": 89.0,
@@ -1047,13 +1235,17 @@
         "DDT": 3.1,
         "OAm": 2.9
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 16.1,
+        "CV": 0.306,
         "Squareness": 0.8,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.306
+        "Polymorph": "cubic"
       },
       "run_id_original": 48
     },
@@ -1061,7 +1253,7 @@
       "exp_id": "EXP_049",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997364",
+      "timestamp": "2026-06-19T13:51:48.874925",
       "conditions": {
         "Temp": 304.0,
         "Time": 34.0,
@@ -1069,13 +1261,17 @@
         "DDT": 2.1,
         "OAm": 3.8
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 15.6,
+        "CV": 0.149,
         "Squareness": 0.95,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.149
+        "Polymorph": "cubic"
       },
       "run_id_original": 49
     },
@@ -1083,7 +1279,7 @@
       "exp_id": "EXP_050",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997417",
+      "timestamp": "2026-06-19T13:51:48.874958",
       "conditions": {
         "Temp": 290.0,
         "Time": 30.0,
@@ -1091,13 +1287,17 @@
         "DDT": 4.0,
         "OAm": 2.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 15.3,
+        "CV": 0.384,
         "Squareness": 0.92,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.384
+        "Polymorph": "cubic"
       },
       "run_id_original": 50
     },
@@ -1105,7 +1305,7 @@
       "exp_id": "EXP_051",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997464",
+      "timestamp": "2026-06-19T13:51:48.874990",
       "conditions": {
         "Temp": 292.0,
         "Time": 42.0,
@@ -1113,13 +1313,17 @@
         "DDT": 4.7,
         "OAm": 1.8
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 40.8,
+        "CV": 0.307,
         "Squareness": 0.76,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "multipod",
-        "CV": 0.307
+        "Polymorph": "multipod"
       },
       "run_id_original": 51
     },
@@ -1127,7 +1331,7 @@
       "exp_id": "EXP_052",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997512",
+      "timestamp": "2026-06-19T13:51:48.875020",
       "conditions": {
         "Temp": 300.0,
         "Time": 39.0,
@@ -1135,13 +1339,17 @@
         "DDT": 4.6,
         "OAm": 5.4
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 28.0,
+        "CV": 0.325,
         "Squareness": 0.77,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "multipod",
-        "CV": 0.325
+        "Polymorph": "multipod"
       },
       "run_id_original": 52
     },
@@ -1149,7 +1357,7 @@
       "exp_id": "EXP_053",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997558",
+      "timestamp": "2026-06-19T13:51:48.875051",
       "conditions": {
         "Temp": 289.0,
         "Time": 57.0,
@@ -1157,13 +1365,17 @@
         "DDT": 1.9,
         "OAm": 4.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 14.4,
+        "CV": 0.505,
         "Squareness": 0.88,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.505
+        "Polymorph": "cubic"
       },
       "run_id_original": 53
     },
@@ -1171,7 +1383,7 @@
       "exp_id": "EXP_054",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997608",
+      "timestamp": "2026-06-19T13:51:48.875082",
       "conditions": {
         "Temp": 300.0,
         "Time": 45.0,
@@ -1179,13 +1391,17 @@
         "DDT": 2.5,
         "OAm": 3.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 16.4,
+        "CV": 0.252,
         "Squareness": 0.94,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.252
+        "Polymorph": "cubic"
       },
       "run_id_original": 54
     },
@@ -1193,7 +1409,7 @@
       "exp_id": "EXP_055",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997653",
+      "timestamp": "2026-06-19T13:51:48.875112",
       "conditions": {
         "Temp": 270.0,
         "Time": 83.0,
@@ -1201,13 +1417,17 @@
         "DDT": 3.4,
         "OAm": 1.4
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 55
     },
@@ -1215,7 +1435,7 @@
       "exp_id": "EXP_056",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997695",
+      "timestamp": "2026-06-19T13:51:48.875141",
       "conditions": {
         "Temp": 279.0,
         "Time": 84.0,
@@ -1223,13 +1443,17 @@
         "DDT": 2.7,
         "OAm": 6.2
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 18.6,
+        "CV": 0.156,
         "Squareness": 0.94,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.156
+        "Polymorph": "cubic"
       },
       "run_id_original": 56
     },
@@ -1237,7 +1461,7 @@
       "exp_id": "EXP_057",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997739",
+      "timestamp": "2026-06-19T13:51:48.875176",
       "conditions": {
         "Temp": 277.0,
         "Time": 71.0,
@@ -1245,13 +1469,17 @@
         "DDT": 2.1,
         "OAm": 5.4
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 21.2,
+        "CV": 0.18,
         "Squareness": 0.71,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.18
+        "Polymorph": "cubic"
       },
       "run_id_original": 57
     },
@@ -1259,7 +1487,7 @@
       "exp_id": "EXP_058",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997783",
+      "timestamp": "2026-06-19T13:51:48.875207",
       "conditions": {
         "Temp": 283.0,
         "Time": 69.0,
@@ -1267,13 +1495,17 @@
         "DDT": 3.5,
         "OAm": 1.4
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 31.6,
+        "CV": 0.533,
         "Squareness": 0.81,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.533
+        "Polymorph": "cubic"
       },
       "run_id_original": 58
     },
@@ -1281,7 +1513,7 @@
       "exp_id": "EXP_059",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997826",
+      "timestamp": "2026-06-19T13:51:48.875237",
       "conditions": {
         "Temp": 290.0,
         "Time": 54.0,
@@ -1289,13 +1521,17 @@
         "DDT": 3.8,
         "OAm": 5.0
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 22.6,
+        "CV": 0.497,
         "Squareness": 0.77,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "multipod",
-        "CV": 0.497
+        "Polymorph": "multipod"
       },
       "run_id_original": 59
     },
@@ -1303,7 +1539,7 @@
       "exp_id": "EXP_060",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997906",
+      "timestamp": "2026-06-19T13:51:48.875267",
       "conditions": {
         "Temp": 280.0,
         "Time": 58.0,
@@ -1311,13 +1547,17 @@
         "DDT": 4.0,
         "OAm": 3.8
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 31.1,
+        "CV": 0.298,
         "Squareness": 0.77,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.298
+        "Polymorph": "cubic"
       },
       "run_id_original": 60
     },
@@ -1325,7 +1565,7 @@
       "exp_id": "EXP_061",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997949",
+      "timestamp": "2026-06-19T13:51:48.875296",
       "conditions": {
         "Temp": 280.0,
         "Time": 47.0,
@@ -1333,13 +1573,17 @@
         "DDT": 1.3,
         "OAm": 3.8
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": null,
+        "CV": null,
         "Squareness": null,
         "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": null,
-        "CV": null
+        "Polymorph": null
       },
       "run_id_original": 61
     },
@@ -1347,7 +1591,7 @@
       "exp_id": "EXP_062",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.997990",
+      "timestamp": "2026-06-19T13:51:48.875323",
       "conditions": {
         "Temp": 294.0,
         "Time": 43.0,
@@ -1355,13 +1599,17 @@
         "DDT": 2.4,
         "OAm": 1.3
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 18.0,
+        "CV": 0.417,
         "Squareness": 0.9,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.417
+        "Polymorph": "cubic"
       },
       "run_id_original": 62
     },
@@ -1369,7 +1617,7 @@
       "exp_id": "EXP_063",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.998034",
+      "timestamp": "2026-06-19T13:51:48.875353",
       "conditions": {
         "Temp": 296.0,
         "Time": 36.0,
@@ -1377,13 +1625,17 @@
         "DDT": 4.2,
         "OAm": 1.5
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 31.2,
+        "CV": 0.273,
         "Squareness": 0.85,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.273
+        "Polymorph": "cubic"
       },
       "run_id_original": 63
     },
@@ -1391,7 +1643,7 @@
       "exp_id": "EXP_064",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.998078",
+      "timestamp": "2026-06-19T13:51:48.876426",
       "conditions": {
         "Temp": 303.0,
         "Time": 34.0,
@@ -1399,13 +1651,17 @@
         "DDT": 4.9,
         "OAm": 2.3
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 16.0,
+        "CV": 0.301,
         "Squareness": 0.93,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.301
+        "Polymorph": "cubic"
       },
       "run_id_original": 64
     },
@@ -1413,7 +1669,7 @@
       "exp_id": "EXP_065",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.998194",
+      "timestamp": "2026-06-19T13:51:48.876557",
       "conditions": {
         "Temp": 308.0,
         "Time": 22.0,
@@ -1421,13 +1677,17 @@
         "DDT": 2.9,
         "OAm": 1.9
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 22.1,
+        "CV": 0.43,
         "Squareness": 0.9,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.43
+        "Polymorph": "cubic"
       },
       "run_id_original": 65
     },
@@ -1435,7 +1695,7 @@
       "exp_id": "EXP_066",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.998242",
+      "timestamp": "2026-06-19T13:51:48.876648",
       "conditions": {
         "Temp": 297.0,
         "Time": 24.0,
@@ -1443,13 +1703,17 @@
         "DDT": 1.0,
         "OAm": 4.3
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 20.5,
+        "CV": 0.543,
         "Squareness": 0.76,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.543
+        "Polymorph": "cubic"
       },
       "run_id_original": 66
     },
@@ -1457,7 +1721,7 @@
       "exp_id": "EXP_067",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.998287",
+      "timestamp": "2026-06-19T13:51:48.876680",
       "conditions": {
         "Temp": 298.0,
         "Time": 11.0,
@@ -1465,13 +1729,17 @@
         "DDT": 3.4,
         "OAm": 1.4
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 28.1,
+        "CV": 0.287,
         "Squareness": 0.89,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.287
+        "Polymorph": "cubic"
       },
       "run_id_original": 67
     },
@@ -1479,7 +1747,7 @@
       "exp_id": "EXP_068",
       "source": "imported",
       "recommendation_id": null,
-      "timestamp": "2026-03-16T11:04:42.998330",
+      "timestamp": "2026-06-19T13:51:48.876710",
       "conditions": {
         "Temp": 302.0,
         "Time": 17.0,
@@ -1487,526 +1755,792 @@
         "DDT": 3.7,
         "OAm": 5.8
       },
+      "precursors": {
+        "Cu_precursor": "CuI",
+        "Metal_precursor": "VO(acac)2"
+      },
       "results": {
         "Size": 24.9,
+        "CV": 0.236,
         "Squareness": 0.91,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.236
+        "Polymorph": "cubic"
       },
       "run_id_original": 68
     },
     {
       "exp_id": "EXP_069",
-      "source": "recommendation",
-      "recommendation_id": "REC_001",
-      "timestamp": "2026-03-18T15:25:18.679089",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.883415",
       "conditions": {
-        "Temp": 304.0,
-        "Time": 27.0,
-        "VOacac": 0.36,
-        "DDT": 3.1,
-        "OAm": 1.8
+        "Temp": 296.0,
+        "Time": 36.0,
+        "VOacac": 0.54,
+        "DDT": 4.2,
+        "OAm": 1.5
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 23.414,
+        "Size": 13.079,
+        "CV": 0.402,
         "Squareness": 0.9,
         "HasProduct": 1,
-        "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.185
-      }
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_070",
-      "source": "recommendation",
-      "recommendation_id": "REC_002",
-      "timestamp": "2026-03-18T15:26:38.778848",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.883471",
       "conditions": {
-        "Temp": 297.0,
-        "Time": 40.0,
-        "VOacac": 0.364,
-        "DDT": 3.5,
-        "OAm": 2.8
+        "Temp": 303.0,
+        "Time": 34.0,
+        "VOacac": 0.106,
+        "DDT": 4.9,
+        "OAm": 2.3
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 25.613,
-        "Squareness": 0.829,
+        "Size": 15.815,
+        "CV": 0.466,
+        "Squareness": 0.83,
         "HasProduct": 1,
-        "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.309
-      }
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_071",
-      "source": "recommendation",
-      "recommendation_id": "REC_003",
-      "timestamp": "2026-03-20T11:32:38.085638",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.883517",
       "conditions": {
-        "Temp": 304.0,
-        "Time": 43.0,
-        "VOacac": 0.251,
-        "DDT": 1.9,
-        "OAm": 4.6
+        "Temp": 290.0,
+        "Time": 54.0,
+        "VOacac": 0.579,
+        "DDT": 3.8,
+        "OAm": 5.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 15.681,
-        "Squareness": 0.949,
+        "Size": 13.744,
+        "CV": 0.423,
+        "Squareness": 0.88,
         "HasProduct": 1,
-        "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.26
-      }
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_072",
-      "source": "recommendation",
-      "recommendation_id": "REC_004",
-      "timestamp": "2026-03-20T11:35:41.958536",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.883561",
       "conditions": {
-        "Temp": 306.0,
-        "Time": 35.0,
-        "VOacac": 0.198,
-        "DDT": 1.9,
-        "OAm": 3.9
+        "Temp": 280.0,
+        "Time": 58.0,
+        "VOacac": 0.25,
+        "DDT": 4.0,
+        "OAm": 3.8
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 15.614,
-        "Squareness": 0.96,
-        "HasProduct": 1,
+        "Size": null,
+        "CV": null,
+        "Squareness": null,
+        "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.145
-      }
+        "Polymorph": null
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_073",
-      "source": "recommendation",
-      "recommendation_id": "REC_005",
-      "timestamp": "2026-03-25T21:02:54.760984",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.883601",
       "conditions": {
-        "Temp": 306.0,
-        "Time": 31.0,
-        "VOacac": 0.261,
-        "DDT": 2.8,
-        "OAm": 2.6
+        "Temp": 277.0,
+        "Time": 71.0,
+        "VOacac": 0.339,
+        "DDT": 2.1,
+        "OAm": 5.4
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 19.79,
-        "Squareness": 0.919,
-        "HasProduct": 1,
+        "Size": null,
+        "CV": null,
+        "Squareness": null,
+        "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.377
-      }
+        "Polymorph": null
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_074",
-      "source": "recommendation",
-      "recommendation_id": "REC_006",
-      "timestamp": "2026-03-25T21:05:09.891648",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891424",
       "conditions": {
-        "Temp": 301.0,
-        "Time": 42.0,
-        "VOacac": 0.286,
-        "DDT": 3.2,
-        "OAm": 4.4
+        "Temp": 283.0,
+        "Time": 69.0,
+        "VOacac": 0.562,
+        "DDT": 3.5,
+        "OAm": 1.4
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 20.867,
-        "Squareness": 0.864,
+        "Size": 12.101,
+        "CV": 0.454,
+        "Squareness": 0.894,
         "HasProduct": 1,
-        "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.522
-      }
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_075",
-      "source": "recommendation",
-      "recommendation_id": "REC_007",
-      "timestamp": "2026-03-25T21:06:18.827031",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891539",
       "conditions": {
-        "Temp": 291.0,
-        "Time": 50.0,
-        "VOacac": 0.1,
-        "DDT": 2.1,
-        "OAm": 2.9
+        "Temp": 270.0,
+        "Time": 83.0,
+        "VOacac": 0.184,
+        "DDT": 1.4,
+        "OAm": 5.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 13.044,
-        "Squareness": 0.926,
-        "HasProduct": 1,
+        "Size": null,
+        "CV": null,
+        "Squareness": null,
+        "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.3
-      }
+        "Polymorph": null
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_076",
-      "source": "recommendation",
-      "recommendation_id": "REC_008",
-      "timestamp": "2026-03-25T21:07:11.361669",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891583",
       "conditions": {
-        "Temp": 298.0,
-        "Time": 42.0,
-        "VOacac": 0.102,
-        "DDT": 2.1,
-        "OAm": 3.0
+        "Temp": 279.0,
+        "Time": 84.0,
+        "VOacac": 0.198,
+        "DDT": 2.7,
+        "OAm": 6.2
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 12.495,
-        "Squareness": 0.916,
-        "HasProduct": 1,
+        "Size": null,
+        "CV": null,
+        "Squareness": null,
+        "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.356
-      }
+        "Polymorph": null
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_077",
-      "source": "recommendation",
-      "recommendation_id": "REC_009",
-      "timestamp": "2026-03-27T10:41:02.700302",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891622",
       "conditions": {
-        "Temp": 296.0,
-        "Time": 24.0,
-        "VOacac": 0.393,
-        "DDT": 3.7,
-        "OAm": 1.2
+        "Temp": 280.0,
+        "Time": 47.0,
+        "VOacac": 0.611,
+        "DDT": 1.3,
+        "OAm": 3.8
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 31.232,
-        "Squareness": 0.871,
-        "HasProduct": 1,
+        "Size": null,
+        "CV": null,
+        "Squareness": null,
+        "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.26
-      }
+        "Polymorph": null
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_078",
-      "source": "recommendation",
-      "recommendation_id": "REC_010",
-      "timestamp": "2026-03-27T10:42:28.844264",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891659",
       "conditions": {
-        "Temp": 299.0,
-        "Time": 27.0,
-        "VOacac": 0.524,
-        "DDT": 3.6,
-        "OAm": 2.6
+        "Temp": 294.0,
+        "Time": 43.0,
+        "VOacac": 0.314,
+        "DDT": 2.4,
+        "OAm": 1.3
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 28.615,
-        "Squareness": 0.888,
+        "Size": 10.581,
+        "CV": 0.475,
+        "Squareness": 0.867,
         "HasProduct": 1,
-        "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.37
-      }
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_079",
-      "source": "recommendation",
-      "recommendation_id": "REC_011",
-      "timestamp": "2026-04-10T13:30:21.889348",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891697",
       "conditions": {
-        "Temp": 302.0,
-        "Time": 21.0,
-        "VOacac": 0.351,
-        "DDT": 2.8,
-        "OAm": 3.8
+        "Temp": 298.0,
+        "Time": 11.0,
+        "VOacac": 0.47,
+        "DDT": 3.4,
+        "OAm": 1.4
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 23.058,
-        "Squareness": 0.918,
+        "Size": 16.708,
+        "CV": 0.254,
+        "Squareness": 0.753,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.343
-      }
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_080",
-      "source": "recommendation",
-      "recommendation_id": "REC_012",
-      "timestamp": "2026-04-10T13:32:51.746002",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891733",
       "conditions": {
-        "Temp": 300.0,
-        "Time": 15.0,
-        "VOacac": 0.353,
-        "DDT": 3.4,
-        "OAm": 5.2
+        "Temp": 302.0,
+        "Time": 17.0,
+        "VOacac": 0.418,
+        "DDT": 3.7,
+        "OAm": 5.8
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 26.124,
-        "Squareness": 0.906,
+        "Size": 9.8,
+        "CV": 0.461,
+        "Squareness": 0.82,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.299
-      }
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_081",
-      "source": "recommendation",
-      "recommendation_id": "REC_013",
-      "timestamp": "2026-04-15T15:47:12.757320",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891768",
       "conditions": {
-        "Temp": 305.0,
-        "Time": 74.0,
-        "VOacac": 0.333,
-        "DDT": 2.5,
-        "OAm": 5.0
+        "Temp": 297.0,
+        "Time": 59.0,
+        "VOacac": 0.645,
+        "DDT": 4.2,
+        "OAm": 5.7
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 17.485,
+        "Size": 15.754,
+        "CV": 0.149,
         "Squareness": 0.95,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.179
-      }
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_082",
-      "source": "recommendation",
-      "recommendation_id": "REC_014",
-      "timestamp": "2026-04-15T15:48:44.154661",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891803",
       "conditions": {
-        "Temp": 304.0,
-        "Time": 43.0,
-        "VOacac": 0.251,
-        "DDT": 1.9,
-        "OAm": 4.6
+        "Temp": 307.0,
+        "Time": 26.0,
+        "VOacac": 0.534,
+        "DDT": 4.1,
+        "OAm": 1.9
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 16.765,
-        "Squareness": 0.959,
+        "Size": 19.821,
+        "CV": 0.271,
+        "Squareness": 0.883,
         "HasProduct": 1,
-        "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.171
-      }
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_083",
-      "source": "recommendation",
-      "recommendation_id": "REC_015",
-      "timestamp": "2026-04-17T10:33:46.779491",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891838",
       "conditions": {
-        "Temp": 308.0,
-        "Time": 67.0,
-        "VOacac": 0.407,
-        "DDT": 3.0,
-        "OAm": 5.4
+        "Temp": 307.0,
+        "Time": 71.0,
+        "VOacac": 0.529,
+        "DDT": 4.3,
+        "OAm": 3.8
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 20.267,
-        "Squareness": 0.954,
+        "Size": 14.553,
+        "CV": 0.497,
+        "Squareness": 0.973,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.157
-      }
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_084",
-      "source": "recommendation",
-      "recommendation_id": "REC_016",
-      "timestamp": "2026-04-17T10:35:17.404201",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891873",
       "conditions": {
-        "Temp": 300.0,
-        "Time": 46.0,
-        "VOacac": 0.341,
-        "DDT": 2.3,
-        "OAm": 5.4
+        "Temp": 298.0,
+        "Time": 79.0,
+        "VOacac": 0.614,
+        "DDT": 3.9,
+        "OAm": 2.4
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 20.619,
-        "Squareness": 0.814,
+        "Size": 14.504,
+        "CV": 0.464,
+        "Squareness": 0.861,
         "HasProduct": 1,
-        "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.39
-      }
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_085",
-      "source": "recommendation",
-      "recommendation_id": "REC_017",
-      "timestamp": "2026-04-22T09:48:19.689735",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891908",
       "conditions": {
-        "Temp": 299.0,
-        "Time": 54.0,
-        "VOacac": 0.16,
-        "DDT": 1.3,
-        "OAm": 2.7
+        "Temp": 305.0,
+        "Time": 85.0,
+        "VOacac": 0.574,
+        "DDT": 4.5,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 12.659,
-        "Squareness": 0.835,
+        "Size": 15.827,
+        "CV": 0.319,
+        "Squareness": 0.924,
         "HasProduct": 1,
-        "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.22
-      }
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_086",
-      "source": "recommendation",
-      "recommendation_id": "REC_018",
-      "timestamp": "2026-04-22T09:51:07.221722",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.891943",
       "conditions": {
-        "Temp": 288.0,
-        "Time": 59.0,
-        "VOacac": 0.183,
-        "DDT": 1.8,
-        "OAm": 3.0
+        "Temp": 307.0,
+        "Time": 28.0,
+        "VOacac": 0.623,
+        "DDT": 5.0,
+        "OAm": 5.7
+      },
+      "precursors": {
+        "Cu_precursor": "CuBr",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 11.301,
-        "Squareness": 0.852,
+        "Size": 16.484,
+        "CV": 0.237,
+        "Squareness": 0.825,
         "HasProduct": 1,
         "PhasePure": 1,
-        "Polymorph": "cubic",
-        "CV": 0.241
-      }
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_087",
-      "source": "recommendation",
-      "recommendation_id": "REC_019",
-      "timestamp": "2026-04-24T11:07:08.551009",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.905187",
       "conditions": {
-        "Temp": 299.0,
-        "Time": 27.0,
-        "VOacac": 0.524,
-        "DDT": 3.6,
-        "OAm": 2.6
+        "Temp": 296.0,
+        "Time": 36.0,
+        "VOacac": 0.54,
+        "DDT": 4.2,
+        "OAm": 1.5
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 28.84,
-        "Squareness": 0.821,
+        "Size": 4.97,
+        "CV": 0.287,
+        "Squareness": 0.774,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.454
-      }
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_088",
-      "source": "recommendation",
-      "recommendation_id": "REC_020",
-      "timestamp": "2026-04-24T11:17:00.203995",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.905234",
       "conditions": {
-        "Temp": 294.0,
-        "Time": 18.0,
-        "VOacac": 0.343,
-        "DDT": 3.0,
-        "OAm": 2.2
+        "Temp": 303.0,
+        "Time": 34.0,
+        "VOacac": 0.106,
+        "DDT": 4.9,
+        "OAm": 2.3
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 27.713,
-        "Squareness": 0.93,
-        "HasProduct": 1,
+        "Size": null,
+        "CV": null,
+        "Squareness": null,
+        "HasProduct": 0,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.261
-      }
+        "Polymorph": null
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_089",
-      "source": "recommendation",
-      "recommendation_id": "REC_021",
-      "timestamp": "2026-05-08T08:27:24.278631",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.905270",
       "conditions": {
-        "Temp": 291.0,
-        "Time": 83.0,
-        "VOacac": 0.2,
-        "DDT": 2.1,
-        "OAm": 3.3
+        "Temp": 290.0,
+        "Time": 54.0,
+        "VOacac": 0.579,
+        "DDT": 3.8,
+        "OAm": 5.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 13.303,
-        "Squareness": 0.936,
+        "Size": 7.567,
+        "CV": 0.817,
+        "Squareness": 0.875,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.267
-      }
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_090",
-      "source": "recommendation",
-      "recommendation_id": "REC_022",
-      "timestamp": "2026-05-08T08:29:19.045986",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.905308",
       "conditions": {
-        "Temp": 294.0,
-        "Time": 88.0,
-        "VOacac": 0.176,
-        "DDT": 1.7,
-        "OAm": 3.9
+        "Temp": 283.0,
+        "Time": 69.0,
+        "VOacac": 0.562,
+        "DDT": 3.5,
+        "OAm": 1.4
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 13.196,
-        "Squareness": 0.814,
+        "Size": 5.044,
+        "CV": 0.289,
+        "Squareness": 0.821,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.309
-      }
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_091",
-      "source": "recommendation",
-      "recommendation_id": "REC_023",
-      "timestamp": "2026-05-18T13:56:59.124024",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.905343",
       "conditions": {
-        "Temp": 302.0,
-        "Time": 59.0,
-        "VOacac": 0.217,
-        "DDT": 1.9,
-        "OAm": 3.3
+        "Temp": 298.0,
+        "Time": 11.0,
+        "VOacac": 0.47,
+        "DDT": 3.4,
+        "OAm": 1.4
       },
       "precursors": {
-        "Cu_precursor": "CuI",
+        "Cu_precursor": "CuCl",
         "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 14.743,
-        "Squareness": 0.958,
+        "Size": 5.166,
+        "CV": 0.13,
+        "Squareness": 0.768,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.17
-      }
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
     },
     {
       "exp_id": "EXP_092",
-      "source": "recommendation",
-      "recommendation_id": "REC_024",
-      "timestamp": "2026-05-18T14:01:10.443233",
+      "source": "imported",
+      "recommendation_id": null,
+      "timestamp": "2026-06-19T13:51:48.905379",
       "conditions": {
-        "Temp": 309.0,
-        "Time": 56.0,
-        "VOacac": 0.256,
-        "DDT": 1.5,
-        "OAm": 5.3
+        "Temp": 302.0,
+        "Time": 17.0,
+        "VOacac": 0.418,
+        "DDT": 3.7,
+        "OAm": 5.8
       },
       "precursors": {
-        "Cu_precursor": "CuI",
+        "Cu_precursor": "CuCl",
         "Metal_precursor": "VO(acac)2"
       },
       "results": {
-        "Size": 15.758,
-        "Squareness": 0.823,
+        "Size": 4.978,
+        "CV": 0.463,
+        "Squareness": 0.718,
         "HasProduct": 1,
         "PhasePure": 0,
-        "Polymorph": "cubic",
-        "CV": 0.189
+        "Polymorph": "cubic"
+      },
+      "run_id_original": null
+    },
+    {
+      "exp_id": "EXP_093",
+      "source": "recommendation",
+      "recommendation_id": "REC_001",
+      "timestamp": "2026-06-23T14:34:49.722359",
+      "conditions": {
+        "Temp": 310.0,
+        "Time": 78.0,
+        "VOacac": 0.443,
+        "DDT": 4.3,
+        "OAm": 6.7
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "results": {
+        "Size": 13.058,
+        "CV": 0.166,
+        "Squareness": 0.934,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      }
+    },
+    {
+      "exp_id": "EXP_094",
+      "source": "recommendation",
+      "recommendation_id": "REC_002",
+      "timestamp": "2026-06-23T14:35:45.817256",
+      "conditions": {
+        "Temp": 309.0,
+        "Time": 46.0,
+        "VOacac": 0.473,
+        "DDT": 3.4,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "results": {
+        "Size": 13.591,
+        "CV": 0.167,
+        "Squareness": 0.854,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      }
+    },
+    {
+      "exp_id": "EXP_095",
+      "source": "recommendation",
+      "recommendation_id": "REC_003",
+      "timestamp": "2026-06-26T15:05:04.022952",
+      "conditions": {
+        "Temp": 304.0,
+        "Time": 45.0,
+        "VOacac": 0.504,
+        "DDT": 4.1,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "results": {
+        "Size": 13.211,
+        "CV": 0.157,
+        "Squareness": 0.852,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      }
+    },
+    {
+      "exp_id": "EXP_096",
+      "source": "recommendation",
+      "recommendation_id": "REC_004",
+      "timestamp": "2026-06-26T15:08:03.961172",
+      "conditions": {
+        "Temp": 305.0,
+        "Time": 85.0,
+        "VOacac": 0.574,
+        "DDT": 4.5,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "results": {
+        "Size": 10.582,
+        "CV": 0.182,
+        "Squareness": 0.888,
+        "HasProduct": 1,
+        "PhasePure": 0,
+        "Polymorph": "cubic"
+      }
+    },
+    {
+      "exp_id": "EXP_097",
+      "source": "recommendation",
+      "recommendation_id": "REC_005",
+      "timestamp": "2026-06-30T15:59:20.370428",
+      "conditions": {
+        "Temp": 308.0,
+        "Time": 71.0,
+        "VOacac": 0.585,
+        "DDT": 3.5,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "results": {
+        "Size": 12.63,
+        "CV": 0.164,
+        "Squareness": 0.915,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
+      }
+    },
+    {
+      "exp_id": "EXP_098",
+      "source": "recommendation",
+      "recommendation_id": "REC_006",
+      "timestamp": "2026-06-30T16:02:41.255751",
+      "conditions": {
+        "Temp": 303.0,
+        "Time": 81.0,
+        "VOacac": 0.568,
+        "DDT": 3.7,
+        "OAm": 7.0
+      },
+      "precursors": {
+        "Cu_precursor": "CuCl",
+        "Metal_precursor": "VO(acac)2"
+      },
+      "results": {
+        "Size": 12.607,
+        "CV": 0.163,
+        "Squareness": 0.884,
+        "HasProduct": 1,
+        "PhasePure": 1,
+        "Polymorph": "cubic"
       }
     }
   ]
